@@ -1,0 +1,22 @@
+{
+    "lengthlen": 4, // the number of bytes before a fragment for its length for example "00 00 00 05 hello" each letter is 1 byte
+    "server": {
+        "listen":"0.0.0.0",
+        "port":1234
+    },
+    "database":{
+        //for local file user, password and ip doesnt matter but for mysql and mongodb for example it is
+        "type":"sqlite",//database type currently [sqlite]
+        "username":"",
+        "password":"",
+        "database":"RemotedCar",
+        "ip":"",
+        "port":"",
+        "file":"" // for local databases(optional)
+        
+    },
+    "client": {
+        "ip": "127.0.0..1",
+        "port":1234
+    }
+}
