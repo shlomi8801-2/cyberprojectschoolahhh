@@ -17,6 +17,8 @@
     },
     "client": {
         "ip": "127.0.0..1",
-        "port":1234
+        "port":1234,
+        "encoding":"utf-8",
+        "header_size":4 //bytes
     }
 }

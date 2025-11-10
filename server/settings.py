@@ -1,5 +1,7 @@
 import json
 from log import log
+import commentjson #if the file doesnt contain comments then import making this module optional
+
 
 #can implament a caching system using the hash of the settings file but its a small file so it doesnt matter for now
 
@@ -39,6 +41,5 @@ def NormalizeJson(string:str)->dict: #removes the comments from there for json m
     try: 
         return dict(json.loads(string))
     except:
-        import commentjson #if the file doesnt contain comments then import making this module optional
         return dict(commentjson.loads(string))
     
