@@ -5,13 +5,15 @@ import commentjson #if the file doesnt contain comments then import making this 
 
 #can implament a caching system using the hash of the settings file but its a small file so it doesnt matter for now
 
-
+cache = {} #currently if the file changes while the code is running it will not update the cache
 def GetSetting(key =None)->list | str | None | dict:
     '''
     if key is given gives value if not gives a list of tree of keys in settings file
     key can look like this "dir1.dir2.val" for json {"dir1": {"dir2": {"val":5}}}
     '''
     #if key is given gives value if not gives a list of tree of keys in settings file
+    if key in cache:
+        cache[key]
     try:
         with open(GetCurrentDir()+"/settings.json","r") as f:
             jf = NormalizeJson(f.read())
@@ -25,6 +27,7 @@ def GetSetting(key =None)->list | str | None | dict:
                     else:
                         log(f"key {x} was not found!")
                         return None
+                cache[key] = output
                 return output
     except FileNotFoundError:
         log("settings.json file not found")
