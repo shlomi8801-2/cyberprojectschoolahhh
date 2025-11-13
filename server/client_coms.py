@@ -4,7 +4,8 @@ import websocket
 
 def parsedata(data: bytearray)->dict:
     '''byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
-    the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings'''
+    the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
+    DON'T FORGET TO REMOVE THE DATA LENGTH FROM THE START'''
     datastructure = []
     output = {}
     offset = 0
@@ -34,7 +35,7 @@ def buildata(data: dict)->bytearray:
     takes the dict and turns into a simple string then bytearray'''
     
     output = bytearray()
-    if len(data) ==0 or len(data) > 2:
+    if len(data) ==0:
         raise ValueError(f"Data must be a dict with 1 or 2 items given:{len(data)}")
     for value in [x for y in data.items() for x in y]:
         encoded = 0
@@ -49,9 +50,14 @@ def buildata(data: dict)->bytearray:
         output.append(encoded)
         for x in value:
             output.append(x)
-    #add the whole array length before as only header value but for tcp its not needed
-    # if len(output) > (1<<8*settings.GetSetting("client.header_size")): #checking if we are able to have all of the dict in one byte-array
-    #     raise "data length is too big! (may need to increase the header size)"
+    
+    #add the whole array length without the first number before as only header value
+    #as unsigned int at the size of client.header_size with big indian
+    msglength = len(output)
+    if msglength > (1<<8*settings.GetSetting("client.header_size")): #checking if we are able to have all of the dict in one byte-array
+        raise "data length is too big! (may need to increase the header size)"
+    output += msglength.to_bytes(settings.GetSetting("client.header_size"),"big",signed=False)
+
     
     return output
 
