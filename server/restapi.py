@@ -14,7 +14,12 @@ def test()->str:
 
 @app.route("/register", methods = ['POST'])
 def register()->str:
-    print(request)
+    must = ["username","pass","cpass"]
+    res = request.json()
+    for x in must:
+        if not (x in must):
+            return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
+    
     return "hello world!"
 
 app.run(debug=True)
