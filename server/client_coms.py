@@ -56,8 +56,11 @@ def buildata(data: dict)->bytearray:
     msglength = len(output)
     if msglength > (1<<8*settings.GetSetting("client.header_size")): #checking if we are able to have all of the dict in one byte-array
         raise "data length is too big! (may need to increase the header size)"
-    output += msglength.to_bytes(settings.GetSetting("client.header_size"),"big",signed=False)
-
-    
+    output = msglength.to_bytes(settings.GetSetting("client.header_size"),"big",signed=False)+output    
     return output
 
+def sendcmd(type:str,data:dict) ->None:
+    """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like length of all the msg without the first num then 
+    length:key:length:value:length:key...."""
+    
+    pass
