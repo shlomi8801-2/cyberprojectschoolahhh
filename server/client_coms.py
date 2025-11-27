@@ -2,6 +2,8 @@ import settings
 import socket
 import websocket
 
+
+
 def parsedata(data: bytearray)->dict:
     '''byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
     the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
@@ -37,7 +39,7 @@ def buildata(data: dict)->bytearray:
     output = bytearray()
     if len(data) ==0:
         raise ValueError(f"Data must be a dict with 1 or 2 items given:{len(data)}")
-    for value in [x for y in data.items() for x in y]:
+    for value in [x for y in data.items() for x in y]: #makes a list of keys and values combined
         encoded = 0
         if not isinstance(value, (bytes, bytearray)):
             encoded = 1
@@ -59,8 +61,13 @@ def buildata(data: dict)->bytearray:
     output = msglength.to_bytes(settings.GetSetting("client.header_size"),"big",signed=False)+output    
     return output
 
-def sendcmd(type:str,data:dict) ->None:
-    """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like length of all the msg without the first num then 
-    length:key:length:value:length:key...."""
-    
-    pass
+class clientSock:
+    def __init__(self,sock:socket.socket):
+        self.sock = sock
+    def sendcmd(self,type:str,data:dict) ->None:
+        """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like length of all the msg without the first num then 
+        length:key:length:value:length:key...."""
+        if (type and data):
+            self.sock.send(buildata({type:buildata(data)}))
+        
+        pass
