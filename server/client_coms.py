@@ -88,5 +88,3 @@ class clientSock:
             return list(output.items())[0]
         except Exception as e:
             raise Exception(f"error parsing data!\n{e}")
-        
-        
