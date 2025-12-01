@@ -1,6 +1,7 @@
 import database
 from log import log
 import hashlib
+import base64
 
 HASHINGALGO = hashlib.sha512
 #tables: Users, Carmodules
@@ -12,7 +13,7 @@ def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
         return False
     if  len(args) !=1:
         return False
-    args = {list(USERS_TABLE[1].keys())[x]: args[0][x+1] for x in range(len(args))}
+    args = makedict(args[0])
     if (algo=="exact"):
         args = " AND ".join([f'{x[0]}=="{x[1]}"' for x in args.items() if x[1] != None])
     elif(algo=="like"):
@@ -47,9 +48,12 @@ def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
     except Exception as e:
         log(f"something went wrong while searching: {e}")
         return None
+def makedict(user:tuple)->dict:
+    """gets a user tuple and assigns the data to dict with its columns in the table"""
+    return dict((list(USERS_TABLE[1].keys())[x], user[x+1]) for x in range(len(user)-1))
 if (__name__=="__main__"):
     deleteUser("shlomi")
     addUser("shlomi","pass")
-    print(searchUser("shlomi"))
+    print(makedict(searchUser("shlomi")[0]))
     deleteUser("shlomi")
-    print(searchUser("shlomi"))
+
