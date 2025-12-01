@@ -79,7 +79,7 @@ class clientSock:
         """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)"""
         if not self.connected:
             return
-        res_len = int(self.sock.recv(settings.GetSetting("client.header_size")))
+        res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
         res = self.sock.recv(res_len)
         try:
             output = parsedata(res)
@@ -88,3 +88,10 @@ class clientSock:
             return list(output.items())[0]
         except Exception as e:
             raise Exception(f"error parsing data!\n{e}")
+def test_buildNparsedata():
+    import random
+    data = {''.join([chr(random.randint(0,255)) for x in range(random.randint(1,100))]):''.join([chr(random.randint(0,255)) for x in range(random.randint(1,100))])}
+    datap = buildata(data)
+    return data == parsedata(datap[settings.GetSetting("client.header_size"):])
+if (__name__=="__main__"):
+    print(test_buildNparsedata())
