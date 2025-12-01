@@ -10,6 +10,7 @@ problem = None
 def CheckConnection()->bool:
     """returns true or false wether the conenction to the database was succesful
     and optionally prints if """
+    global DB #point to the global variable
     match dbtype:
         case "sqlite":
             #https://www.geeksforgeeks.org/python/introduction-to-sqlite-in-python/
@@ -19,6 +20,7 @@ def CheckConnection()->bool:
                 log(f"database file not found {dbfile}!")
                 return False
             DB = sqlite3.connect(dbfile)
+            return True
         case _:
             log(f"database type not found {dbtype}!")
             return False
@@ -33,11 +35,11 @@ def Search(table:str,args:str)->list:
         case _:
             log(f"database type not found {dbtype}!")
             raise f"database type not found {dbtype}!"
-def Insert(table:str,values:tuple) -> bool:
+def Insert(table:str,values:dict) -> bool:
     try:
         match dbtype:
             case "sqlite":
-                    DB.execute(f"insert into {table} values({", ".join(["?" for x in range(len(values))])})",values)
+                    DB.execute(f"insert into {table} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values.values()))])})",list(values.values()))
                     DB.commit()
                     return True
             case _:
@@ -59,3 +61,23 @@ def Delete(table:str,args:str)->bool:
     except Exception as e:
         log(f"something went wrong while deleting from database: {e}")
         return False
+def AddTable(table:str,args:dict)->bool:
+    """CREATE TABLE table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+    ....
+    );"""
+    try:
+        match dbtype:
+            case "sqlite":
+                    DB.execute(f"CREATE TABLE IF NOT EXISTS {table} (ID INTEGER PRIMARY KEY AUTOINCREMENT,{','.join([' '.join(x) for x in args.items()])});")
+                    DB.commit()
+                    return True
+            case _:
+                log(f"database type not found {dbtype}!")
+                raise f"database type not found {dbtype}!"
+    except Exception as e:
+        log(f"something went wrong while creating a table: {e}")
+        return False
+CheckConnection()

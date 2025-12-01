@@ -12,7 +12,7 @@
         "database":"RemotedCar",
         "ip":"",
         "port":"",
-        "file":"" // for local databases(optional)
+        "file":"database.db" // for local databases(optional)
         
     },
     "client": {
