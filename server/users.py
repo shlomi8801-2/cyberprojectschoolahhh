@@ -82,17 +82,20 @@ def login(username:str,password:str)->str:
     res = searchUser(username)
     if (len(res!=1)):
         return None
-    res = res[0]
+    res = makedict(res[0])
     if (makedict(res)["password"] == hashPassword(password)):
         if (getnNowEpoc()-int(res["token-date"]) <REMEMBERTOKENTIME):
             #update the token-date
             #return the old token
-            
-            pass
+            updateUser({"token-date":getnNowEpoc()},res)
+            return res["token"]            
         else:
             #generate new token
             #update the token-date
-            #return the old token
+            #return the new token
+            token = generateToken()
+            updateUser({"token-date":getnNowEpoc(),"token":token},res)
+            return token
             pass
     
 if (__name__=="__main__"):
