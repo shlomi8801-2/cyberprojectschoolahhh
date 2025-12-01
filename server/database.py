@@ -48,6 +48,26 @@ def Insert(table:str,values:dict) -> bool:
     except Exception as e:
         log(f"something went wrong while inserting to database: {e}")
         return False
+def Update(table:str,values:dict,searchArgs:str):
+    """UPDATE table
+    SET column_1 = new_value_1,
+        column_2 = new_value_2
+    WHERE
+        search_condition 
+    ORDER column_or_expression"""
+    
+    try:
+        match dbtype:
+            case "sqlite":
+                    DB.execute(f"UPDATE {table} SET {','.join([x[0]+' = "'+x[1]+'"' for x in values.items()])} where {searchArgs}",list(values.values()))
+                    DB.commit()
+                    return True
+            case _:
+                log(f"database type not found {dbtype}!")
+                raise f"database type not found {dbtype}!"
+    except Exception as e:
+        log(f"something went wrong while updating table: {e}")
+        return False
 def Delete(table:str,args:str)->bool:
     try:
         match dbtype:
