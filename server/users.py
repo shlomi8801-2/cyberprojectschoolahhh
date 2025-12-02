@@ -108,6 +108,7 @@ def register(username:str,password:str)->str:
     addUser(username,password)
     return login(username,password)
 
+
 if (__name__=="__main__"):
     # deleteUser("shlomi")
     # register("shlomi","1234")
