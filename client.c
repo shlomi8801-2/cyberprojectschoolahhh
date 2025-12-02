@@ -1,6 +1,9 @@
 //my arduino chip is atmega328p
+#ifndef pc
 #include <avr/io.h>
-#include <util/delay.h>
+#include "iom328p.h"
+#include "atmega328p/avr/portpins.h"
+#endif
 // #include "portpins.h"
 // #include "iom328p.h"
 void sleep(unsigned int ms){
@@ -16,6 +19,7 @@ int main()
         PORTB |=  (1 << PB5);   // LED on
         // PORTD = 0b00000100;
         _delay_ms(1000);
+        
 
         PORTB &= ~(1 << PB5);   // LED off
         // PORTD = 0;
