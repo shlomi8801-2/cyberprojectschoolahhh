@@ -13,7 +13,10 @@ CARMODULES_TABLE = "Carmodules"
 def getNowEpoc():
     now = time.time()
     return round(now)
-
+def encodeUsername(username:str)->str:
+    return base64.b64encode(username.encode("ascii")).decode("ascii")
+def decodeUsername(username:str)->str:
+    return base64.b64decode(username.encode("ascii")).decode("ascii")
 def hashPassword(password:str)->str:
     return HASHINGALGO(password.encode()).hexdigest()
 
@@ -38,12 +41,12 @@ def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
 
 def addUser(username:str,password:str)->bool:
     database.AddTable(*USERS_TABLE)
-    return database.Insert(USERS_TABLE[0],{"username":username,"password":hashPassword(password),"date_created":getNowEpoc(),"token":""})
+    return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashPassword(password),"date_created":getNowEpoc(),"token":""})
 
 def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
     """algo is [exact,like,contains]"""
     # database.AddTable(*USERS_TABLE)
-    args = {"username":username,"token":token}
+    args = {"username":encodeUsername(username),"token":token}
     if (algo=="exact"):
         args = " AND ".join([f'{x[0]}=="{x[1]}"' for x in args.items() if x[1] != None])
     elif(algo=="like"):
@@ -110,8 +113,8 @@ def register(username:str,password:str)->str:
 
 
 if (__name__=="__main__"):
-    # deleteUser("shlomi")
-    # register("shlomi","1234")
-    # print(login("shlomi","1234"))
+    deleteUser("shlomi")
+    register("shlomi","1234")
+    print(login("shlomi","1234"))
     pass
     
