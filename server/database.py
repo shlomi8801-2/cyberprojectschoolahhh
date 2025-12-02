@@ -23,7 +23,7 @@ def CheckConnection(times:int=0)->bool:
                 f.close()
                 if (times >=5):
                     return False
-                return CheckConnection()
+                return CheckConnection(times+1)
             DB = sqlite3.connect(dbfile)
             return True
         case _:
