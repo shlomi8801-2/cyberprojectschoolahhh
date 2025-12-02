@@ -2,3 +2,4 @@
 main
 main.hex
 server/__pycache__
+server/database.db
