@@ -7,7 +7,7 @@ dbtype = GetSetting("database.type")
 DB :sqlite3.Connection = None
 problem = None
 
-def CheckConnection()->bool:
+def CheckConnection(times:int=0)->bool:
     """returns true or false wether the conenction to the database was succesful
     and optionally prints if """
     global DB #point to the global variable
@@ -18,7 +18,12 @@ def CheckConnection()->bool:
             dbfile =(GetCurrentDir()+"/"+dbfile) if dbfile[0] !="/" else dbfile
             if (not os.path.isfile(dbfile)):
                 log(f"database file not found {dbfile}!")
-                return False
+                #create the file
+                f = open(dbfile,"w")
+                f.close()
+                if (times >=5):
+                    return False
+                return CheckConnection()
             DB = sqlite3.connect(dbfile)
             return True
         case _:
@@ -59,7 +64,7 @@ def Update(table:str,values:dict,searchArgs:str):
     try:
         match dbtype:
             case "sqlite":
-                    DB.execute(f"UPDATE {table} SET {','.join([x[0]+' = "'+x[1]+'"' for x in values.items()])} where {searchArgs}",list(values.values()))
+                    DB.execute(f"UPDATE {table} SET {','.join([x[0]+' = "'+str(x[1])+'"' for x in values.items()])} where {searchArgs}")
                     DB.commit()
                     return True
             case _:

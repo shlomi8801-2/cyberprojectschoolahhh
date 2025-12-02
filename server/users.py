@@ -8,9 +8,9 @@ import random
 HASHINGALGO = hashlib.sha512
 REMEMBERTOKENTIME = 5*60 # 5 mins
 #tables: Users, Carmodules
-USERS_TABLE = ["Users",{"username":"varchar(255) not null UNIQUE","password":"varchar(255) not null","token":"varchar(128)","token-date":"INT DEFAULT 0","date-created":"INT DEFAULT 0"}]
+USERS_TABLE = ["Users",{"username":"varchar(255) not null UNIQUE","password":"varchar(128) not null","token":"varchar(30)","token_date":"INT DEFAULT 0","date_created":"INT DEFAULT 0"}]
 CARMODULES_TABLE = "Carmodules"
-def getnNowEpoc():
+def getNowEpoc():
     now = time.time()
     return round(now)
 
@@ -38,7 +38,7 @@ def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
 
 def addUser(username:str,password:str)->bool:
     database.AddTable(*USERS_TABLE)
-    return database.Insert(USERS_TABLE[0],{"username":username,"password":hashPassword(password),"token":""})
+    return database.Insert(USERS_TABLE[0],{"username":username,"password":hashPassword(password),"date_created":getNowEpoc(),"token":""})
 
 def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
     """algo is [exact,like,contains]"""
@@ -60,6 +60,8 @@ def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
         return None
 def makedict(user:tuple)->dict:
     """gets a user tuple and assigns the data to dict with its columns in the table"""
+    if not isinstance(user,tuple):
+        return None
     return dict((list(USERS_TABLE[1].keys())[x], user[x+1]) for x in range(len(user)-1))
 def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     """args should look like the makedict output for example: {"username":username,"token":token}"""
@@ -74,30 +76,41 @@ def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     return database.Update(USERS_TABLE[0],values,args)
     pass
 def generateToken()->str:
-    return random.randint()
+    return ''.join(chr(random.randint(0,255)) for _ in range(30))
+
 
 #the more simple functions
 def login(username:str,password:str)->str:
     """gets username and password returnes token or none"""
     res = searchUser(username)
-    if (len(res!=1)):
+    if (len(res)!=1):
         return None
     res = makedict(res[0])
-    if (makedict(res)["password"] == hashPassword(password)):
-        if (getnNowEpoc()-int(res["token-date"]) <REMEMBERTOKENTIME):
+    if (res["password"] == hashPassword(password)):
+        if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME):
             #update the token-date
             #return the old token
-            updateUser({"token-date":getnNowEpoc()},res)
+            updateUser({"token_date":getNowEpoc()},res)
             return res["token"]            
         else:
             #generate new token
             #update the token-date
             #return the new token
             token = generateToken()
-            updateUser({"token-date":getnNowEpoc(),"token":token},res)
+            updateUser({"token_date":getNowEpoc(),"token":token},res)
             return token
-            pass
+def register(username:str,password:str)->str:
+    """gets username and password returnes token or none"""
+    res = searchUser(username)
     
-if (__name__=="__main__"):
-    getnNowEpoc()
+    if (res or len(res)>=1):
+        return None
+    addUser(username,password)
+    return login(username,password)
 
+if (__name__=="__main__"):
+    # deleteUser("shlomi")
+    # register("shlomi","1234")
+    # print(login("shlomi","1234"))
+    pass
+    
