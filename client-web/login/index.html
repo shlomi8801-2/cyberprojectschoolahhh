@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemotedCar</title>
+</head>
+<body>
+    add things here so it will look like a login screen and make requests from the servevr the server
+    <h1>please sign in</h1>
+    <div id="data-form">
+        <label>username:</label>
+        <input type="text" id="usernameBox" />
+        <label>password:</label>
+        <input type="password" id="passwordBox"/>
+        <button type="loginBtn" onclick="login()">login</button>
+    </div>
+</body>
+<script>
+    import('/constants.js').then(({ API_URL }) => {
+        console.log(API_URL);
+        });
+    function login(){
+        const username = document.getElementById("usernameBox").value
+        const password = document.getElementById("passwordBox").value
+        // console.log(`username:${username} password: ${password}`);
+        fetch()
+    }
+</script>
+</html>

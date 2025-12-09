@@ -1,5 +1,6 @@
 from flask import Flask,request
 import users
+import settings
 app = Flask(__name__)
 
 #login
@@ -38,4 +39,4 @@ def login()->dict:
     if not token:
         return {"error":"username or password are incorrect!","code":1}
     return {"token":token,"code":0}
-app.run(debug=True)
+app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))
