@@ -17,14 +17,26 @@
     </div>
 </body>
 <script>
+    apiUrl = null;
     import('/constants.js').then(({ API_URL }) => {
-        console.log(API_URL);
+        apiUrl = API_URL;
         });
-    function login(){
+    async function login(){
         const username = document.getElementById("usernameBox").value
         const password = document.getElementById("passwordBox").value
         // console.log(`username:${username} password: ${password}`);
-        fetch()
+        if (!apiUrl){
+            alert("failed to acuire apiUrl!")
+            return
+        }
+        res = await fetch(apiUrl+"/login", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({username: 1, pass: 'Textual content'})
+  });
+    console.log(res.JSON())
     }
 </script>
 </html>

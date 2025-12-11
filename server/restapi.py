@@ -1,7 +1,10 @@
 from flask import Flask,request
+from flask_cors import CORS
 import users
 import settings
 app = Flask(__name__)
+CORS(app)
+
 
 #login
 #test
@@ -17,13 +20,13 @@ def test()->str:
 @app.route("/register", methods = ['POST'])
 def register()->dict:
     must = ["username","pass","cpass"]
-    res = request.json()
+    res = request.get_json()
     for x in must:
         if not (x in must):
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
     if (res["pass"] != res["cpass"]):
         return {"error":"passwords does not match!","code":1}
-    token = users.register(res["username"],res["pass"])
+    token = users.register(str(res["username"]),str(res["pass"]))
     if not token:
         return {"error":"username already used!","code":1}
     return {"token":token,"code":0}
@@ -31,12 +34,13 @@ def register()->dict:
 @app.route("/login", methods = ['POST'])
 def login()->dict:
     must = ["username","pass"]
-    res = request.json()
+    res = request.get_json()
     for x in must:
         if not (x in must):
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
-    token = users.login(res["username"],res["pass"])
+    token = users.login(str(res["username"]),str(res["pass"]))
     if not token:
         return {"error":"username or password are incorrect!","code":1}
     return {"token":token,"code":0}
-app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))
+def startServer():
+    app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))

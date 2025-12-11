@@ -86,6 +86,8 @@ def generateToken()->str:
 def login(username:str,password:str)->str:
     """gets username and password returnes token or none"""
     res = searchUser(username)
+    if (res == None):
+        return None
     if (len(res)!=1):
         return None
     res = makedict(res[0])
