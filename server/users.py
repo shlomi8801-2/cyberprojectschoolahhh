@@ -79,7 +79,8 @@ def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     return database.Update(USERS_TABLE[0],values,args)
     pass
 def generateToken()->str:
-    return ''.join(chr(random.randint(0,255)) for _ in range(30))
+    allowedChars = [x for x in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"] #must be allowed inside a browser cookie
+    return ''.join(random.choice(allowedChars) for _ in range(30))
 
 
 #the more simple functions

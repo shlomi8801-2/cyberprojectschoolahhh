@@ -1,60 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RemotedCar</title>
-</head>
-<body>
-    add things here so it will look like a login screen and make requests from the servevr the server
+  </head>
+  <body>
+    add things here so it will look like a login screen and make requests from
+    the servevr the server
     <h1>please sign in</h1>
     <div id="data-form">
-        <label>username:</label>
-        <input type="text" id="usernameBox" />
-        <label>password:</label>
-        <input type="password" id="passwordBox"/>
-        <button onclick="login()">login</button>
-        <button onclick="register()">register</button>
+      <label>username:</label>
+      <input type="text" id="usernameBox" />
+      <label>password:</label>
+      <input type="password" id="passwordBox" />
+      <button onclick="login()">login</button>
+      <button onclick="register()">register</button>
+      <p id="status">ye this works</p>
     </div>
-</body>
-<script type="text/javascript">
-
-
-    async function login(){
-        const {API_URL} = await import("../constants.js");
-        const username = document.getElementById("usernameBox").value
-        const password = document.getElementById("passwordBox").value
-        // console.log(`username:${username} password: ${password}`);
-        if (!API_URL){
-            alert("failed to acuire  API_URL!")
-            return
-        }
-        res = await fetch( API_URL+"/login", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({username: username, pass: password})
-  });
-}
-  async function register(){
-        const {API_URL} = await import("../constants.js");
-        const username = document.getElementById("usernameBox").value
-        const password = document.getElementById("passwordBox").value
-        // console.log(`username:${username} password: ${password}`);
-        if (!API_URL){
-            alert("failed to acuire  API_URL!")
-            return
-        }
-        res = await fetch( API_URL+"/register", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({username: username, pass: password,cpass: password})
-  });
-}
-
-    
-</script>
+  </body>
+  <script type="text/javascript">
+    function setCookie(key,value){
+        console.log("setting cookie"+`${key}=${value}`)
+        document.cookie = `${key}=${value}` // might have alot of problems here with vulnerabilities
+    }
+    function getCookie(key){
+        let cookies = document.cookie;
+        return cookies.substring(cookies.findIndex(key)+key.length).split(";")[0] 
+    }
+    function deleteCookie(key){
+        document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`
+    }
+    async function login() {
+      const { API_URL } = await import("../constants.js");
+      const username = document.getElementById("usernameBox").value;
+      const password = document.getElementById("passwordBox").value;
+      // console.log(`username:${username} password: ${password}`);
+      if (!API_URL) {
+        alert("failed to acuire  API_URL!");
+        return;
+      }
+      res = await fetch(API_URL + "/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: username, pass: password }),
+      });
+      const statusBox = document.getElementById("status");
+      res = await res.json();
+      switch (res.code){
+        case 1: //error
+            statusBox.innerText=res.error;
+            statusBox.style.color = "red"
+            break;
+        case 0: // success
+            statusBox.style.color = "black"
+            statusBox.innerText = "redirecting"
+            setCookie("token",res.token)
+            //now redirect to wherever needed
+            
+      }
+      
+    }
+    async function register() {
+      const { API_URL } = await import("../constants.js");
+      const username = document.getElementById("usernameBox").value;
+      const password = document.getElementById("passwordBox").value;
+      // console.log(`username:${username} password: ${password}`);
+      if (!API_URL) {
+        alert("failed to acuire  API_URL!");
+        return;
+      }
+      res = await fetch(API_URL + "/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          pass: password,
+          cpass: password,
+        }),
+      });
+    }
+  </script>
 </html>
