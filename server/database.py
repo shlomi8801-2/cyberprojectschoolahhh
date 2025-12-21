@@ -33,13 +33,16 @@ def Search(table:str,args:str)->list:
     """returns list of lines(tuples) found in database select query with the args as the string after where for example:
     select * from <table> where <args>;"""
     #convert everything to base64 to prevent sql injection
-    match dbtype:
-        case "sqlite":
-            res = DB.execute(f"select * from {table} where {args}")
-            return res.fetchall() 
-        case _:
-            log(f"database type not found {dbtype}!")
-            raise f"database type not found {dbtype}!"
+    try:
+        match dbtype:
+            case "sqlite":
+                res = DB.execute(f"select * from {table} where {args}")
+                return res.fetchall() 
+            case _:
+                log(f"database type not found {dbtype}!")
+                raise f"database type not found {dbtype}!"
+    except Exception as e:
+        log(f"something went wrong searching in the database:{e}\n({table},{args}")
 def Insert(table:str,values:dict) -> bool:
     try:
         match dbtype:
@@ -51,7 +54,7 @@ def Insert(table:str,values:dict) -> bool:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while inserting to database: {e}")
+        log(f"something went wrong while inserting to database: {e}\n({table},{values}")
         return False
 def Update(table:str,values:dict,searchArgs:str):
     """UPDATE table
@@ -71,7 +74,7 @@ def Update(table:str,values:dict,searchArgs:str):
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while updating table: {e}")
+        log(f"something went wrong while updating table: {e}\n({table},{values},{searchArgs})")
         return False
 def Delete(table:str,args:str)->bool:
     try:
@@ -84,7 +87,7 @@ def Delete(table:str,args:str)->bool:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while deleting from database: {e}")
+        log(f"something went wrong while deleting from database: {e}\n({table},{args}")
         return False
 def AddTable(table:str,args:dict)->bool:
     """CREATE TABLE table_name (
@@ -103,6 +106,6 @@ def AddTable(table:str,args:dict)->bool:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while creating a table: {e}")
+        log(f"something went wrong while creating a table: {e}\n({table},{args}")
         return False
 CheckConnection()
