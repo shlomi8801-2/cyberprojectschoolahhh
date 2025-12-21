@@ -21,7 +21,6 @@
   </body>
   <script type="text/javascript">
     function setCookie(key,value){
-        console.log("setting cookie"+`${key}=${value}`)
         document.cookie = `${key}=${value}` // might have alot of problems here with vulnerabilities
     }
     function getCookie(key){
@@ -55,11 +54,12 @@
             statusBox.style.color = "red"
             break;
         case 0: // success
-            statusBox.style.color = "black"
-            statusBox.innerText = "redirecting"
-            setCookie("token",res.token)
+            statusBox.style.color = "black";
+            statusBox.innerText = "redirecting";
+            setCookie("token",res.token);
             //now redirect to wherever needed
-            
+            //...
+            break;
       }
       
     }

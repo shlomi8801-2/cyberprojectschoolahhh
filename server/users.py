@@ -8,8 +8,11 @@ import random
 HASHINGALGO = hashlib.sha512
 REMEMBERTOKENTIME = 5*60 # 5 mins
 #tables: Users, Carmodules
-USERS_TABLE = ["Users",{"username":"varchar(255) not null UNIQUE","password":"varchar(128) not null","token":"varchar(30)","token_date":"INT DEFAULT 0","date_created":"INT DEFAULT 0"}]
+USERS_TABLE = ["Users",{"username":"varchar(255) not null UNIQUE","password":"varchar(128) not null","token":"varchar(30)","permissions_level":"INT DEFAULT 0","token_date":"INT DEFAULT 0","date_created":"INT DEFAULT 0"}]
 CARMODULES_TABLE = "Carmodules"
+
+FIRST_USER = -1 # if the user table just created in this execution of the code it will give the first user permissions by setting its value to 1
+
 def getNowEpoc():
     now = time.time()
     return round(now)
@@ -40,8 +43,16 @@ def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
     return True
 
 def addUser(username:str,password:str)->bool:
+    global FIRST_USER
     database.AddTable(*USERS_TABLE)
-    return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashPassword(password),"date_created":getNowEpoc(),"token":""})
+    if (FIRST_USER == -1): # might be slow for alot of users
+        if (database.Search(USERS_TABLE[0],"1=1 limit 1") != None):
+            FIRST_USER = 1; #the first user
+        else:
+            FIRST_USER = 0; #not the first user
+    elif (FIRST_USER not in [ 0,1]): #to not encounter some error relating to FIRST_USER not being in the right range of values
+        FIRST_USER = 0
+    return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashPassword(password),"permissions_level":FIRST_USER,"date_created":getNowEpoc(),"token":""})
 
 def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
     """algo is [exact,like,contains]"""
@@ -108,7 +119,6 @@ def login(username:str,password:str)->str:
 def register(username:str,password:str)->str:
     """gets username and password returnes token or none"""
     res = searchUser(username)
-    
     if (res != None and len(res)>=1): # if there is a user with that username
         return None
     addUser(username,password)
