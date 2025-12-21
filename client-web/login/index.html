@@ -13,30 +13,48 @@
         <input type="text" id="usernameBox" />
         <label>password:</label>
         <input type="password" id="passwordBox"/>
-        <button type="loginBtn" onclick="login()">login</button>
+        <button onclick="login()">login</button>
+        <button onclick="register()">register</button>
     </div>
 </body>
-<script>
-    apiUrl = null;
-    import('/constants.js').then(({ API_URL }) => {
-        apiUrl = API_URL;
-        });
+<script type="text/javascript">
+
+
     async function login(){
+        const {API_URL} = await import("../constants.js");
         const username = document.getElementById("usernameBox").value
         const password = document.getElementById("passwordBox").value
         // console.log(`username:${username} password: ${password}`);
-        if (!apiUrl){
-            alert("failed to acuire apiUrl!")
+        if (!API_URL){
+            alert("failed to acuire  API_URL!")
             return
         }
-        res = await fetch(apiUrl+"/login", {
+        res = await fetch( API_URL+"/login", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({username: 1, pass: 'Textual content'})
+    body: JSON.stringify({username: username, pass: password})
   });
-    console.log(res.JSON())
-    }
+}
+  async function register(){
+        const {API_URL} = await import("../constants.js");
+        const username = document.getElementById("usernameBox").value
+        const password = document.getElementById("passwordBox").value
+        // console.log(`username:${username} password: ${password}`);
+        if (!API_URL){
+            alert("failed to acuire  API_URL!")
+            return
+        }
+        res = await fetch( API_URL+"/register", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({username: username, pass: password,cpass: password})
+  });
+}
+
+    
 </script>
 </html>

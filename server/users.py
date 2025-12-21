@@ -108,7 +108,7 @@ def register(username:str,password:str)->str:
     """gets username and password returnes token or none"""
     res = searchUser(username)
     
-    if (res or len(res)>=1):
+    if (res != None and len(res)>=1): # if there is a user with that username
         return None
     addUser(username,password)
     return login(username,password)

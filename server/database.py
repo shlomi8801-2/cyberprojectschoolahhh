@@ -24,7 +24,7 @@ def CheckConnection(times:int=0)->bool:
                 if (times >=5):
                     return False
                 return CheckConnection(times+1)
-            DB = sqlite3.connect(dbfile)
+            DB = sqlite3.connect(dbfile,check_same_thread=False)
             return True
         case _:
             log(f"database type not found {dbtype}!")
