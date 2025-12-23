@@ -120,8 +120,10 @@ def login(username:str,password:str)->str:
             #update the token-date
             #return the new token
             token = generateToken()
-            while (searchUser(token=token) != None):
+            tmp = searchUser(token=token)
+            while (tmp != None):
                 token = generateToken() #unique token for each user might be slow but safest for now
+                tmp = searchUser(token=token)
             updateUser({"token_date":getNowEpoc(),"token":token},res)
             return token
 
