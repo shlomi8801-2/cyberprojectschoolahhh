@@ -42,5 +42,16 @@ def login()->dict:
     if not token:
         return {"error":"username or password are incorrect!","code":1}
     return {"token":token,"code":0}
+
+@app.route("/logout", methods = ['POST'])
+def logout()->dict:
+    must = ["token"]
+    res = request.cookies
+    for x in must:
+        if not (x in must):
+            return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
+    
+    return {"code":0 if users.logout(res.get("token")) else 1}
+
 def startServer():
     app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))

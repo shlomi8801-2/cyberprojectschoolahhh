@@ -17,10 +17,16 @@ def getNowEpoc():
     now = time.time()
     return round(now)
 def encodeUsername(username:str)->str:
+    if username == None:
+        return ""
     return base64.b64encode(username.encode("ascii")).decode("ascii")
 def decodeUsername(username:str)->str:
+    if username == None:
+        return ""
     return base64.b64decode(username.encode("ascii")).decode("ascii")
 def hashPassword(password:str)->str:
+    if password == None:
+        return ""
     return HASHINGALGO(password.encode()).hexdigest()
 
 def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
@@ -114,8 +120,23 @@ def login(username:str,password:str)->str:
             #update the token-date
             #return the new token
             token = generateToken()
+            while (searchUser(token=token) != None):
+                token = generateToken() #unique token for each user might be slow but safest for now
             updateUser({"token_date":getNowEpoc(),"token":token},res)
             return token
+
+def logout(token:str)->bool:
+    """gets token and searches for it if found deletes it and returns true else returns false"""
+    res = searchUser(token=token)
+    if (res == None):
+        return False
+    if (len(res) != 1):
+        return False
+    
+    res = makedict(res[0])
+    updateUser({"token_date":0},res) #sets the token date to 0 so its considered expired
+    return True
+    
 def register(username:str,password:str)->str:
     """gets username and password returnes token or none"""
     res = searchUser(username)
