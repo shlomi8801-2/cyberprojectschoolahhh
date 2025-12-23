@@ -30,14 +30,15 @@ def GetSetting(key =None)->list | str | None | dict:
                 cache[key] = output
                 return output
     except FileNotFoundError:
-        log("settings.json file not found")
+        log(f"settings.json file not found at '{GetCurrentDir()+"/settings.json"}'")
         return None
     except Exception as e:
         print(e)
 
 def GetCurrentDir()->str:
     """returns the dir of the server.py file"""
-    return "/".join(__file__.split("/")[:-1])
+    # return "/".join(__file__.split("/")[:-1])
+    return __file__[:-len(__name__+".py")]
 
 def NormalizeJson(string:str)->dict: #removes the comments from there for json module to load it
     """loads a json file and returns a dict object of the contents"""
