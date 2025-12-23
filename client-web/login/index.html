@@ -60,12 +60,13 @@
         switch (res.code) {
           case 1: //error
             statusBox.innerText = res.error;
-            statusBox.style.color = "red";
+            statusBox.style.color = "var(--pico-form-element-invalid-active-border-color)";
             break;
           case 0: // success
-            statusBox.style.color = "black";
+            statusBox.style.color = "var(--pico-h2-color)";
             statusBox.innerText = "redirecting";
             setCookie("token", res.token);
+            document.location = "../dashboard"
             //now redirect to wherever needed
             //...
             break;
@@ -97,6 +98,15 @@
             cpass: password,
           }),
         });
+        res = await res.json()
+        switch (res.code){
+          case 1: 
+          statusBox.innerText = res.error;
+            statusBox.style.color = "var(--pico-form-element-invalid-active-border-color)";
+            break;
+          case 0:
+            login();
+        }
       } catch (error) {
         const statusBox = document.getElementById("status");
         statusBox.innerText = `something went wrong!\n${error}`;
