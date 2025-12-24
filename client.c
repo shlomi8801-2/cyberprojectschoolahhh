@@ -1,5 +1,6 @@
 //my arduino chip is atmega328p
 #ifndef pc
+#include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include <avr/io.h>
 #include "iom328p.h"
 #include "atmega328p/avr/portpins.h"
