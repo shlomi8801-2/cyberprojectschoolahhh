@@ -50,7 +50,7 @@ def logout()->dict:
     for x in must:
         if not (x in must):
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
-    
+    print(res.get("token"))
     return {"code":0 if users.logout(res.get("token")) else 1}
 
 def startServer():

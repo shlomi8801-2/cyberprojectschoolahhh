@@ -1,8 +1,9 @@
 async function logout(){
-    const res = (await fetch(API_URL+"/logout",{
+    var res = await fetch(API_URL+"/logout",{
         method: "POST",
           headers: {}
-    })).json();
+    });
+    res = await res.json()
      switch (res.code) {
           case 1: //error
             alert("error logging out")
@@ -10,5 +11,7 @@ async function logout(){
           case 0: // success
             document.location = "/"
             break;
+          default:
+            alert("error logging out: unexpected code")
         }
 }

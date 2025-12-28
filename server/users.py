@@ -129,6 +129,8 @@ def login(username:str,password:str)->str:
 
 def logout(token:str)->bool:
     """gets token and searches for it if found deletes it and returns true else returns false"""
+    if (token == None):
+        return True
     res = searchUser(token=token)
     if (res == None):
         return False
