@@ -121,7 +121,7 @@ def login(username:str,password:str)->str:
             #return the new token
             token = generateToken()
             tmp = searchUser(token=token)
-            while (tmp != None):
+            while (tmp != None and len(tmp) >0):
                 token = generateToken() #unique token for each user might be slow but safest for now
                 tmp = searchUser(token=token)
             updateUser({"token_date":getNowEpoc(),"token":token},res)
