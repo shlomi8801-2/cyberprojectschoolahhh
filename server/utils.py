@@ -22,7 +22,10 @@ def hashString(string:str)->str:
 def generateToken(length:int = 30)->str:
     allowedChars = [x for x in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"] #must be allowed inside a browser cookie
     return ''.join(random.choice(allowedChars) for _ in range(length))
-def buildWhereQuery(args:dict,algo:str="exact") -> str | None:
+def buildWhereQuery(args:dict,algo:str="exact") -> str :
+    if (len(args)==0):
+        log.log("warning: args must have items")
+        return "1=1" #for all used like "... where 1=1" instead of "... where "
     output = ""
     if (algo=="exact"):
         output = " AND ".join([f'{x[0]}=="{x[1]}"' for x in args.items() if x[1] != None])
@@ -32,5 +35,12 @@ def buildWhereQuery(args:dict,algo:str="exact") -> str | None:
         output = " AND ".join([f'contains({x[0]},"{x[1]}")' for x in args.items() if x[1] != None])
     else:
         log.log(f"searchUser went wrong no algo:{algo}")
-        return None
+        return "1=1"
     return output
+def makeSqlDict(data:tuple,table:list)->dict:
+    """gets a tuple and assigns the data to dict with its columns in the table"""
+    #for sqlite it appends another item before so skip it before sending into this function
+    if not isinstance(data,tuple):
+        return {}
+    keys = list(table[1].keys())
+    return dict((keys[x], data[x]) for x in range(len(data)))

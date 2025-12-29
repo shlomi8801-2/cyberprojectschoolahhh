@@ -14,7 +14,7 @@ def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
         return False
     if  len(args) !=1:
         return False
-    args = makedict(args[0])
+    args = makeUserDict(args[0])
     args = buildWhereQuery(args,algo)
     database.Delete(USERS_TABLE[0],args)
     return True
@@ -41,11 +41,11 @@ def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
     except Exception as e:
         log(f"something went wrong while searching: {e}")
         return None
-def makedict(user:tuple)->dict:
+def makeUserDict(user:tuple)->dict:
     """gets a user tuple and assigns the data to dict with its columns in the table"""
     if not isinstance(user,tuple):
         return None
-    return dict((list(USERS_TABLE[1].keys())[x], user[x+1]) for x in range(len(user)-1))
+    return makeSqlDict(user[1:],USERS_TABLE)
 def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     """args should look like the makedict output for example: {"username":username,"token":token}"""
     args = buildWhereQuery(args,algo)
@@ -64,7 +64,7 @@ def login(username:str,password:str)->str:
         return None
     if (len(res)!=1):
         return None
-    res = makedict(res[0])
+    res = makeUserDict(res[0])
     if (res["password"] == hashString(password)):
         if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME):
             #update the token-date
@@ -93,7 +93,7 @@ def logout(token:str)->bool:
     if (len(res) != 1):
         return False
     
-    res = makedict(res[0])
+    res = makeUserDict(res[0])
     updateUser({"token_date":0},res) #sets the token date to 0 so its considered expired
     return True
     
