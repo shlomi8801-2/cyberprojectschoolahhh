@@ -15,14 +15,32 @@ async function logout(){
             alert("error logging out: unexpected code")
         }
 }
-
-window.onload = function() {
-  const container = document.getElementById("container")
-  switch(getCurrentHas()){
-    case '':{
-      container.
+function changewindow(){
+const container = document.getElementById("container")
+  switch(getCurrentHash()){
+    case "#clients":{
+container.src = "clients.html"
+      break;
     }
-    case 
+    case "#users":{
+container.src = "users.html"
+      break;
+    }
+    case "#about":{
+container.src = "about.html"
+      break;
+    }
+    default:{
+      container.src = "dashboard.html"
+      break;
+    }
   }
    
+}
+navigation.addEventListener("navigate", e => {
+changewindow()
+});
+
+window.onload = function() {
+  changewindow()
 }
