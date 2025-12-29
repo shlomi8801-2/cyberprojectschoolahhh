@@ -10,3 +10,7 @@ function setCookie(key, value) {
     function deleteCookie(key) {
       document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
     }
+  function getCurrentHash(){
+    // the fragment of the url for example: "https://example.com/#hello" -> hello
+    return (new URL(window.location.href)).hash
+  }

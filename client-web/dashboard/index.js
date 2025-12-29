@@ -15,3 +15,14 @@ async function logout(){
             alert("error logging out: unexpected code")
         }
 }
+
+window.onload = function() {
+  const container = document.getElementById("container")
+  switch(getCurrentHas()){
+    case '':{
+      container.
+    }
+    case 
+  }
+   
+}
