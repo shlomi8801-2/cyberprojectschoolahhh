@@ -12,8 +12,7 @@ def getClients(args:dict,algo:str="exact")->list:
     #all the dict keys MUST be columns in the table in the database
     if (len(args ==0)):
         return []
-    return database.Search(CARMODULES_TABLE[0],args)        
-    pass
+    return database.Search(CARMODULES_TABLE[0],args)
 
 def registerClient(cSock:client_coms.clientSock)->None:
     #when gettings register will generate unique id and password both will be sent to the controller
