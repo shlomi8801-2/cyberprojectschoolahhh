@@ -62,23 +62,22 @@ def buildata(data: dict)->bytearray:
     return output
 
 class clientSock:
-    
     def __init__(self,accept_res:tuple):
         """accept_res is the output of socker.accept()"""
         self.sock:socket.socket = accept_res[0]
         self.connected=True
         #todo: add a condition to check if still connected
     def sendcmd(self,type:str,data:dict) ->None:
-        """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like length of all the msg without the first num then 
+        """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like: length of all the msg without the first num then 
         length:key:length:value:length:key...."""
         if not self.connected:
             return
         if (type and data):
             self.sock.sendall(buildata({type:buildata(data)}))
-    def recievecmd(self,data:bytearray)->tuple:
+    def recievecmd(self)->tuple:
         """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)"""
         if not self.connected:
-            return
+            return {}
         res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
         res = self.sock.recv(res_len)
         try:

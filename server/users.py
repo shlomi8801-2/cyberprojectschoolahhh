@@ -1,33 +1,12 @@
 import database
 from log import log
-import hashlib
-import base64
-import time
-import random
+from utils import *
 
-HASHINGALGO = hashlib.sha512
-REMEMBERTOKENTIME = 5*60 # 5 mins
-#tables: Users, Carmodules
-USERS_TABLE = ["Users",{"username":"varchar(255) not null UNIQUE","password":"varchar(128) not null","token":"varchar(30)","permissions_level":"INT DEFAULT 0","token_date":"INT DEFAULT 0","date_created":"INT DEFAULT 0"}]
-CARMODULES_TABLE = "Carmodules"
+from constants import *
 
 FIRST_USER = -1 # if the user table just created in this execution of the code it will give the first user permissions by setting its value to 1
 
-def getNowEpoc():
-    now = time.time()
-    return round(now)
-def encodeUsername(username:str)->str:
-    if username == None:
-        return ""
-    return base64.b64encode(username.encode("ascii")).decode("ascii")
-def decodeUsername(username:str)->str:
-    if username == None:
-        return ""
-    return base64.b64decode(username.encode("ascii")).decode("ascii")
-def hashPassword(password:str)->str:
-    if password == None:
-        return ""
-    return HASHINGALGO(password.encode()).hexdigest()
+
 
 def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
     args =searchUser(username,token,algo)
@@ -36,15 +15,7 @@ def deleteUser(username:str=None,token:str=None,algo:str="exact")->bool:
     if  len(args) !=1:
         return False
     args = makedict(args[0])
-    if (algo=="exact"):
-        args = " AND ".join([f'{x[0]}=="{x[1]}"' for x in args.items() if x[1] != None])
-    elif(algo=="like"):
-        args = " AND ".join([f'{x[0]} like "%{x[1]}%"' for x in args.items() if x[1] != None])
-    elif(algo=="contains"):
-        args = " AND ".join([f'contains({x[0]},"{x[1]}")' for x in args.items() if x[1] != None])
-    else:
-        log.log(f"searchUser went wrong no algo:{algo}")
-        return None
+    args = buildWhereQuery(args,algo)
     database.Delete(USERS_TABLE[0],args)
     return True
 
@@ -58,21 +29,13 @@ def addUser(username:str,password:str)->bool:
             FIRST_USER = 0; #not the first user
     elif (FIRST_USER not in [ 0,1]): #to not encounter some error relating to FIRST_USER not being in the right range of values
         FIRST_USER = 0
-    return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashPassword(password),"permissions_level":FIRST_USER,"date_created":getNowEpoc(),"token":""})
+    return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashString(password),"permissions_level":FIRST_USER,"date_created":getNowEpoc(),"token":""})
 
 def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
     """algo is [exact,like,contains]"""
     # database.AddTable(*USERS_TABLE)
     args = {"username":encodeUsername(username),"token":token}
-    if (algo=="exact"):
-        args = " AND ".join([f'{x[0]}=="{x[1]}"' for x in args.items() if x[1] != None])
-    elif(algo=="like"):
-        args = " AND ".join([f'{x[0]} like "%{x[1]}%"' for x in args.items() if x[1] != None])
-    elif(algo=="contains"):
-        args = " AND ".join([f'contains({x[0]},"{x[1]}")' for x in args.items() if x[1] != None])
-    else:
-        log.log(f"searchUser went wrong no algo:{algo}")
-        return None
+    args = buildWhereQuery(args,algo)
     try:
         return database.Search(USERS_TABLE[0],args)
     except Exception as e:
@@ -85,19 +48,12 @@ def makedict(user:tuple)->dict:
     return dict((list(USERS_TABLE[1].keys())[x], user[x+1]) for x in range(len(user)-1))
 def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     """args should look like the makedict output for example: {"username":username,"token":token}"""
-    if (algo=="exact"):
-        args = " AND ".join([f'{x[0]}=="{x[1]}"' for x in args.items() if x[1] != None])
-    elif(algo=="like"):
-        args = " AND ".join([f'{x[0]} like "%{x[1]}%"' for x in args.items() if x[1] != None])
-    elif(algo=="contains"):
-        args = " AND ".join([f'contains({x[0]},"{x[1]}")' for x in args.items() if x[1] != None])
-    else:
+    args = buildWhereQuery(args,algo)
+    if (args == None):
         log.log(f"searchUser went wrong no algo:{algo}")
     return database.Update(USERS_TABLE[0],values,args)
     pass
-def generateToken()->str:
-    allowedChars = [x for x in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"] #must be allowed inside a browser cookie
-    return ''.join(random.choice(allowedChars) for _ in range(30))
+
 
 
 #the more simple functions
@@ -109,7 +65,7 @@ def login(username:str,password:str)->str:
     if (len(res)!=1):
         return None
     res = makedict(res[0])
-    if (res["password"] == hashPassword(password)):
+    if (res["password"] == hashString(password)):
         if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME):
             #update the token-date
             #return the old token
