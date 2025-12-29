@@ -37,7 +37,7 @@ container.src = "about.html"
   }
    
 }
-navigation.addEventListener("navigate", e => {
+window.addEventListener("hashchange", () => {
 changewindow()
 });
 
