@@ -41,6 +41,3 @@ navigation.addEventListener("navigate", e => {
 changewindow()
 });
 
-window.onload = function() {
-  changewindow()
-}
