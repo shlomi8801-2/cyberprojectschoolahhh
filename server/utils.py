@@ -3,6 +3,7 @@ import random
 import log
 import time
 import threading
+import settings
 from constants import *
 
 def getNowEpoc():
@@ -40,12 +41,13 @@ def buildWhereQuery(args:dict,algo:str="exact") -> str :
     return output
 def makeSqlDict(data:tuple,table:list)->dict:
     """gets a tuple and assigns the data to dict with its columns in the table"""
-    #for sqlite it appends another item before so skip it before sending into this function
+    #for sqlite it appends another item before so skip it before sending into this function - fixed in the database script
     if not isinstance(data,tuple):
         return {}
     keys = list(table[1].keys())
+    print(f"{keys}\n{data}")
     return dict((keys[x], data[x]) for x in range(len(data)))
-def makeThreadAndStart(target:function,args:list=[]):
+def makeThreadAndStart(target,args:list=[]):
     tmp = threading.Thread(target=target,args=args)
     tmp.start()
     return tmp

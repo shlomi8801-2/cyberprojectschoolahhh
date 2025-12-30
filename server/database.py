@@ -37,7 +37,10 @@ def Search(table:str,args:str)->list:
         match dbtype:
             case "sqlite":
                 res = DB.execute(f"select * from {table} where {args}")
-                return res.fetchall() 
+                output = res.fetchall()
+                #for sqlite it adds the row number before so skip it
+                output = [x[1:] for x in output]
+                return output
             case _:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"

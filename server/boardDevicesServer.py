@@ -79,4 +79,7 @@ def listen(host:str,port:int)->None:
 
 
 def startServer():
-    listen(settings.GetSetting("server.listen"),int(settings.GetSetting("server.port")))
+    host = settings.GetSetting("server.listen")
+    port =int(settings.GetSetting("server.port"))
+    log.log(f"starting controllers server at {host}:{port}")
+    listen(host,port)

@@ -31,7 +31,7 @@ def addUser(username:str,password:str)->bool:
         FIRST_USER = 0
     return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashString(password),"permissions_level":FIRST_USER,"date_created":getNowEpoc(),"token":""})
 
-def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
+def searchUser(username:str=None,token:str=None,algo:str="exact")->list:
     """algo is [exact,like,contains]"""
     # database.AddTable(*USERS_TABLE)
     args = {"username":encodeUsername(username),"token":token}
@@ -40,7 +40,7 @@ def searchUser(username:str=None,token:str=None,algo:str="exact")->str:
         return database.Search(USERS_TABLE[0],args)
     except Exception as e:
         log(f"something went wrong while searching: {e}")
-        return None
+        return []
 def makeUserDict(user:tuple)->dict:
     """gets a user tuple and assigns the data to dict with its columns in the table"""
     if not isinstance(user,tuple):

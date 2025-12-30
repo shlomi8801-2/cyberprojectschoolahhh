@@ -2,6 +2,8 @@ from flask import Flask,request
 from flask_cors import CORS
 import users
 import settings
+import constants
+import utils
 app = Flask(__name__)
 CORS(app)
 
@@ -12,6 +14,21 @@ CORS(app)
 #list of arduino modules(they will ask to register)
 #option to assign module to user
 #home page after logged in
+
+def checkpermissions(permission_level:int = 1) -> bool:
+    """checks with the token cookie if the user has the required permissions True if they have else False"""
+    # 0 - normal user
+    # 1 - admin
+    if not ("token" in request.cookies): #takes the request object from the thread it's running in
+        return False
+    user = users.searchUser(token=request.cookies.get("token"))
+    if (len(user) != 1):
+        return False
+    user = user[0] # because its a list of tuples get the first one
+    user = utils.makeSqlDict(user,constants.USERS_TABLE)
+    return int(user.get("permisions_level","0"))>=permission_level
+        
+    
 
 @app.route("/")
 def test()->str:
@@ -51,6 +68,23 @@ def logout()->dict:
         if not (x in must):
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
     return {"code":0 if users.logout(res.get("token")) else 1}
+@app.route("/list/<type>/<rows>")
+def getList(type:str,rows:int = 100)->dict:
+    try:
+        rows = int(rows)
+    except:
+        return {"code":1,"error":"rows should be a number"}
+    if (not checkpermissions(1)):
+        return {"code":1,"error":"permission level is too low"}
+    match (type):
+        case "users":
+            #get users
 
+            pass
+        case "controllers":
+            pass
+        case _:
+            return {"code":1,"error":"no such type"}
+    pass
 def startServer():
     app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))
