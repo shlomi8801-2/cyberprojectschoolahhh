@@ -29,14 +29,15 @@ def CheckConnection(times:int=0)->bool:
         case _:
             log(f"database type not found {dbtype}!")
             return False
-def Search(table:str,args:str)->list:
+def Search(table:str,args:str, maxrows:int =-1,offset:int=0)->list:
     """returns list of lines(tuples) found in database select query with the args as the string after where for example:
     select * from <table> where <args>;"""
     #convert everything to base64 to prevent sql injection
     try:
         match dbtype:
             case "sqlite":
-                res = DB.execute(f"select * from {table} where {args}")
+                query = f"select * from {table} where {args} {("limit " +str(maxrows) )if maxrows >=1 else ""} {("offset "+str(offset)) if offset >0 else ""}"
+                res = DB.execute(query)
                 output = res.fetchall()
                 #for sqlite it adds the row number before so skip it
                 output = [x[1:] for x in output]
@@ -45,7 +46,7 @@ def Search(table:str,args:str)->list:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong searching in the database:{e}\n({table},{args}")
+        log(f"something went wrong searching in the database:{e}\n{table},{args}\n{query if query else ""}")
 def Insert(table:str,values:dict) -> bool:
     try:
         match dbtype:

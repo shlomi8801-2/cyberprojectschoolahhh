@@ -52,9 +52,10 @@ def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     if (args == None):
         log.log(f"searchUser went wrong no algo:{algo}")
     return database.Update(USERS_TABLE[0],values,args)
-    pass
 
-
+def getUsersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
+    output =database.Search(USERS_TABLE[0],buildWhereQuery(filters,algo),maxRows,offset)
+    return [] if output is None else output
 
 #the more simple functions
 def login(username:str,password:str)->str:

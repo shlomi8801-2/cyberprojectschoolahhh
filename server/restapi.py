@@ -69,18 +69,19 @@ def logout()->dict:
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
     return {"code":0 if users.logout(res.get("token")) else 1}
 @app.route("/list/<type>/<rows>")
-def getList(type:str,rows:int = 100)->dict:
+def getList(type:str,rows:int = 100,offset:int=0)->dict:
     try:
         rows = int(rows)
+        offset = int(offset)
     except:
-        return {"code":1,"error":"rows should be a number"}
+        return {"code":1,"error":"rows/offset should be a number"}
     if (not checkpermissions(1)):
         return {"code":1,"error":"permission level is too low"}
     match (type):
         case "users":
             #get users
-            
-            pass
+            usersList = users.getUsersList(maxRows=rows,offset=offset)
+            return {"code":0,"users":usersList}
         case "controllers":
             pass
         case _:
