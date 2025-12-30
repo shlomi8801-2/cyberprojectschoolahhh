@@ -67,7 +67,6 @@ def login(username:str,password:str)->str:
     if (len(res)!=1):
         return None
     res = makeUserDict(res[0])
-    print(res)
     if (res["password"] == hashString(password)):
         if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME):
             #update the token-date

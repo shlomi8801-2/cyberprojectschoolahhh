@@ -25,6 +25,15 @@ def generateToken(length:int = 30)->str:
     allowedChars = [x for x in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"] #must be allowed inside a browser cookie
     return ''.join(random.choice(allowedChars) for _ in range(length))
 def buildWhereQuery(args:dict,algo:str="exact") -> str :
+    # filters = {} # in case del function casuse problems use it
+    # for key in args:
+    #     if not (args[key] == "" or args[key] == None):
+    #         filters[key] = args[key]
+    # args = filters
+    for key in list(args.keys()):
+        if (args[key] == "" or args[key] == None):
+            del args[key]
+
     if (len(args)==0):
         log.log("warning: args must have items")
         return "1=1" #for all used like "... where 1=1" instead of "... where "
