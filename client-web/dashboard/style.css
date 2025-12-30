@@ -6,6 +6,7 @@
 
 /* Style the links inside the navigation bar */
 .topnav a {
+  
   float: left;
   color: #f2f2f2;
   text-align: center;
@@ -24,4 +25,13 @@
 .topnav a.active {
   background-color: var(--pico-primary-hover-background); /* from the pico style*/
   color: white;
+}
+
+.logoutbtn {
+  
+  background: var(--pico-del-color);
+  margin-left: auto; 
+  float: right !important; 
+  
+  
 }
