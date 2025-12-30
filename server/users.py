@@ -25,6 +25,7 @@ def addUser(username:str,password:str)->bool:
     if (FIRST_USER == -1): # might be slow for alot of users
         if (database.Search(USERS_TABLE[0],"1=1 limit 1") != None):
             FIRST_USER = 1; #the first user
+            log.log("first user!")
         else:
             FIRST_USER = 0; #not the first user
     elif (FIRST_USER not in [ 0,1]): #to not encounter some error relating to FIRST_USER not being in the right range of values
@@ -45,7 +46,7 @@ def makeUserDict(user:tuple)->dict:
     """gets a user tuple and assigns the data to dict with its columns in the table"""
     if not isinstance(user,tuple):
         return None
-    return makeSqlDict(user[1:],USERS_TABLE)
+    return makeSqlDict(user,USERS_TABLE)
 def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     """args should look like the makedict output for example: {"username":username,"token":token}"""
     args = buildWhereQuery(args,algo)
@@ -66,6 +67,7 @@ def login(username:str,password:str)->str:
     if (len(res)!=1):
         return None
     res = makeUserDict(res[0])
+    print(res)
     if (res["password"] == hashString(password)):
         if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME):
             #update the token-date
