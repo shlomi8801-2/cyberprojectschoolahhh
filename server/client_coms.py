@@ -67,13 +67,13 @@ class clientSock:
         self.sock:socket.socket = accept_res[0]
         self.connected=True
         #todo: add a condition to check if still connected
-    def sendcmd(self,type:str,data:dict) ->None:
+    def sendcmd(self,cmdtype:str,data:dict) ->None:
         """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like: length of all the msg without the first num then 
         length:key:length:value:length:key...."""
         if not self.connected:
             return
-        if (type and data):
-            self.sock.sendall(buildata({type:buildata(data)}))
+        if (cmdtype and data):
+            self.sock.sendall(buildata({cmdtype:buildata(data)}))
     def recievecmd(self)->tuple:
         """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)"""
         if not self.connected:
