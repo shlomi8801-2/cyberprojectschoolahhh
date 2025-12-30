@@ -51,16 +51,31 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         del waitingToRegister[_id]
     
 
-def handleClient():
+def handleClient(clientSock:client_coms.clientSock)->None:
     #listen to each client and handle commands
-    pass    
+    conncted = True
+    while (conncted):
+        msg = clientSock.recievecmd()
+        if (len(msg) == 0):
+            continue
+        match (msg[0]): #commands are here
+            case "REG":
+                registerClient(clientSock,msg[1])
+                break
+            case _:
+                log.log(f"warning: uknown command {msg[0]}")
+                break
 
 def listen(host:str,port:int)->None:
     #Reg - to register client to the database and give unique id
     #Action - tell the controller what to do on what pins
     #list - give the device details like available pins
-
-    pass
+    server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# ipv4,tcp
+    server.bind((settings.GetSetting("server.listen"),int(settings.GetSetting("server.port"))))
+    server.listen(5)
+    while (True):
+        cSock = client_coms.clientSock(server.accept())
+        utils.makeThreadAndStart(handleClient,[cSock])
 
 
 def startServer():

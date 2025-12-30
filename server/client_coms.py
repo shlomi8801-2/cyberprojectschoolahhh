@@ -1,7 +1,6 @@
 import settings
 import socket
-import websocket
-
+import log
 
 
 def parsedata(data: bytearray)->dict:
@@ -77,15 +76,18 @@ class clientSock:
     def recievecmd(self)->tuple:
         """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)"""
         if not self.connected:
-            return {}
+            return ()
         res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
         res = self.sock.recv(res_len)
         try:
             output = parsedata(res)
             if (len(output) ==0):
                 raise Exception(f"blank after parsing!\n{output}")
-            return list(output.items())[0]
+            return list(output.items())[0] #gets the first couple of data for now (type:data)
         except Exception as e:
+            #should be a warning not an error
+            log.log(f"warning: an error occured reciving data from controller \n{e}")
+            return ()
             raise Exception(f"error parsing data!\n{e}")
 def test_buildNparsedata():
     import random

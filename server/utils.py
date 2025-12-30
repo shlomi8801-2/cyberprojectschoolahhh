@@ -45,7 +45,7 @@ def makeSqlDict(data:tuple,table:list)->dict:
         return {}
     keys = list(table[1].keys())
     return dict((keys[x], data[x]) for x in range(len(data)))
-def makeThreadAndStart(target:function,args:list):
+def makeThreadAndStart(target:function,args:list=[]):
     tmp = threading.Thread(target=target,args=args)
     tmp.start()
     return tmp
