@@ -45,7 +45,6 @@ def makeSqlDict(data:tuple,table:list)->dict:
     if not isinstance(data,tuple):
         return {}
     keys = list(table[1].keys())
-    print(f"{keys}\n{data}")
     return dict((keys[x], data[x]) for x in range(len(data)))
 def makeThreadAndStart(target,args:list=[]):
     tmp = threading.Thread(target=target,args=args)

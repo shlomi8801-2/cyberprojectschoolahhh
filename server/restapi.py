@@ -26,7 +26,7 @@ def checkpermissions(permission_level:int = 1) -> bool:
         return False
     user = user[0] # because its a list of tuples get the first one
     user = utils.makeSqlDict(user,constants.USERS_TABLE)
-    return int(user.get("permisions_level","0"))>=permission_level
+    return int(user.get("permissions_level","0"))>=permission_level
         
     
 
@@ -79,7 +79,7 @@ def getList(type:str,rows:int = 100)->dict:
     match (type):
         case "users":
             #get users
-
+            
             pass
         case "controllers":
             pass
