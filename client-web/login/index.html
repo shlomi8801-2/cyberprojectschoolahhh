@@ -6,32 +6,29 @@
     <title>RemotedCar</title>
     <link rel="stylesheet" href="../css/pico.min.css" />
 
-      <!-- MUST BE IN ORDER to import functions and variables -->
-  <script type="text/javascript" src="../utils.js"></script>
-  <script type="text/javascript" src="../constants.js"></script>
-  <script type="text/javascript" src="index.js"></script>
-  
+    <!-- MUST BE IN ORDER to import functions and variables -->
+    <script type="text/javascript" src="../utils.js"></script>
+    <script type="text/javascript" src="../constants.js"></script>
+    <script type="text/javascript" src="index.js"></script>
   </head>
   <body>
     <!-- add things here so it will look like a login screen and make requests from
     the servevr the server - things added -->
 
     <div id="data-form" style="position: relative; padding: 50px 30%">
-      <article> <!-- for the looks-->
-      <h1 style="text-align: center">please sign in</h1>
-      <label>username:</label>
-      <input type="text" id="usernameBox" />
-      <label>password:</label>
-      <input type="password" id="passwordBox" />
-      <div style="display: grid">
-        <button id="loginBtn" onclick="login()">login</button>
-        <button onclick="register()">register</button>
-      </div>
-      <p id="status">ye this works</p>
+      <article>
+        <!-- for the looks-->
+        <h1 style="text-align: center">please sign in</h1>
+        <label>username:</label>
+        <input type="text" id="usernameBox" />
+        <label>password:</label>
+        <input type="password" id="passwordBox" />
+        <div style="display: grid">
+          <button id="loginBtn" onclick="login()">login</button>
+          <button onclick="register()">register</button>
+        </div>
+        <p id="status">ye this works</p>
       </article>
     </div>
   </body>
-
-  
-  
 </html>
