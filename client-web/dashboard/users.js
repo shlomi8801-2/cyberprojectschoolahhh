@@ -14,7 +14,6 @@ async function getUsers() {
       break;
     case 0: // success
       //put them in the table
-      console.log(res.users)
       const container = document.createElement("table")
       var row = document.createElement("tr")
       document.getElementById("container").appendChild(container)
@@ -26,9 +25,27 @@ async function getUsers() {
       }
       for (var x=0;x<res.users.length;++x){
         row = document.createElement("tr")
-        for (var i=0;i<res.users[i].length;i++){
+        for (var i=0;i<res.columns.length;i++){ // columns
           var elem = document.createElement("td");
-          elem.innerText=res.users[x][i];
+          //here parse the value acording to the column
+          const column = res.columns[i]
+          var currentDataValue = res.users[x][i]
+          var valueElement;
+          if (column.includes("username") && 0){ // currently "&& 0" because for now its skipping it
+            //translate from base64
+          }else if (column.includes("date")){
+            const tmpElem = document.createElement("input")
+            tmpElem.type = "date";
+            tmpElem.disabled = true
+            tmpElem.value =epocToYYYYMMDD(currentDataValue);
+            console.log(tmpElem.value)
+            valueElement = tmpElem;
+          }else{
+            valueElement = document.createElement("a")
+            valueElement.innerText = currentDataValue;
+          }
+          
+          elem.appendChild(valueElement);
           row.appendChild(elem)
         }
         container.appendChild(row)
@@ -38,4 +55,19 @@ async function getUsers() {
       alert("error getting users list: unexpected code");
   }
 }
+
+function epocToYYYYMMDD(epocTime){
+  return (new Date(Number(epocTime))).toISOString().substring(0,10); // it returns something like '1970-01-01T00:00:00.001Z' so we cut it to 10 first digits(thats what date input takes)
+}
+
+
+
+
+
+
+
+
+
+
+
 getUsers()
