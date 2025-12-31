@@ -1,5 +1,8 @@
 /* Add a black background color to the top navigation */
 .topnav {
+  position: fixed;
+  width: 100%;
+  top: 0px;
   background-color: #ffffff15;
   overflow: hidden;
 }
@@ -34,5 +37,14 @@
   float: right !important;
 }
 #container {
-  width: 100%;
+  position: absolute;
+  top: 60px; /* the top bar height */
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0 none;
+  box-sizing: border-box;
 }
