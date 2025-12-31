@@ -9,7 +9,7 @@ async function logout() {
       alert("error logging out");
       break;
     case 0: // success
-      document.location = "/";
+      document.location = "../";
       break;
     default:
       alert("error logging out: unexpected code");
