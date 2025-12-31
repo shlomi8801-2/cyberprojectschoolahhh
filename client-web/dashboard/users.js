@@ -56,7 +56,8 @@ async function getUsers() {
   }
 }
 
-function epocToYYYYMMDD(epocTime){
+function epocToYYYYMMDD(epocTimeInSeconds){
+  const epocTime = epocTimeInSeconds*1000
   return (new Date(Number(epocTime))).toISOString().substring(0,10); // it returns something like '1970-01-01T00:00:00.001Z' so we cut it to 10 first digits(thats what date input takes)
 }
 
