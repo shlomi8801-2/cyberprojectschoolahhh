@@ -111,16 +111,13 @@ def removeFromUsersList(UsersList:list,columns:tuple)->list:
     #its low numbers here for the lengths so it matters less what is the complexity
     indexesToRemove =[]
     keys = list(USERS_TABLE[1].keys())
-    for key in columns:
-        if (key not in keys):
-            continue
-        indexesToRemove.append(keys.index(key))
-    for x in indexesToRemove:
-        keys.pop(x)
+    for key in keys:
+        if (key in columns):
+            indexesToRemove.append(keys.index(key))
     for i in range(len(UsersList)):
-        UsersList[i] = list(UsersList[i])
-        for x in indexesToRemove:
-            UsersList[i].pop(x)
+        UsersList[i] = [UsersList[i][x] for x in range(len(keys)) if x not in indexesToRemove] # the length of keys and every "row" in usersList are the same(if the function is used correctly)
+    keys = [keys[x] for x in range(len(keys)) if not(x in indexesToRemove)]
+
     return keys
 
 if (__name__=="__main__"):
