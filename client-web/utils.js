@@ -12,3 +12,6 @@ function getCurrentHash() {
   // the fragment of the url for example: "https://example.com/#hello" -> hello
   return new URL(window.location.href).hash;
 }
+function changeTheme(){
+ //change the  data-theme property of the html element of the whole page to "light" or "dark"
+}
