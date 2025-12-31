@@ -5,7 +5,7 @@ import settings
 import constants
 import utils
 app = Flask(__name__)
-CORS(app)
+CORS(app,supports_credentials=True)
 
 
 #login
@@ -68,8 +68,8 @@ def logout()->dict:
         if not (x in must):
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
     return {"code":0 if users.logout(res.get("token")) else 1}
-@app.route("/list/<type>/<rows>")
-def getList(type:str,rows:int = 100,offset:int=0)->dict:
+@app.route("/list/<_type>/<rows>")
+def getList(_type:str,rows:int = 100,offset:int=0)->dict:
     try:
         rows = int(rows)
         offset = int(offset)
@@ -77,7 +77,7 @@ def getList(type:str,rows:int = 100,offset:int=0)->dict:
         return {"code":1,"error":"rows/offset should be a number"}
     if (not checkpermissions(1)):
         return {"code":1,"error":"permission level is too low"}
-    match (type):
+    match (_type):
         case "users":
             #get users
             usersList = users.getUsersList(maxRows=rows,offset=offset)
@@ -85,7 +85,7 @@ def getList(type:str,rows:int = 100,offset:int=0)->dict:
         case "controllers":
             pass
         case _:
-            return {"code":1,"error":"no such type"}
+            return {"code":1,"error":f"no such type {_type}"}
     pass
 def startServer():
     app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))
