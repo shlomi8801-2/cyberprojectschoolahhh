@@ -106,7 +106,22 @@ def register(username:str,password:str)->str:
         return None
     addUser(username,password)
     return login(username,password)
-
+def removeFromUsersList(UsersList:list,columns:tuple)->list:
+    """returns the keys left in the table"""
+    #its low numbers here for the lengths so it matters less what is the complexity
+    indexesToRemove =[]
+    keys = list(USERS_TABLE[1].keys())
+    for key in columns:
+        if (key not in keys):
+            continue
+        indexesToRemove.append(keys.index(key))
+    for x in indexesToRemove:
+        keys.pop(x)
+    for i in range(len(UsersList)):
+        UsersList[i] = list(UsersList[i])
+        for x in indexesToRemove:
+            UsersList[i].pop(x)
+    return keys
 
 if (__name__=="__main__"):
     deleteUser("shlomi")

@@ -15,11 +15,23 @@ async function getUsers() {
     case 0: // success
       //put them in the table
       console.log(res.users)
-      const container = document.getElementById("container")
+      const container = document.createElement("table")
+      var row = document.createElement("tr")
+      document.getElementById("container").appendChild(container)
+      container.appendChild(row)
+      for (var x=0;x<res.columns.length;x++){
+                var elem = document.createElement("th");
+          elem.innerText=res.columns[x]
+          row.appendChild(elem)
+      }
       for (var x=0;x<res.users.length;++x){
-        var elem = document.createElement("a");
-        elem.innerText=res.users[x];
-        container.appendChild(elem)
+        row = document.createElement("tr")
+        for (var i=0;i<res.users[i].length;i++){
+          var elem = document.createElement("td");
+          elem.innerText=res.users[x][i];
+          row.appendChild(elem)
+        }
+        container.appendChild(row)
       }
       break;
     default:

@@ -81,7 +81,11 @@ def getList(_type:str,rows:int = 100,offset:int=0)->dict:
         case "users":
             #get users
             usersList = users.getUsersList(maxRows=rows,offset=offset)
-            return {"code":0,"users":usersList}
+            #get the columns that sent
+            #remove the password and token from the users to not show it
+            keys = users.removeFromUsersList(usersList,["password","token"])
+                    
+            return {"code":0,"columns":keys,"users":usersList}
         case "controllers":
             pass
         case _:
