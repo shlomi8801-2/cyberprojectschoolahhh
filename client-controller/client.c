@@ -5,7 +5,6 @@
 #include "iom328p.h"
 #include "atmega328p/avr/portpins.h"
 #endif
-// #include "portpins.h"
 // #include "iom328p.h"
 void sleep(unsigned int ms){
     for (unsigned int i=0;i<ms;i++);
@@ -17,12 +16,12 @@ int main()
     DDRD = ~(0); //set pd2 to output  
       
     while (1) {
-        PORTB |=  (1 << PB5);   // LED on
+        PORTB |=  (1 << PORTB5);   // LED on
         // PORTD = 0b00000100;
         _delay_ms(1000);
         
 
-        PORTB &= ~(1 << PB5);   // LED off
+        PORTB &= ~(1 << PORTB5);   // LED off
         // PORTD = 0;
 
         _delay_ms(1000);
