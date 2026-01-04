@@ -10,8 +10,7 @@
     <script type="text/javascript" src="../utils.js"></script>
     <script type="text/javascript" src="../constants.js"></script>
     <script type="text/javascript" src="index.js"></script>
-        <link rel="stylesheet" href="../css/pico.min.css" />
-
+    <link rel="stylesheet" href="../css/pico.min.css" />
   </head>
   <body>
     <div class="topnav">
@@ -21,7 +20,9 @@
       <a href="#about">About</a>
       <a onclick="logout()" class="logoutbtn"> logout</a>
     </div>
-      <iframe id="container" src="dashboard.html" ></iframe>
-    
+    <div class="loaderBg" id="loader">
+      <div class="loader"></div>
+    </div>
+    <iframe id="container" src="dashboard.html"></iframe>
   </body>
 </html>

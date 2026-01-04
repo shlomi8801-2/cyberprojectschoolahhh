@@ -1,3 +1,4 @@
+var iframeContainer;
 async function logout() {
   var res = await fetch(API_URL + "/logout", {
     method: "POST",
@@ -36,6 +37,35 @@ function changewindow() {
     }
   }
 }
+function setLoading(){
+  document.getElementById("loader").style.visibility="visible";
+}
+function setNotLoading(){
+  document.getElementById("loader").style.visibility="hidden";
+}
+function updateLoadState(readyState){
+  // alert(document.readyState)
+  if (readyState == "complete") {
+    //finished loading
+    setNotLoading();
+  }else{
+    //still loading
+    setLoading();
+  }
+}
+document.onreadystatechange = function() {
+  updateLoadState(document.readyState)
+}
+
+
+window.onload = function (){
+  iframeContainer = document.getElementById("container");
+    iframeContainer.onload = function(){
+      updateLoadState("complete");
+  }
+  changewindow();
+}
 window.addEventListener("hashchange", () => {
+  setLoading();
   changewindow();
 });
