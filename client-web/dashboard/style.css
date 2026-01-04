@@ -38,7 +38,7 @@
   float: right !important;
 }
 #container {
-  position: absolute;
+  position: fixed;
   top: 60px; /* the top bar height */
   display: block;
   width: 100vw;
