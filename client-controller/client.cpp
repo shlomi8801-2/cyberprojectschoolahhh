@@ -3,15 +3,17 @@
 #ifdef pc 
 //anything that has errors in intellesense put here
 #include <util/delay.h>
+// #include <Arduino.h>
+#include <SoftwareSerial.h>
+#include "atmega328p/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.h"
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #else
 //anything that the intellesense require but doesnt compile
+#include "atmega328p/ArduinoCore-avr/cores/arduino/Stream.h"
+
 #include "atmega328p/avr/include/util/delay.h.in"
 #include "iom328p.h"
 #include "atmega328p/avr/portpins.h"
-#include "atmega328p/ArduinoCore-avr/cores/arduino/Stream.h"
-#include "atmega328p/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.h"
-
 #endif
 
 inline void sleep(unsigned int ms){ // inline because _delay_ms throws error when its non inline function
@@ -22,8 +24,8 @@ void toggleLed(){
 }
 int main()
 {
-    SoftwareSerial serial1 = {0,1};
-    serial1.begin(115200);
+    Serial.begin(115200);
+    
     // Set built-in LED pin as output
     DDRB |= (1 << DDB5); // just sets the pb register at bit 5 which is the led state to output for output
     DDRD = ~(0); //set pd2 to output  
