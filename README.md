@@ -15,7 +15,7 @@
 * [w3schools](https://www.w3schools.com/)
 * [tinygsm](https://github.com/vshymanskyy/TinyGSM)
 * [css loaders](https://css-loaders.com)
-
+* [arduino libs](https://github.com/arduino/ArduinoCore-avr/tree/master)
   </details>
 
 ### how to run?
