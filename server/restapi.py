@@ -63,7 +63,7 @@ def login()->dict:
 @app.route("/logout", methods = ['POST'])
 def logout()->dict:
     must = ["token"]
-    res = request.cookies
+    res = request.headers
     for x in must:
         if not (x in must):
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
