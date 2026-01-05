@@ -19,9 +19,9 @@ def checkpermissions(permission_level:int = 1) -> bool:
     """checks with the token cookie if the user has the required permissions True if they have else False"""
     # 0 - normal user
     # 1 - admin
-    if not ("token" in request.cookies): #takes the request object from the thread it's running in
+    if not ("token" in request.headers): #takes the request object from the thread it's running in
         return False
-    user = users.searchUser(token=request.cookies.get("token"))
+    user = users.searchUser(token=request.headers.get("Token"))
     if (len(user) != 1):
         return False
     user = user[0] # because its a list of tuples get the first one

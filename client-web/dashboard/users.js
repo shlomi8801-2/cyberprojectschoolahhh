@@ -3,8 +3,8 @@ async function getUsers() {
     const offset = 0;
   var res = await fetch(API_URL + `/list/users/${maxrows}`, {
     method: "get",
-    headers: {},
-    credentials: 'include'
+    headers: {"Token":getCookie("token")},
+    credentials: 'include' // not working for some reason may fix later for now using in header
   });
   res = await res.json();
   switch (res.code) {
