@@ -1,5 +1,6 @@
 //my arduino chip is atmega328p
 #include <avr/io.h>
+#include <Arduino.h>
 #ifdef pc 
 //anything that has errors in intellesense put here
 #include <util/delay.h>
@@ -10,7 +11,6 @@
 #else
 //anything that the intellesense require but doesnt compile
 #include "atmega328p/ArduinoCore-avr/cores/arduino/Stream.h"
-
 #include "atmega328p/avr/include/util/delay.h.in"
 #include "iom328p.h"
 #include "atmega328p/avr/portpins.h"
@@ -32,7 +32,7 @@ int main()
       
     while (1) {
         toggleLed();
-        serial1.print("hello");
+        Serial.print("hello");
         // PORTB = 1<<PORT5;
         // PORTD = 0b00000100;
         sleep(500);

@@ -3,3 +3,4 @@ main
 main.hex
 server/__pycache__
 server/database.db
+client-controller/atmega328p/ArduinoCore-avr
