@@ -69,6 +69,7 @@ def logout()->dict:
             return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
     return {"code":0 if users.logout(res.get("token")) else 1}
 @app.route("/list/<_type>/<rows>")
+@app.route("/list/<_type>/<rows>/<offset>", defaults={'offset': 0})
 def getList(_type:str,rows:int = 100,offset:int=0)->dict:
     try:
         rows = int(rows)
