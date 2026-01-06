@@ -17,6 +17,8 @@
 * [css loaders](https://css-loaders.com)
 * [avr libs](https://github.com/arduino/ArduinoCore-avr/tree/master)
 * [arduino libs](https://docs.arduino.cc/libraries/)
+* [getbootstrap](https://icons.getbootstrap.com/i)
+
   </details>
 
 ### how to run?
