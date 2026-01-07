@@ -8,7 +8,7 @@ avr-objcopy main -O ihex main.hex &&
 avrdude -C atmega328p/prog.conf -v -p atmega328p -carduino -P /dev/ttyUSB0 -b 115200 -D -U flash:w:./main.hex:i;
 else
 if [ $1 == "-S" ]; then
-avr-g++ -S client.cpp -lm -Iatmega328p/includes/core -Iatmega328p/includes/ -Os &&
+avr-g++ -S  client.cpp -lm -Iatmega328p/includes/core -Iatmega328p/includes/ -Os &&
 echo "generated client.s file";
 fi
 fi
