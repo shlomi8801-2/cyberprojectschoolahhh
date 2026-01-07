@@ -1,11 +1,11 @@
 //my arduino chip is atmega328p
 #include <avr/io.h>
 #include <Arduino.h>
+#include <SoftwareSerial.h>
 #ifdef pc 
 //anything that has errors in intellesense put here
 #include <util/delay.h>
 // #include <Arduino.h>
-#include <SoftwareSerial.h>
 #include "atmega328p/ArduinoCore-avr/libraries/SoftwareSerial/src/SoftwareSerial.h"
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #else
@@ -15,7 +15,7 @@
 #include "iom328p.h"
 #include "atmega328p/avr/portpins.h"
 #endif
-
+SoftwareSerial Serial = {0,1};
 inline void sleep(unsigned int ms){ // inline because _delay_ms throws error when its non inline function
     _delay_ms(ms);
 }
