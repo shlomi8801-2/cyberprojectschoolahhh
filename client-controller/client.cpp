@@ -1,11 +1,15 @@
 //my arduino chip is atmega328p
-#define mmcu atmega328
+#ifndef pc
+// #define mmcu atmega328p //must include those in the compiler line but keep it here for the intellisense
 #define __AVR_ATmega328P__
-#define F_CPU 16000000UL
+// #define F_CPU 16000000UL
+#endif
 #include <avr/io.h>
+// #include <avr/iom328p.h>
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <util/delay.h>
+
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 
 // #include "avr/io.h"

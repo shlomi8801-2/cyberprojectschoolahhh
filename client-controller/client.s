@@ -19,6 +19,9 @@ _Z9toggleLedv:
 /* epilogue start */
 	ret
 	.size	_Z9toggleLedv, .-_Z9toggleLedv
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC0:
+	.string	"hello"
 	.section	.text.startup,"ax",@progbits
 .global	main
 	.type	main, @function
@@ -27,15 +30,22 @@ main:
 /* frame size = 0 */
 /* stack size = 0 */
 .L__stack_usage = 0
+	ldi r20,lo8(5)
+	ldi r21,0
+	ldi r22,lo8(.LC0)
+	ldi r23,hi8(.LC0)
+	ldi r24,lo8(Serial)
+	ldi r25,hi8(Serial)
+	call _ZN5Print5writeEPKhj
 	ldi r22,lo8(1)
 	ldi r23,0
 	ldi r24,0
-	rcall analogWrite
+	call analogWrite
 	sbi 0x4,5
 	ldi r24,lo8(-1)
 	out 0xa,r24
 .L3:
-	rcall _Z9toggleLedv
+	call _Z9toggleLedv
 	ldi r18,lo8(1599999)
 	ldi r24,hi8(1599999)
 	ldi r25,hlo8(1599999)
@@ -48,3 +58,4 @@ main:
 	rjmp .L3
 	.size	main, .-main
 	.ident	"GCC: (Fedora 14.2.0-1.fc41) 14.2.0"
+.global __do_copy_data
