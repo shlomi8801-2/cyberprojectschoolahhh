@@ -20,7 +20,7 @@ void toggleLed(){
 int main()
 {
     
-    
+    Serial.write("hello");
     analogWrite(PB0,1);
     // Set built-in LED pin as output
     DDRB |= (1 << DDB5); // just sets the pb register at bit 5 which is the led state to output for output
