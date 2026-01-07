@@ -16,18 +16,17 @@ void toggleLed(){
 }
 int main()
 {
-    #ifdef UBRRH
-    gggg
-    #endif
-    // Serial.begin(115200);
+    #ifdef HAVE_HWSERIAL0
     
+    Serial;
+    Serial.print("hello");
+    #endif
     // Set built-in LED pin as output
     DDRB |= (1 << DDB5); // just sets the pb register at bit 5 which is the led state to output for output
     DDRD = ~(0); //set pd2 to output  
       
     while (1) {
         toggleLed();
-        // Serial.print("hello");
         // PORTB = 1<<PORT5;
         // PORTD = 0b00000100;
         sleep(500);
