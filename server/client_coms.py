@@ -2,6 +2,37 @@ import settings
 import socket
 import log
 
+class clientSock:
+    def __init__(self,accept_res:tuple):
+        """accept_res is the output of socker.accept()"""
+        self.sock:socket.socket = accept_res[0]
+        self.connected=True
+        #todo: add a condition to check if still connected
+    def sendcmd(self,cmdtype:str,data:dict) ->None:
+        """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like: length of all the msg without the first num then 
+        length:key:length:value:length:key...."""
+        if not self.connected:
+            return
+        if (cmdtype and data):
+            self.sock.sendall(buildata({cmdtype:buildata(data)}))
+    def recievecmd(self)->tuple:
+        """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)
+        gets the first couple of data for now (type:str:data:dict)"""
+        if not self.connected:
+            return ()
+        res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
+        res = self.sock.recv(res_len)
+        try:
+            output = parsedata(res)
+            if (len(output) ==0):
+                return {}
+                raise Exception(f"blank after parsing!\n{output}")
+            return list(output.items())[0] #gets the first couple of data for now (type:data)
+        except Exception as e:
+            #should be a warning not an error
+            log.log(f"warning: an error occured reciving data from controller \n{e}")
+            return {}
+            raise Exception(f"error parsing data!\n{e}")
 
 def parsedata(data: bytearray)->dict:
     '''byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
@@ -60,37 +91,6 @@ def buildata(data: dict)->bytearray:
     output = msglength.to_bytes(settings.GetSetting("client.header_size"),"big",signed=False)+output    
     return output
 
-class clientSock:
-    def __init__(self,accept_res:tuple):
-        """accept_res is the output of socker.accept()"""
-        self.sock:socket.socket = accept_res[0]
-        self.connected=True
-        #todo: add a condition to check if still connected
-    def sendcmd(self,cmdtype:str,data:dict) ->None:
-        """gets a type and a dict for easier loading of the remote client(in the car) the packet will be built like: length of all the msg without the first num then 
-        length:key:length:value:length:key...."""
-        if not self.connected:
-            return
-        if (cmdtype and data):
-            self.sock.sendall(buildata({cmdtype:buildata(data)}))
-    def recievecmd(self)->tuple:
-        """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)
-        gets the first couple of data for now (type:str:data:dict)"""
-        if not self.connected:
-            return ()
-        res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
-        res = self.sock.recv(res_len)
-        try:
-            output = parsedata(res)
-            if (len(output) ==0):
-                return {}
-                raise Exception(f"blank after parsing!\n{output}")
-            return list(output.items())[0] #gets the first couple of data for now (type:data)
-        except Exception as e:
-            #should be a warning not an error
-            log.log(f"warning: an error occured reciving data from controller \n{e}")
-            return {}
-            raise Exception(f"error parsing data!\n{e}")
 def test_buildNparsedata():
     import random
     data = {''.join([chr(random.randint(0,255)) for x in range(random.randint(1,100))]):''.join([chr(random.randint(0,255)) for x in range(random.randint(1,100))])}

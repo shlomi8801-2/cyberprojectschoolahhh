@@ -60,10 +60,28 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         del waitingToRegister[_id]
     
 
-def handleClient(clientSock:client_coms.clientSock)->None:
+def handleClient(controllerObj:controllerActions.Controller)->None:
     #listen to each client and handle commands
-    controller = controllerActions.Controller()
-    while (controller.connected):
+    connectedClients[controllerObj.Id] = controllerObj
+    while (controllerObj.connected):
+        msg = controllerObj.Csock.recievecmd() # (type:str,data:dict)
+        if (len(msg) == 0):
+            continue
+        match (msg[0]): #commands are here
+            case "PING":
+                pass
+            case "LOGOUT":
+                del connectedClients[controllerObj.Id]
+                return
+            case _:
+                log.log(f"warning: uknown command {msg[0]}")
+                break
+    # del connectedClients[controller.Id] #client not connected
+
+def indentifyClient(clientSock:client_coms.clientSock):
+    """used for client first messages only for REG and CON"""
+    known:bool = False
+    while (not known):
         msg = clientSock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
             continue
@@ -73,13 +91,17 @@ def handleClient(clientSock:client_coms.clientSock)->None:
                 break
             case "CON": #connect - first message
                 #gets the id from the client and checks password
-                controller = controllerActions.Controller(loginClient(msg[1].get("id",""),msg[1].get("password","")))
-                break
+                controllerRow = loginClient(msg[1].get("id",""),msg[1].get("password","")) #list of tuples of data
+                if (len(controllerRow) == 0):
+                    continue
+                #logged in
+                #might change later to new thread for less memory usage because this function ends after the handleClient function ends
+                controller = controllerActions.Controller(controllerRow[0],clientSock)
+                handleClient(controller)
+                return #the controller is not connected anymore
             case _:
                 log.log(f"warning: uknown command {msg[0]}")
                 break
-    del connectedClients[controller.Id] #client not connected
-
 def listen(host:str,port:int)->None:
     #Reg - to register client to the database and give unique id
     #Action - tell the controller what to do on what pins
@@ -89,7 +111,7 @@ def listen(host:str,port:int)->None:
     server.listen(5)
     while (True):
         cSock = client_coms.clientSock(server.accept())
-        utils.makeThreadAndStart(handleClient,[cSock])
+        utils.makeThreadAndStart(indentifyClient,[cSock])
 
 
 def startServer():
