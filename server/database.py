@@ -112,4 +112,9 @@ def AddTable(table:str,args:dict)->bool:
     except Exception as e:
         log(f"something went wrong while creating a table: {e}\n({table},{args}")
         return False
-CheckConnection()
+
+from constants import ALLTABLES
+def setupDatabase():
+    CheckConnection()
+    for table in ALLTABLES:
+        AddTable(*table)

@@ -1,6 +1,7 @@
 import threading
 import restapi
 import boardDevicesServer
+from database import setupDatabase
 
 #available real world options(examples):
 # turn on ac(optional for each car)
@@ -19,5 +20,6 @@ contollersthread = threading.Thread(target=boardDevicesServer.startServer)
 
 
 if (__name__ == "__main__"):
+    setupDatabase()
     restthread.start()
     contollersthread.start()
