@@ -64,7 +64,7 @@ def handleClient(clientSock:client_coms.clientSock)->None:
     #listen to each client and handle commands
     controller = controllerActions.Controller()
     while (controller.connected):
-        msg = clientSock.recievecmd()
+        msg = clientSock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
             continue
         match (msg[0]): #commands are here
@@ -73,11 +73,12 @@ def handleClient(clientSock:client_coms.clientSock)->None:
                 break
             case "CON": #connect - first message
                 #gets the id from the client and checks password
-                controller = controllerActions.Controller()
-                pass
+                controller = controllerActions.Controller(loginClient(msg[1].get("id",""),msg[1].get("password","")))
+                break
             case _:
                 log.log(f"warning: uknown command {msg[0]}")
                 break
+    del connectedClients[controller.Id] #client not connected
 
 def listen(host:str,port:int)->None:
     #Reg - to register client to the database and give unique id

@@ -17,6 +17,9 @@ class Controller:
     connected:bool = True
     availablePins:list = None
     def __init__(self, sqlRow:tuple,CSock:socket):
+        if (len(sqlRow) ==0): #couldn't login the controller
+            self.connected = False
+            return
         sqlRow:dict = utils.makeSqlDict(sqlRow,CARMODULES_TABLE)
         self.Id = sqlRow.get("id",None)
         self.Socket = CSock
