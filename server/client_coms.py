@@ -74,7 +74,8 @@ class clientSock:
         if (cmdtype and data):
             self.sock.sendall(buildata({cmdtype:buildata(data)}))
     def recievecmd(self)->tuple:
-        """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)"""
+        """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)
+        gets the first couple of data for now (type:str:data:dict)"""
         if not self.connected:
             return ()
         res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
@@ -82,12 +83,13 @@ class clientSock:
         try:
             output = parsedata(res)
             if (len(output) ==0):
+                return {}
                 raise Exception(f"blank after parsing!\n{output}")
             return list(output.items())[0] #gets the first couple of data for now (type:data)
         except Exception as e:
             #should be a warning not an error
             log.log(f"warning: an error occured reciving data from controller \n{e}")
-            return ()
+            return {}
             raise Exception(f"error parsing data!\n{e}")
 def test_buildNparsedata():
     import random

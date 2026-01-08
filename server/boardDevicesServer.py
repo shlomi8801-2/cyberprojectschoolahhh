@@ -5,14 +5,23 @@ from constants import *
 import client_coms
 import utils
 import log
+import controllerActions
 import time
 waitingToRegister = dict() # id -> password in plain text
+connectedClients = dict() # id -> Controller object
+
 
 def getClients(args:dict,algo:str="exact")->list:
     #all the dict keys MUST be columns in the table in the database
     if (len(args ==0)):
         return []
     return database.Search(CARMODULES_TABLE[0],args)
+
+def loginClient(_id:str,password:str)->tuple:
+    """searching the client in the database if found and the password and id match,
+    returnes the row of the client in the database as tuple"""
+    return database.Search(CARMODULES_TABLE[0],{"id":_id,"password":utils.hashString(password)})
+
 def addClientToDatabase(_id:str,password:str,availablePins:str) ->None:
     database.AddTable(*CARMODULES_TABLE)
     database.Insert(CARMODULES_TABLE[0],{"id":_id,"password":password,"availablePins":"".join(sorted(list(set(x for x in availablePins))))}) # the availablePins compacting is to prevent sql injection and use the laest amount of chars
@@ -35,26 +44,26 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         _password = utils.generateToken()
         while (len(getClients({"id":_id}))==1): #acquiring a unique id
                 _id = utils.generateToken()
-        waitingToRegister[_id] = _password
+        waitingToRegister[_id] = utils.hashString(_password)
         cSock.sendcmd("REG",{"id":_id,"password":_password})
         utils.makeThreadAndStart(expirId,[_id])
     else:
         #got response to the register msg
-        _id = msg["id"]
+        _id = msg.get("id")
         if not (_id in waitingToRegister):
             cSock.sendcmd("REG",{"error":f"request for id {_id} doesn't exist"})
             return
-        if (_id != waitingToRegister[_id]):
+        if (utils.hashString(msg.get("password","")) != waitingToRegister[_id]):
             cSock.sendcmd("REG",{"error":"passwords does not match"})
             return
-        addClientToDatabase(_id,msg["password"],msg.get("availablePins",""))
+        addClientToDatabase(_id,utils.hashString(msg["password"]),msg.get("availablePins",""))
         del waitingToRegister[_id]
     
 
 def handleClient(clientSock:client_coms.clientSock)->None:
     #listen to each client and handle commands
-    conncted = True
-    while (conncted):
+    controller = controllerActions.Controller()
+    while (controller.connected):
         msg = clientSock.recievecmd()
         if (len(msg) == 0):
             continue
@@ -62,6 +71,10 @@ def handleClient(clientSock:client_coms.clientSock)->None:
             case "REG":
                 registerClient(clientSock,msg[1])
                 break
+            case "CON": #connect - first message
+                #gets the id from the client and checks password
+                controller = controllerActions.Controller()
+                pass
             case _:
                 log.log(f"warning: uknown command {msg[0]}")
                 break
