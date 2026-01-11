@@ -107,7 +107,7 @@ def listen(host:str,port:int)->None:
     #Action - tell the controller what to do on what pins
     #list - give the device details like available pins
     server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# ipv4,tcp
-    server.bind((settings.GetSetting("server.listen"),int(settings.GetSetting("server.port"))))
+    server.bind((host,port))
     server.listen(5)
     while (True):
         cSock = client_coms.clientSock(server.accept())

@@ -59,3 +59,15 @@ def makeThreadAndStart(target,args:list=[]):
     tmp = threading.Thread(target=target,args=args)
     tmp.start()
     return tmp
+def removeFromSqlList(List:list,columns:tuple,Table:list):
+    """returns the keys left in the table"""
+    #its low numbers here for the lengths so it matters less what is the complexity
+    indexesToRemove =[]
+    keys = list(Table[1].keys())
+    for key in keys:
+        if (key in columns):
+            indexesToRemove.append(keys.index(key))
+    for i in range(len(List)):
+        List[i] = [List[i][x] for x in range(len(keys)) if x not in indexesToRemove] # the length of keys and every "row" in usersList are the same(if the function is used correctly)
+    keys = [keys[x] for x in range(len(keys)) if not(x in indexesToRemove)]
+    return keys

@@ -108,17 +108,7 @@ def register(username:str,password:str)->str:
     return login(username,password)
 def removeFromUsersList(UsersList:list,columns:tuple)->list:
     """returns the keys left in the table"""
-    #its low numbers here for the lengths so it matters less what is the complexity
-    indexesToRemove =[]
-    keys = list(USERS_TABLE[1].keys())
-    for key in keys:
-        if (key in columns):
-            indexesToRemove.append(keys.index(key))
-    for i in range(len(UsersList)):
-        UsersList[i] = [UsersList[i][x] for x in range(len(keys)) if x not in indexesToRemove] # the length of keys and every "row" in usersList are the same(if the function is used correctly)
-    keys = [keys[x] for x in range(len(keys)) if not(x in indexesToRemove)]
-
-    return keys
+    return removeFromSqlList(UsersList,columns,USERS_TABLE)
 
 if (__name__=="__main__"):
     deleteUser("shlomi")
