@@ -1,7 +1,6 @@
-import boardDevicesServer
-from socket import socket
 from constants import CONTROLLERSCOMMANDS_TABLE,CARMODULES_TABLE
 import utils
+import database
 from client_coms import clientSock
 
 class clientCommand:
@@ -36,3 +35,8 @@ class Controller:
         if (not self.connected):
             return
         self.Csock.sendcmd(cmdtype,data)
+def getControllersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
+    output = database.Search(CARMODULES_TABLE,utils.buildWhereQuery(filters,algo),maxRows,offset)
+    return [] if output is None else output
+def removeFromControllersList(ControllersList:list,columns:tuple)->list:
+    return utils.removeFromSqlList(ControllersList,columns,CARMODULES_TABLE)

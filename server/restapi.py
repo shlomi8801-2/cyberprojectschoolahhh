@@ -3,6 +3,7 @@ from flask_cors import CORS
 import users
 import settings
 import constants
+import controllersActions as controllersActions
 import utils
 app = Flask(__name__)
 CORS(app,supports_credentials=True)
@@ -78,19 +79,24 @@ def getList(_type:str,rows:int = 100,offset:int=0)->dict:
         return {"code":1,"error":"rows/offset should be a number"}
     if (not checkpermissions(1)):
         return {"code":1,"error":"permission level is too low"}
-    match (_type):
-        case "users":
-            #get users
-            usersList = users.getUsersList(maxRows=rows,offset=offset)
-            #get the columns that sent
-            #remove the password and token from the users to not show it
-            keys = users.removeFromUsersList(usersList,["password","token"])
-                    
-            return {"code":0,"columns":keys,"users":usersList}
-        case "controllers":
-            pass
-        case _:
-            return {"code":1,"error":f"no such type {_type}"}
-    pass
+    try:
+        match (_type):
+            case "users":
+                #get users
+                usersList = users.getUsersList(maxRows=rows,offset=offset)
+                #get the columns that sent
+                #remove the password and token from the users to not show it
+                keys = users.removeFromUsersList(usersList,("password","token"))
+                        
+                return {"code":0,"columns":keys,"users":usersList}
+            case "controllers":
+                ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset)
+                keys = controllersActions.removeFromControllersList(ControllersList,("password"))
+                return {"code":0,"columns":keys,"controllers":ControllersList}
+            case _:
+                return {"code":1,"error":f"no such type {_type}"}
+    except Exception as e:
+        return {"code":1,"error":e}
+
 def startServer():
     app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))

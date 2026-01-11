@@ -107,7 +107,7 @@ def register(username:str,password:str)->str:
     addUser(username,password)
     return login(username,password)
 def removeFromUsersList(UsersList:list,columns:tuple)->list:
-    """returns the keys left in the table"""
+    """returns the keys given from the output of the sql table to not send not needed columns"""
     return removeFromSqlList(UsersList,columns,USERS_TABLE)
 
 if (__name__=="__main__"):
