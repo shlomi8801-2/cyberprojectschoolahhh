@@ -93,6 +93,18 @@ def Delete(table:str,args:str)->bool:
     except Exception as e:
         log(f"something went wrong while deleting from database: {e}\n({table},{args}")
         return False
+def getTableColumns(table:str)->list:
+    try:
+        match dbtype:
+            case "sqlite":
+                    res = DB.execute(f"pragma table_info({table})")
+                    return [x[1] for x in res.fetchall()] # ("<row number>,<column name>,<columns...>")
+            case _:
+                log(f"database type not found {dbtype}!")
+                raise f"database type not found {dbtype}!"
+    except Exception as e:
+        log(f"something went wrong while reading a table: {e}\n({table}")
+        return []
 def AddTable(table:str,args:dict)->bool:
     """CREATE TABLE table_name (
     column1 datatype,
@@ -103,6 +115,12 @@ def AddTable(table:str,args:dict)->bool:
     try:
         match dbtype:
             case "sqlite":
+                    columnsnum = getTableColumns(table)
+                    if (columnsnum>0 and len(args)!=columnsnum):
+                        #need to add the columns
+                        #add it later because its used only in development and upgrades but is not a key feature
+                        log(f"table {table} was found outdated")
+                        pass
                     DB.execute(f"CREATE TABLE IF NOT EXISTS {table} (ID INTEGER PRIMARY KEY AUTOINCREMENT,{','.join([' '.join(x) for x in args.items()])});")
                     DB.commit()
                     return True
