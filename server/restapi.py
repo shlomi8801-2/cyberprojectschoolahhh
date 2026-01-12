@@ -80,18 +80,22 @@ def getList(_type:str,rows:int = 100,offset:int=0)->dict:
     if (not checkpermissions(1)):
         return {"code":1,"error":"permission level is too low"}
     try:
+        filters = utils.dictFromJson(request.headers.get("filters","{}"))
         match (_type):
             case "users":
                 #get users
-                usersList = users.getUsersList(maxRows=rows,offset=offset)
+                usersList = users.getUsersList(maxRows=rows,offset=offset,filters=filters)
                 #get the columns that sent
                 #remove the password and token from the users to not show it
                 keys = users.removeFromUsersList(usersList,("password","token"))
                         
                 return {"code":0,"columns":keys,"users":usersList}
             case "controllers":
-                ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset)
+                ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset,filters=filters)
                 keys = controllersActions.removeFromControllersList(ControllersList,("password"))
+                return {"code":0,"columns":keys,"controllers":ControllersList}
+            case "myControllers":
+                
                 return {"code":0,"columns":keys,"controllers":ControllersList}
             case _:
                 return {"code":1,"error":f"no such type {_type}"}

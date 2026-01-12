@@ -3,7 +3,7 @@ import random
 import log
 import time
 import threading
-import settings
+import json
 from constants import *
 
 def getNowEpoc():
@@ -71,3 +71,5 @@ def removeFromSqlList(List:list,columnsToRemove:tuple,Table:list):
         List[i] = [List[i][x] for x in range(len(keys)) if x not in indexesToRemove] # the length of keys and every "row" in usersList are the same(if the function is used correctly)
     keys = [keys[x] for x in range(len(keys)) if not(x in indexesToRemove)]
     return keys
+def dictFromJson(text:str)->dict:
+    return json.loads(text)

@@ -1,9 +1,10 @@
 async function getUsers() {
     const maxrows=100;
     const offset = 0;
+    var filters = JSON.stringify({}) // exmaple: {"username":"c2hsb21p"}
   var res = await fetch(API_URL + `/list/users/${maxrows}/${offset}`, {
     method: "get",
-    headers: {"Token":getCookie("token")},
+    headers: {"Token":getCookie("token"),"Filters":filters},
     credentials: 'include' // not working for some reason may fix later for now using in header
   });
   res = await res.json();
