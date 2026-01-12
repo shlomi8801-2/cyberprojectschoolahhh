@@ -1,13 +1,13 @@
-async function getUsers() {
-    const maxrows=100;
-    const offset = 0;
-  var res = await fetch(API_URL + `/list/users/${maxrows}/${offset}`, {
+async function getClients() { // controllers
+  const maxrows = 100;
+  const offset = 0;
+  var res = await fetch(API_URL + `/list/controllers/${maxrows}/${offset}`, {
     method: "get",
-    headers: {"Token":getCookie("token")},
-    credentials: 'include' // not working for some reason may fix later for now using in header
+    headers: { Token: getCookie("token") },
+    credentials: "include", // not working for some reason may fix later for now using in header
   });
   res = await res.json();
-  switch (res.code) {
+    switch (res.code) {
     case 1: //error
       alert("error gettings users list");
       console.error(res.error)
@@ -23,11 +23,11 @@ async function getUsers() {
           elem.innerText=res.columns[x]
           row.appendChild(elem)
       }
-      if (!res.users) {
-        alert("users were not found in the server response")
+      if (!res.controllers) {
+        alert("controllers were not found in the server response")
         break;
       }
-      for (var x=0;x<res.users.length;++x){
+      for (var x=0;x<res.controllers.length;++x){
         row = document.createElement("tr")
         if (!res.columns) {
         alert("columns were not found in the server response")
@@ -37,7 +37,7 @@ async function getUsers() {
           var elem = document.createElement("td");
           //here parse the value acording to the column
           const column = res.columns[i]
-          var currentDataValue = res.users[x][i]
+          var currentDataValue = res.controllers[x][i]
           var valueElement;
           if (column.includes("username") && 0){ // currently "&& 0" because for now its skipping it
             //translate from base64
@@ -62,21 +62,6 @@ async function getUsers() {
     default:
       alert("error getting users list: unexpected code");
   }
+  return res;
 }
-
-function epocToYYYYMMDD(epocTimeInSeconds){
-  const epocTime = epocTimeInSeconds*1000
-  return (new Date(Number(epocTime))).toISOString().substring(0,10); // it returns something like '1970-01-01T00:00:00.001Z' so we cut it to 10 first digits(thats what date input takes)
-}
-
-
-
-
-
-
-
-
-
-
-
-getUsers()
+getClients();
