@@ -18,5 +18,6 @@ CARMODULES_TABLE = ["Carmodules",
 CONTROLLERSCOMMANDS_TABLE = ["ControllerCommands",{"ControllerId":"varchar(30)",
                                                    "title":"varchar(50)",
                                                    "actions":"varchar(255)",
+                                                   "ownerUsername":"varchar(255)",
                                                    "CONSTRAINT uuid ":"UNIQUE(ControllerId,title)"}]
 ALLTABLES = [USERS_TABLE,CARMODULES_TABLE,CONTROLLERSCOMMANDS_TABLE]

@@ -16,18 +16,19 @@ CORS(app,supports_credentials=True)
 #option to assign module to user
 #home page after logged in
 
-def checkpermissions(permission_level:int = 1) -> bool:
-    """checks with the token cookie if the user has the required permissions True if they have else False"""
+def checkpermissions() -> tuple: # (int,dict)
+    """checks with the token cookie and returnes the permission level and the user searched to save time searching again if needed
+    if user not found returns (-1,{})"""
     # 0 - normal user
     # 1 - admin
     if not ("token" in request.headers): #takes the request object from the thread it's running in
-        return False
+        return (-1,{})
     user = users.searchUser(token=request.headers.get("Token"))
     if (len(user) != 1):
-        return False
+        return (-1,{})
     user = user[0] # because its a list of tuples get the first one
     user = utils.makeSqlDict(user,constants.USERS_TABLE)
-    return int(user.get("permissions_level","0"))>=permission_level
+    return (int(user.get("permissions_level","0")))
         
     
 
@@ -71,16 +72,24 @@ def logout()->dict:
     return {"code":0 if users.logout(res.get("token")) else 1}
 @app.route("/list/<_type>/<rows>")
 @app.route("/list/<_type>/<rows>/<offset>", defaults={'offset': 0})
-def getList(_type:str,rows:int = 100,offset:int=0)->dict:
+def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={})->dict:
+    permsForTypes = {1:{"users","controllers"}} # 0 is default
     try:
         rows = int(rows)
         offset = int(offset)
     except:
         return {"code":1,"error":"rows/offset should be a number"}
-    if (not checkpermissions(1)):
-        return {"code":1,"error":"permission level is too low"}
+    perm,userDict = checkpermissions()
+    if (not perm >= 0):
+        return {"code":1,"error":"permission level is too low - probably not logged in"}
+    
     try:
         filters = utils.dictFromJson(request.headers.get("filters","{}"))
+        #checking for the permissions required
+        for x in permsForTypes:
+            if _type in permsForTypes[x]:
+                if (not perm >= x):
+                    return {"code":1,"error":"permission level is too low"}
         match (_type):
             case "users":
                 #get users
@@ -95,8 +104,9 @@ def getList(_type:str,rows:int = 100,offset:int=0)->dict:
                 keys = controllersActions.removeFromControllersList(ControllersList,("password"))
                 return {"code":0,"columns":keys,"controllers":ControllersList}
             case "myControllers":
-                
-                return {"code":0,"columns":keys,"controllers":ControllersList}
+                #acuire user from token then search with username for controllers
+                #uses previous checking for the user
+                return getList("controllers",rows,offset,{"ownerUsername":userDict.get("username","")})
             case _:
                 return {"code":1,"error":f"no such type {_type}"}
     except Exception as e:
