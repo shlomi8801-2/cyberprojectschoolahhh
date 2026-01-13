@@ -33,7 +33,7 @@ def GetSetting(key =None)->list | str | None | dict:
         log(f"settings.json file not found at '{GetCurrentDir()+"/settings.json"}'")
         return None
     except Exception as e:
-        print(e)
+        print(f"error while getting a setting: {e}")
 
 def GetCurrentDir()->str:
     """returns the dir of the server.py file"""

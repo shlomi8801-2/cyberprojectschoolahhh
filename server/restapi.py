@@ -28,7 +28,7 @@ def checkpermissions() -> tuple: # (int,dict)
         return (-1,{})
     user = user[0] # because its a list of tuples get the first one
     user = utils.makeSqlDict(user,constants.USERS_TABLE)
-    return (int(user.get("permissions_level","0")))
+    return (int(user.get("permissions_level","0")),user)
         
     
 

@@ -1,3 +1,4 @@
+# import traceback # use with traceback.print_exc() for more detailed error
 import sqlite3
 from settings import GetSetting,GetCurrentDir
 from log import log
@@ -7,9 +8,9 @@ from utils import checkSqlInjection, buildWhereQuery
 dbtype = GetSetting("database.type")
 DB :sqlite3.Connection = None
 problem = None
-def checkSqlInjectionInIter(iter)->None:
+def checkSqlInjectionInIter(itera)->None:
     """outputs error if a possible sql injection was found"""
-    for x in iter:
+    for x in itera:
         if (checkSqlInjection(x)):        
             raise Exception(f"possible sql injection detected in string: {x}")
 def CheckConnection(times:int=0)->bool:
@@ -57,17 +58,19 @@ def Search(table:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact"
 def Insert(table:str,values:dict) -> bool:
     try:
         # after all the checking outside check again for sql injections here
+       
         checkSqlInjectionInIter(list(values.values()) + list(values.keys()))
+        
         match dbtype:
             case "sqlite":
-                    DB.execute(f"insert into {table} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values))])})",values.values())
+                    DB.execute(f"insert into {table} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values))])})",list(values.values()))
                     DB.commit()
                     return True
             case _:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while inserting to database: {e}\n({table},{values}")
+        log(f"something went wrong while inserting to database: {e}\n\ttable:{table}\n\tvalues:{values}")
         return False
 def Update(table:str,values:dict,searchArgs:str):
     """UPDATE table

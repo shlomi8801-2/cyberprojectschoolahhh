@@ -77,8 +77,11 @@ def dictFromJson(text:str)->dict:
     return json.loads(text)
 def checkSqlInjection(text:str)->bool:
     """if found some type of sql injection(problematic string that might be) returnes True else False"""
-    problematicStrings = ["--","'",'"',""]
+    problematicStrings = ["--","'",'"']
     for x in problematicStrings:
+        
+        if (not isinstance(text,str)):
+            continue
         if x in text:
             return True
     return False
