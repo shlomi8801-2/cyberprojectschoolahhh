@@ -9,13 +9,13 @@ from constants import *
 def getNowEpoc():
     now = time.time()
     return round(now)
-def encodeUsername(username:str)->str:
-    if username == None:
-        return ""
-    return base64.b64encode(username.encode("ascii")).decode("ascii")
-def decodeUsername(username:str)->str:
-    if username == None:
-        return ""
+# def encodeUsername(username:str)->str:
+#     if username == None:
+#         return ""
+#     return base64.b64encode(username.encode("ascii")).decode("ascii")
+# def decodeUsername(username:str)->str:
+#     if username == None:
+#         return ""
     return base64.b64decode(username.encode("ascii")).decode("ascii")
 def hashString(string:str)->str:
     if string == None:
@@ -34,7 +34,8 @@ def buildWhereQuery(args:dict,algo:str="exact") -> str :
     for key in list(args.keys()):
         if (args[key] == "" or args[key] == None):
             del args[key]
-
+    if (len(args) == 0):
+        return "1=1"
     if (len(args)==0):
         log.log("warning: args must have items")
         return "1=1" #for all used like "... where 1=1" instead of "... where "

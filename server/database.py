@@ -2,7 +2,7 @@ import sqlite3
 from settings import GetSetting,GetCurrentDir
 from log import log
 import os.path
-from utils import checkSqlInjection
+from utils import checkSqlInjection, buildWhereQuery
 
 dbtype = GetSetting("database.type")
 DB :sqlite3.Connection = None
@@ -34,11 +34,12 @@ def CheckConnection(times:int=0)->bool:
         case _:
             log(f"database type not found {dbtype}!")
             return False
-def Search(table:str,args:str, maxrows:int =-1,offset:int=0)->list:
+def Search(table:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact")->list:
     """returns list of lines(tuples) found in database select query with the args as the string after where for example:
     select * from <table> where <args>;"""
     #convert everything to base64 to prevent sql injection - instead use a functionn to check for sql injection
     #the args are usually from buildwherequery
+    args = buildWhereQuery(filters,algo=algo)
     try:
         match dbtype:
             case "sqlite":

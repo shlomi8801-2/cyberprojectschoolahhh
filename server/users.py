@@ -23,22 +23,22 @@ def addUser(username:str,password:str)->bool:
     global FIRST_USER
     database.AddTable(*USERS_TABLE)
     if (FIRST_USER == -1): # might be slow for alot of users
-        if (database.Search(USERS_TABLE[0],"1=1 limit 1") != None):
+        if (database.Search(USERS_TABLE[0],{},1) != None):
             FIRST_USER = 1; #the first user
             log.log("first user!")
         else:
             FIRST_USER = 0; #not the first user
     elif (FIRST_USER not in [ 0,1]): #to not encounter some error relating to FIRST_USER not being in the right range of values
         FIRST_USER = 0
-    return database.Insert(USERS_TABLE[0],{"username":encodeUsername(username),"password":hashString(password),"permissions_level":FIRST_USER,"date_created":getNowEpoc(),"token":""})
+    return database.Insert(USERS_TABLE[0],{"username":username,"password":hashString(password),"permissions_level":FIRST_USER,"date_created":getNowEpoc(),"token":""})
 
 def searchUser(username:str=None,token:str=None,algo:str="exact")->list:
     """algo is [exact,like,contains]"""
     # database.AddTable(*USERS_TABLE)
-    args = {"username":encodeUsername(username),"token":token}
-    args = buildWhereQuery(args,algo)
+    args = {"username":username,"token":token}
+    
     try:
-        return database.Search(USERS_TABLE[0],args)
+        return database.Search(USERS_TABLE[0],args,algo=algo)
     except Exception as e:
         log(f"something went wrong while searching: {e}")
         return []
@@ -55,7 +55,7 @@ def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     return database.Update(USERS_TABLE[0],values,args)
 
 def getUsersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
-    output =database.Search(USERS_TABLE[0],buildWhereQuery(filters,algo),maxRows,offset)
+    output =database.Search(USERS_TABLE[0],filters,maxRows,offset,algo)
     return [] if output is None else output
 
 #the more simple functions
