@@ -107,7 +107,7 @@ def getTableColumns(table:str)->list:
         match dbtype:
             case "sqlite":
                     res = DB.execute(f"pragma table_info({table})")
-                    return [x[1] for x in res.fetchall()] # ("<row number>,<column name>,<columns...>")
+                    return [x[1] for x in res.fetchall()][1:] # ("<row number>,<column name>,<columns...>") first one will be ID which is default for sqlite in this present
             case _:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
@@ -117,20 +117,25 @@ def getTableColumns(table:str)->list:
 def addAllColumns(table:list)->list:
     """tries to add all the columns in the table defenition(does not update columns types if the columns exist currently)
     and returnes a list of names of the columns added"""
+    output = []
     try:
         for column_name in table[1]:
-        
             match dbtype:
                 case "sqlite":
-                    DB.execute(f"alter table {table[0]} add column {column_name} {table[1][column_name]}")
-                    DB.commit()
+                    try:
+                        DB.execute(f"alter table {table[0]} add column {column_name} {table[1][column_name]}")
+                        DB.commit()
+                        output.append(column_name)
+                    except Exception as e:
+                        # log(e)
+                        continue
                 case _:
                     log(f"database type not found {dbtype}!")
                     raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while creating a table: {e}\n({table[0]},{table[1]}")
+        log(f"something went wrong while adding columns to a table: {e}\n({table[0]},{table[1]}")
 
-def AddTable(table_name:str,args:dict)->bool:
+def AddTable(table_name:str,args:dict,specialAttr:dict={})->bool:
     """CREATE TABLE table_name (
     column1 datatype,
     column2 datatype,
@@ -140,14 +145,15 @@ def AddTable(table_name:str,args:dict)->bool:
     try:
         match dbtype:
             case "sqlite":
-                    columnsnum = len(getTableColumns(table_name))
-                    if (columnsnum>0 and len(args)!=columnsnum):
+                    existingColumns = getTableColumns(table_name)
+                    if (len(existingColumns)>0 and set(existingColumns) != set(args.keys())): #appearently it checks for the items in lists and not the pointer
                         #need to add the columns
                         #its used only in development and upgrades but is not a key feature
+                        #will error if the table in the database have too many columns(more then in "args")
                         addAllColumns([table_name,args])
-                        log(f"table {table_name} was found outdated")
+                        log(f"table {table_name} was found outdated(missmatched number of columns {len(existingColumns)}!={len(args)})")
                         pass
-                    DB.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (ID INTEGER PRIMARY KEY AUTOINCREMENT,{','.join([' '.join(x) for x in args.items()])});")
+                    DB.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (ID INTEGER PRIMARY KEY AUTOINCREMENT,{','.join([' '.join(x) for x in list(args.items())+list(specialAttr.items())])});")
                     DB.commit()
                     return True
             case _:
