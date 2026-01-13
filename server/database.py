@@ -105,7 +105,23 @@ def getTableColumns(table:str)->list:
     except Exception as e:
         log(f"something went wrong while reading a table: {e}\n({table}")
         return []
-def AddTable(table:str,args:dict)->bool:
+def addAllColumns(table:list)->list:
+    """tries to add all the columns in the table defenition(does not update columns types if the columns exist currently)
+    and returnes a list of names of the columns added"""
+    try:
+        for column_name in table[1]:
+        
+            match dbtype:
+                case "sqlite":
+                    DB.execute(f"alter table {table[0]} add column {column_name} {table[1][column_name]}")
+                    DB.commit()
+                case _:
+                    log(f"database type not found {dbtype}!")
+                    raise f"database type not found {dbtype}!"
+    except Exception as e:
+        log(f"something went wrong while creating a table: {e}\n({table[0]},{table[1]}")
+
+def AddTable(table_name:str,args:dict)->bool:
     """CREATE TABLE table_name (
     column1 datatype,
     column2 datatype,
@@ -115,20 +131,21 @@ def AddTable(table:str,args:dict)->bool:
     try:
         match dbtype:
             case "sqlite":
-                    columnsnum = getTableColumns(table)
+                    columnsnum = getTableColumns(table_name)
                     if (columnsnum>0 and len(args)!=columnsnum):
                         #need to add the columns
-                        #add it later because its used only in development and upgrades but is not a key feature
-                        log(f"table {table} was found outdated")
+                        #its used only in development and upgrades but is not a key feature
+                        addAllColumns([table_name,args])
+                        log(f"table {table_name} was found outdated")
                         pass
-                    DB.execute(f"CREATE TABLE IF NOT EXISTS {table} (ID INTEGER PRIMARY KEY AUTOINCREMENT,{','.join([' '.join(x) for x in args.items()])});")
+                    DB.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (ID INTEGER PRIMARY KEY AUTOINCREMENT,{','.join([' '.join(x) for x in args.items()])});")
                     DB.commit()
                     return True
             case _:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while creating a table: {e}\n({table},{args}")
+        log(f"something went wrong while creating a table: {e}\n({table_name},{args}")
         return False
 
 from constants import ALLTABLES
