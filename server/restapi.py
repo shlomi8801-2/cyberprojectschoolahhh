@@ -84,6 +84,7 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={})->dict:
         return {"code":1,"error":"permission level is too low - probably not logged in"}
     
     try:
+        #here its volnoruble for sql injection but insert and search functions in database.py handles it
         filters = utils.dictFromJson(request.headers.get("filters","{}"))
         #checking for the permissions required
         for x in permsForTypes:

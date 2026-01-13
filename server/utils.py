@@ -30,6 +30,7 @@ def buildWhereQuery(args:dict,algo:str="exact") -> str :
     #     if not (args[key] == "" or args[key] == None):
     #         filters[key] = args[key]
     # args = filters
+    
     for key in list(args.keys()):
         if (args[key] == "" or args[key] == None):
             del args[key]
@@ -73,3 +74,10 @@ def removeFromSqlList(List:list,columnsToRemove:tuple,Table:list):
     return keys
 def dictFromJson(text:str)->dict:
     return json.loads(text)
+def checkSqlInjection(text:str)->bool:
+    """if found some type of sql injection(problematic string that might be) returnes True else False"""
+    problematicStrings = ["--","'",'"',""]
+    for x in problematicStrings:
+        if x in text:
+            return True
+    return False

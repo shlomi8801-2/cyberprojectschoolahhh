@@ -2,11 +2,16 @@ import sqlite3
 from settings import GetSetting,GetCurrentDir
 from log import log
 import os.path
+from utils import checkSqlInjection
 
 dbtype = GetSetting("database.type")
 DB :sqlite3.Connection = None
 problem = None
-
+def checkSqlInjectionInIter(iter)->None:
+    """outputs error if a possible sql injection was found"""
+    for x in iter:
+        if (checkSqlInjection(x)):        
+            raise Exception(f"possible sql injection detected in string: {x}")
 def CheckConnection(times:int=0)->bool:
     """returns true or false wether the conenction to the database was succesful
     and optionally prints if """
@@ -32,7 +37,8 @@ def CheckConnection(times:int=0)->bool:
 def Search(table:str,args:str, maxrows:int =-1,offset:int=0)->list:
     """returns list of lines(tuples) found in database select query with the args as the string after where for example:
     select * from <table> where <args>;"""
-    #convert everything to base64 to prevent sql injection
+    #convert everything to base64 to prevent sql injection - instead use a functionn to check for sql injection
+    #the args are usually from buildwherequery
     try:
         match dbtype:
             case "sqlite":
@@ -49,9 +55,11 @@ def Search(table:str,args:str, maxrows:int =-1,offset:int=0)->list:
         log(f"something went wrong searching in the database:{e}\n{table},{args}\n{query if query else ""}")
 def Insert(table:str,values:dict) -> bool:
     try:
+        # after all the checking outside check again for sql injections here
+        checkSqlInjectionInIter(list(values.values()) + list(values.keys()))
         match dbtype:
             case "sqlite":
-                    DB.execute(f"insert into {table} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values.values()))])})",list(values.values()))
+                    DB.execute(f"insert into {table} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values))])})",values.values())
                     DB.commit()
                     return True
             case _:
@@ -131,7 +139,7 @@ def AddTable(table_name:str,args:dict)->bool:
     try:
         match dbtype:
             case "sqlite":
-                    columnsnum = getTableColumns(table_name)
+                    columnsnum = len(getTableColumns(table_name))
                     if (columnsnum>0 and len(args)!=columnsnum):
                         #need to add the columns
                         #its used only in development and upgrades but is not a key feature
