@@ -23,7 +23,7 @@ def addUser(username:str,password:str)->bool:
     global FIRST_USER
     database.AddTable(*USERS_TABLE)
     if (FIRST_USER == -1): # might be slow for alot of users
-        if (database.Search(USERS_TABLE[0],{},1) != None):
+        if (len(database.Search(USERS_TABLE[0],{},1)) != 1):
             FIRST_USER = 1; #the first user
             log.log("first user!")
         else:
