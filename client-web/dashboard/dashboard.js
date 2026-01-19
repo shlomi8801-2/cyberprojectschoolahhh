@@ -10,4 +10,18 @@ async function getCommands(){
   console.log(res)
   return res
 }
+editMode = false
+function editBtnClick(){
+  const editBtn = document.getElementById("editBtn");
+  if (editMode){
+    //its confirm
+    editBtn.getElementById("face0").style.display = "block"
+    editBtn.getElementById("face1").style.display = "none"
+  }else if (!editMode){
+    //enter edit
+    editBtn.getElementById("face0").style.display = "none"
+    editBtn.getElementById("face1").style.display = "block"
+  }
+  editMode = !editMode
+}
 getCommands()
