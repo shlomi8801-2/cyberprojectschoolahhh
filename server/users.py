@@ -49,10 +49,9 @@ def makeUserDict(user:tuple)->dict:
     return makeSqlDict(user,USERS_TABLE)
 def updateUser(values:dict,args:dict,algo:str="exact")->bool:
     """args should look like the makedict output for example: {"username":username,"token":token}"""
-    args = buildWhereQuery(args,algo)
     if (args == None):
         log.log(f"searchUser went wrong no algo:{algo}")
-    return database.Update(USERS_TABLE[0],values,args)
+    return database.Update(USERS_TABLE[0],values,args,algo)
 
 def getUsersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
     output =database.Search(USERS_TABLE[0],filters,maxRows,offset,algo)

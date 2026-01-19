@@ -55,7 +55,7 @@ def Search(table:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact"
                 raise f"database type not found {dbtype}!"
     except Exception as e:
         log(f"something went wrong searching in the database:{e}\n{table},{args}\n{query if query else ""}")
-def Insert(table:str,values:dict) -> bool:
+def Insert(table_name:str,values:dict) -> bool:
     try:
         # after all the checking outside check again for sql injections here
        
@@ -63,16 +63,17 @@ def Insert(table:str,values:dict) -> bool:
         
         match dbtype:
             case "sqlite":
-                    DB.execute(f"insert into {table} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values))])})",list(values.values()))
+                    
+                    DB.execute(f"insert into {table_name} ({", ".join(list(values.keys()))}) values({", ".join(["?" for x in range(len(values))])})",list(values.values()))
                     DB.commit()
                     return True
             case _:
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong while inserting to database: {e}\n\ttable:{table}\n\tvalues:{values}")
+        log(f"something went wrong while inserting to database: {e}\n\ttable:{table_name}\n\tvalues:{values}")
         return False
-def Update(table:str,values:dict,searchArgs:str):
+def Update(table:str,values:dict,searchArgs:dict,algo:str="exact"):
     """UPDATE table
     SET column_1 = new_value_1,
         column_2 = new_value_2
@@ -80,10 +81,13 @@ def Update(table:str,values:dict,searchArgs:str):
         search_condition 
     ORDER column_or_expression"""
     
+    # after all the checking outside check again for sql injections here
+    checkSqlInjectionInIter(list(values.values()) + list(values.keys()))
+    
     try:
         match dbtype:
             case "sqlite":
-                    DB.execute(f"UPDATE {table} SET {','.join([x[0]+' = "'+str(x[1])+'"' for x in values.items()])} where {searchArgs}")
+                    DB.execute(f"UPDATE {table} SET {','.join([x[0]+' = "'+str(x[1])+'"' for x in values.items()])} where {buildWhereQuery(searchArgs,algo)}")
                     DB.commit()
                     return True
             case _:

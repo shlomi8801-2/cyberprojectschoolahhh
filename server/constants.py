@@ -18,7 +18,6 @@ CARMODULES_TABLE = ["Carmodules",
                     "availablePins":"char(20)"}] #pin number as char for each char for example ab for pins 61,62
 CONTROLLERSCOMMANDS_TABLE = ["ControllerCommands",{"ControllerId":"varchar(30)",
                                                    "title":"varchar(50)",
-                                                   "actions":"varchar(255)",
-                                                   "ownerUsername":"varchar(255)"},{ #special attributes
+                                                   "actions":"varchar(255)"},{ #special attributes
                                                    "":"UNIQUE(ControllerId,title)"}]
 ALLTABLES = [USERS_TABLE,CARMODULES_TABLE,CONTROLLERSCOMMANDS_TABLE]
