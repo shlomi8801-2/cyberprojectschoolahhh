@@ -7,10 +7,9 @@ async function getCommands(){
     credentials: 'include' // not working for some reason may fix later for now using in header
   });
   res = await res.json();
-  console.log(res)
+  // console.log(res)
   return res
 }
-editMode = false
 function editBtnClick(){
   const editBtn = document.getElementById("editBtn");
   if (editMode){
@@ -24,4 +23,13 @@ function editBtnClick(){
   }
   editMode = !editMode
 }
+
+function getBtnId(htmlBtn){
+  //get hidden input with id "BTNID" and get its value
+  //https://stackoverflow.com/questions/2899072/get-child-by-id
+  const inputElem = htmlBtn.querySelector("input#BTNID");
+  return inputElem ? inputElem.value : null;
+}
+
+editMode = false
 getCommands()
