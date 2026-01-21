@@ -1,4 +1,7 @@
+editMode = false
+
 async function getCommands(){
+    //get my controllers then get commands based on selected controller
     const maxrows=100;
     const offset = 0;
   var res = await fetch(API_URL + `/list/controllers/${maxrows}/${offset}`, {
@@ -7,19 +10,19 @@ async function getCommands(){
     credentials: 'include' // not working for some reason may fix later for now using in header
   });
   res = await res.json();
-  // console.log(res)
+  console.log(res)
   return res
 }
 function editBtnClick(){
   const editBtn = document.getElementById("editBtn");
   if (editMode){
     //its confirm
-    editBtn.getElementById("face0").style.display = "block"
-    editBtn.getElementById("face1").style.display = "none"
+    editBtn.querySelector("div#face0").style.display = "block"
+    editBtn.querySelector("div#face1").style.display = "none"
   }else if (!editMode){
     //enter edit
-    editBtn.getElementById("face0").style.display = "none"
-    editBtn.getElementById("face1").style.display = "block"
+    editBtn.querySelector("div#face0").style.display = "none"
+    editBtn.querySelector("div#face1").style.display = "block"
   }
   editMode = !editMode
 }
@@ -31,5 +34,4 @@ function getBtnId(htmlBtn){
   return inputElem ? inputElem.value : null;
 }
 
-editMode = false
-getCommands()
+console.log(getCommands())
