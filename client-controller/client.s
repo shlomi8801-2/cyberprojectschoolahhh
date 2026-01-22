@@ -30,6 +30,14 @@ main:
 /* frame size = 0 */
 /* stack size = 0 */
 .L__stack_usage = 0
+	ldi r18,lo8(6)
+	ldi r20,0
+	ldi r21,lo8(-62)
+	ldi r22,lo8(1)
+	ldi r23,0
+	ldi r24,lo8(Serial)
+	ldi r25,hi8(Serial)
+	call _ZN14HardwareSerial5beginEmh
 	ldi r20,lo8(5)
 	ldi r21,0
 	ldi r22,lo8(.LC0)
@@ -46,9 +54,9 @@ main:
 	out 0xa,r24
 .L3:
 	call _Z9toggleLedv
-	ldi r18,lo8(1599999)
-	ldi r24,hi8(1599999)
-	ldi r25,hlo8(1599999)
+	ldi r18,lo8(799999)
+	ldi r24,hi8(799999)
+	ldi r25,hlo8(799999)
 1:	subi r18,1
 	sbci r24,0
 	sbci r25,0
@@ -57,5 +65,5 @@ main:
 	nop
 	rjmp .L3
 	.size	main, .-main
-	.ident	"GCC: (Fedora 14.2.0-1.fc41) 14.2.0"
+	.ident	"GCC: (Fedora 14.2.0-2.fc42) 14.2.0"
 .global __do_copy_data
