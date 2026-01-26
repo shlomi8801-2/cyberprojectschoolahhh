@@ -5,7 +5,7 @@ async function getMyControllers(){
     //get my controllers then get commands based on selected controller
     const maxrows=100;
     const offset = 0;
-  var res = await fetch(API_URL + `/list/controllers/${maxrows}/${offset}`, {
+  var res = await fetch(API_URL + `/list/myControllers/${maxrows}/${offset}`, {
     method: "get",
     headers: {"Token":getCookie("token")},
     credentials: 'include' // not working for some reason may fix later for now using in header
@@ -14,8 +14,27 @@ async function getMyControllers(){
   myControllers = res;
   return res
 }
-async function getCommands(){
-
+async function getCommands(controllerId){
+    //get my controllers then get commands based on selected controller
+    const maxrows=100;
+    const offset = 0;
+  var res = await fetch(API_URL + `/list/commands/${maxrows}/${offset}`, {
+    method: "get",
+    headers: {"Token":getCookie("token"),"uuid":controllerId},
+    credentials: 'include' // not working for some reason may fix later for now using in header
+  });
+  res = await res.json();
+  return res
+}
+function getRowWithColumn(columns,iterable,columnName, value){
+  const rows =iterable.filter((row)=>row[columns.index(columnName)] == value);
+  return rows.length==1 ? rows[0]:null;
+}
+function getCommands(controlleruuid){
+  return getRowWithColumn(myControllers.columns,myControllers.controllers,"uuid",controlleruuid);
+}
+function getCommandRow(commandId){
+  return getRowWithColumn(myControllers.columns,myControllers.controllers,"uuid",controlleruuid);
 }
 function editBtnClick(){
   const editBtn = document.getElementById("editBtn");

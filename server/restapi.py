@@ -3,8 +3,9 @@ from flask_cors import CORS
 import users
 import settings
 import constants
-import controllersActions as controllersActions
+import controllersActions 
 import utils
+
 app = Flask(__name__)
 CORS(app,supports_credentials=True)
 
@@ -72,7 +73,7 @@ def logout()->dict:
     return {"code":0 if users.logout(res.get("token")) else 1}
 @app.route("/list/<_type>/<rows>")
 @app.route("/list/<_type>/<rows>/<offset>", defaults={'offset': 0})
-def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={})->dict:
+def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissionChecking:bool=False)->dict:
     permsForTypes = {1:{"users","controllers"}} # 0 is default
     try:
         rows = int(rows)
@@ -80,7 +81,7 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={})->dict:
     except:
         return {"code":1,"error":"rows/offset should be a number"}
     perm,userDict = checkpermissions()
-    if (not perm >= 0):
+    if ((not perm >= 0) and not bypassPermissionChecking):
         return {"code":1,"error":"permission level is too low - probably not logged in"}
     
     try:
@@ -88,6 +89,8 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={})->dict:
         filters = utils.dictFromJson(request.headers.get("filters","{}"))
         #checking for the permissions required
         for x in permsForTypes:
+            if bypassPermissionChecking:
+                break
             if _type in permsForTypes[x]:
                 if (not perm >= x):
                     return {"code":1,"error":"permission level is too low"}
@@ -107,7 +110,15 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={})->dict:
             case "myControllers":
                 #acuire user from token then search with username for controllers
                 #uses previous checking for the user
-                return getList("controllers",rows,offset,{"ownerUsername":userDict.get("username","")})
+                return getList("controllers",rows,offset,{"ownerUsername":userDict.get("username","")},bypassPermissionChecking=True)
+            case "commands":
+                #gets the id of the controller from the request then send back the result from commands that match the requirements in the database
+                #get the id from the headers
+                uuid = request.headers.get("uuid","")
+                if (len(controllersActions.getControllersList(maxRows=2,offset=0,filters={"ownerUsername":userDict.get("username",""),"uuid":uuid}))!= 1):
+                    #multiple or no controllers fitting this info
+                    return {"error":1,"error":"multiple or no controllers rather then 1 unique controller"}
+                return {"code":0,"columns":constants.CONTROLLERSCOMMANDS_TABLE[1],"commands":controllersActions.getControllerCommands()}
             case _:
                 return {"code":1,"error":f"no such type {_type}"}
     except Exception as e:

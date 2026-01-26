@@ -45,8 +45,11 @@ class Controller:
     def updateCommand(self,cmd:clientCommand)->None: 
         """set in the database the command with the id of 'cmd' to the current values"""
         database.Update(CONTROLLERSCOMMANDS_TABLE[0],cmd.toDict(),{"ControllerId":cmd.controllerId})
+def getControllerCommands(controllerId:str,maxRows:int=100,offset:int=0):
+    return database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId},maxRows,offset,"exact")
 def getControllersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
     output = database.Search(CARMODULES_TABLE[0],filters,maxRows,offset,algo)
     return [] if output is None else output
 def removeFromControllersList(ControllersList:list,columns:tuple)->list:
+    #removing columns from the list of rows(tuples)
     return utils.removeFromSqlList(ControllersList,columns,CARMODULES_TABLE)

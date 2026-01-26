@@ -35,7 +35,7 @@ def CheckConnection(times:int=0)->bool:
         case _:
             log(f"database type not found {dbtype}!")
             return False
-def Search(table:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact")->list:
+def Search(tableName:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact")->list:
     """returns list of lines(tuples) found in database select query with the args as the string after where for example:
     select * from <table> where <args>;"""
     #convert everything to base64 to prevent sql injection - instead use a functionn to check for sql injection
@@ -44,7 +44,7 @@ def Search(table:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact"
     try:
         match dbtype:
             case "sqlite":
-                query = f"select * from {table} where {args} {("limit " +str(maxrows) )if maxrows >=1 else ""} {("offset "+str(offset)) if offset >0 else ""}"
+                query = f"select * from {tableName} where {args} {("limit " +str(maxrows) )if maxrows >=1 else ""} {("offset "+str(offset)) if offset >0 else ""}"
                 res = DB.execute(query)
                 output = res.fetchall()
                 #for sqlite it adds the row number before so skip it
@@ -54,7 +54,7 @@ def Search(table:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="exact"
                 log(f"database type not found {dbtype}!")
                 raise f"database type not found {dbtype}!"
     except Exception as e:
-        log(f"something went wrong searching in the database:{e}\n{table},{args}\n{query if query else ""}")
+        log(f"something went wrong searching in the database:{e}\n{tableName},{args}\n{query if query else ""}")
 def Insert(table_name:str,values:dict) -> bool:
     try:
         # after all the checking outside check again for sql injections here
