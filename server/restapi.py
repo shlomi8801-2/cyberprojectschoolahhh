@@ -138,8 +138,36 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
                 # return {"error":1,"error":"multiple or no controllers rather then 1 unique controller"}
             return {"code":0,"columns":constants.CONTROLLERSCOMMANDS_TABLE[1],"commands":controllersActions.getControllerCommands()}
         case _:
-            raise Exception(f"no such type {_type}")
+            raise Exception(f"no such endpoint /list/{_type}")
             # return {"code":1,"error":f"no such type {_type}"}
+
+@app.route("/controllers/<controllerId>/<option>",methods=['GET', 'POST'])
+def controllerManagement(controllerId:int,option:str="get"):
+    perm,user = checkpermissions()
+    if (perm ==-1):#user not logged in
+        raise Exception("not logged in")
+    with getList("controllers",1,0,{"ownerUsername":user.get("username",""),"uuid":controllerId},bypassPermissionChecking=True) as controller:
+        if (len(controller) == 0):
+            raise f"no such controller with id {controllerId}"
+        controller = controller[0]
+    if (request.method == "POST"):
+        match (option):
+            #only for the commands - no need to change the controller row
+            case "update":
+                #check if a command have the same title already
+                pass
+            case "add":
+                #check if a command have the same title already
+                pass
+            case "delete":
+                #check if a command have the same title 
+                pass
+            case _:
+                raise f"no such option {option}"
+    if (request.method == "GET"):
+        pass
+            
+        
 
 def startServer():
     app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))

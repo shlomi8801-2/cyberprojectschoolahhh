@@ -40,6 +40,7 @@ def Search(tableName:str,filters:dict, maxrows:int =-1,offset:int=0,algo:str="ex
     select * from <table> where <args>;"""
     #convert everything to base64 to prevent sql injection - instead use a functionn to check for sql injection
     #the args are usually from buildwherequery
+    checkSqlInjectionInIter(list(filters.values()) + list(filters.keys()))
     args = buildWhereQuery(filters,algo=algo)
     try:
         match dbtype:
