@@ -2,6 +2,7 @@ from constants import CONTROLLERSCOMMANDS_TABLE,CARMODULES_TABLE
 import utils
 import database
 from client_coms import clientSock
+import constants
 
 class clientCommand:
     action:str = ""
@@ -18,6 +19,13 @@ class clientCommand:
         #"title":"varchar(50)",
         #"actions":"varchar(255)"}
         return {"ControllerId":self.controllerId,"title":self.buttonTitle,"actions":self.action}
+    def addToDatabase(self):
+        database.Insert(CONTROLLERSCOMMANDS_TABLE[0],self.toDict())
+    def deleteFromDatabase(self):
+        pass
+    def updateDatabase(self):
+        database.Update(CONTROLLERSCOMMANDS_TABLE[0],self.toDict(),{"ControllerId":self.controllerId,"title":self.buttonTitle})
+
 
 class Controller:
     Id:str = ""
@@ -40,16 +48,22 @@ class Controller:
         if (not self.connected):
             return
         self.Csock.sendcmd(cmdtype,data)
-    def addCommand(self,cmd:clientCommand)->None:
-        database.Insert(CONTROLLERSCOMMANDS_TABLE[0],cmd.toDict())
-    def updateCommand(self,cmd:clientCommand)->None: 
+    def addCommand(cmd:clientCommand)->None:
+        cmd.addToDatabase()
+    def updateCommand(cmd:clientCommand)->None: 
         """set in the database the command with the id of 'cmd' to the current values"""
-        database.Update(CONTROLLERSCOMMANDS_TABLE[0],cmd.toDict(),{"ControllerId":cmd.controllerId})
-def getControllerCommands(controllerId:str,maxRows:int=100,offset:int=0):
+        cmd.updateDatabase()
+def getControllerCommands(controllerId:str,maxRows:int=100,offset:int=0) -> list:
     return database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId},maxRows,offset,"exact")
 def getControllersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
     output = database.Search(CARMODULES_TABLE[0],filters,maxRows,offset,algo)
     return [] if output is None else output
+def checkCommandExistanceById(controllerId:str,title:str) -> bool:
+    """returnes true if the command was found in the database else returns false"""
+    return len(database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId,"title":title})) >=1
+def checkCommandExistanceByRow(controllerRow:tuple,title:str) -> bool:
+    """returnes true if the command was found in the database else returns false"""
+    return len(database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerRow[[constants.CONTROLLERSCOMMANDS_TABLE[1].keys()].index("ControllerId")],"title":title})) >=1
 def removeFromControllersList(ControllersList:list,columns:tuple)->list:
     #removing columns from the list of rows(tuples)
     return utils.removeFromSqlList(ControllersList,columns,CARMODULES_TABLE)

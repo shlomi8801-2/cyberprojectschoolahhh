@@ -10,13 +10,15 @@ app = Flask(__name__)
 CORS(app,supports_credentials=True)
 
 
-#login
-#test
-#register
-#list of arduino modules(they will ask to register)
+#login - done
+#test - done
+#register - done
+#list of arduino modules(they will ask to register) - done
 #option to assign module to user
-#home page after logged in
+#home page after logged in - done
+
 def handleHeaders():
+    #https://stackoverflow.com/questions/10434599/get-the-data-received-in-a-flask-request
     try:
         return request.headers
     except:
@@ -150,17 +152,27 @@ def controllerManagement(controllerId:int,option:str="get"):
         if (len(controller) == 0):
             raise f"no such controller with id {controllerId}"
         controller = controller[0]
+    
+    commandTitle = request.json().get("title","")
+
     if (request.method == "POST"):
         match (option):
             #only for the commands - no need to change the controller row
             case "update":
                 #check if a command have the same title already
+                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandTitle):
+                    raise f"command {commandTitle} does not exist for controller {controllerId}"
                 pass
             case "add":
                 #check if a command have the same title already
+                if controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandTitle):
+                    raise f"command {commandTitle} already exists for controller {controllerId}"
                 pass
             case "delete":
                 #check if a command have the same title 
+                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandTitle):
+                    raise f"command {commandTitle} does not exist for controller {controllerId}"
+
                 pass
             case _:
                 raise f"no such option {option}"
