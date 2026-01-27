@@ -1,6 +1,6 @@
 editMode = false
 myControllers = []
-
+currentCommands = {"controllerId":0,"commands":[]}
 async function getMyControllers(){
     //get my controllers then get commands based on selected controller
     const maxrows=100;
@@ -31,10 +31,10 @@ function getRowWithColumn(columns,iterable,columnName, value){
   return rows.length==1 ? rows[0]:null;
 }
 function getCommands(controlleruuid){
-  return getRowWithColumn(myControllers.columns,myControllers.controllers,"uuid",controlleruuid);
+  return getRowWithColumn(myControllers.columns,myControllers.controllers,"ControllerId",controlleruuid);
 }
-function getCommandRow(commandId){
-  return getRowWithColumn(myControllers.columns,myControllers.controllers,"uuid",controlleruuid);
+function getCommandRow(commandTitle){
+  return getRowWithColumn(currentCommands.commands.columns,currentCommands.commands.commands,"title",commandTitle);
 }
 function editBtnClick(){
   const editBtn = document.getElementById("editBtn");
