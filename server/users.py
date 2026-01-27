@@ -67,7 +67,7 @@ def login(username:str,password:str)->str:
         return None
     res = makeUserDict(res[0])
     if (res["password"] == hashString(password)):
-        if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME):
+        if (getNowEpoc()-int(res["token_date"]) <REMEMBERTOKENTIME): #if token is present update its time and return it
             #update the token-date
             #return the old token
             updateUser({"token_date":getNowEpoc()},res)
@@ -97,7 +97,10 @@ def logout(token:str)->bool:
     res = makeUserDict(res[0])
     updateUser({"token_date":0},res) #sets the token date to 0 so its considered expired
     return True
-    
+def validateToken(userDict:dict):
+    #checks if the userdict token_date because this is how it logging out from the system
+    #the expiring time is at <token_date>+REMEMBERTOKENTIME
+    return getNowEpoc()<int(userDict.get("token_date",-REMEMBERTOKENTIME))+REMEMBERTOKENTIME
 def register(username:str,password:str)->str:
     """gets username and password returnes token or none"""
     res = searchUser(username)

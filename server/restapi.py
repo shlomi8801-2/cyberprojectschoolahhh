@@ -36,6 +36,8 @@ def checkpermissions() -> tuple: # (int,dict)
         return (-1,{})
     user = user[0] # because its a list of tuples get the first one
     user = utils.makeSqlDict(user,constants.USERS_TABLE)
+    if (not users.validateToken(user)):
+        return (-1,{})
     return (int(user.get("permissions_level","0")),user)
 
 @app.errorhandler(Exception)
@@ -82,8 +84,8 @@ def logout()->dict:
     for x in must:
         if not (x in must):
             raise Exception("those fields does not present in request!\nmissing:"+",".join([y for y in must if not (y in res)]) )
-    
     return {"code":0 if users.logout(res.get("token")) else 1}
+
 @app.route("/list/<_type>/<rows>")
 @app.route("/list/<_type>/<rows>/<offset>", defaults={'offset': 0})
 def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissionChecking:bool=False)->dict:
