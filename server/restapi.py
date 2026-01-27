@@ -16,22 +16,31 @@ CORS(app,supports_credentials=True)
 #list of arduino modules(they will ask to register)
 #option to assign module to user
 #home page after logged in
+def handleHeaders():
+    try:
+        return request.headers
+    except:
+        #just in case
+        raise Exception("error parsing headers")
 
 def checkpermissions() -> tuple: # (int,dict)
     """checks with the token cookie and returnes the permission level and the user searched to save time searching again if needed
     if user not found returns (-1,{})"""
     # 0 - normal user
     # 1 - admin
-    if not ("token" in request.headers): #takes the request object from the thread it's running in
+    res = handleHeaders()
+    if not ("token" in res): #takes the request object from the thread it's running in
         return (-1,{})
-    user = users.searchUser(token=request.headers.get("Token"))
+    user = users.searchUser(token=res.get("Token"))
     if (len(user) != 1):
         return (-1,{})
     user = user[0] # because its a list of tuples get the first one
     user = utils.makeSqlDict(user,constants.USERS_TABLE)
     return (int(user.get("permissions_level","0")),user)
-        
-    
+
+@app.errorhandler(Exception)
+def handle_bad_request(e):
+    return {"code":1,"error":str(e)}, 400
 
 @app.route("/")
 def test()->str:
@@ -63,13 +72,17 @@ def login()->dict:
         return {"error":"username or password are incorrect!","code":1}
     return {"token":token,"code":0}
 
+
+
 @app.route("/logout", methods = ['POST'])
 def logout()->dict:
     must = ["token"]
-    res = request.headers
+    res = handleHeaders()
+
     for x in must:
         if not (x in must):
-            return {"error":"those fields does not present in request!","missing":",".join([y for y in must if not (y in res)]),"code":1}
+            raise Exception("those fields does not present in request!\nmissing:"+",".join([y for y in must if not (y in res)]) )
+    
     return {"code":0 if users.logout(res.get("token")) else 1}
 @app.route("/list/<_type>/<rows>")
 @app.route("/list/<_type>/<rows>/<offset>", defaults={'offset': 0})
@@ -79,50 +92,52 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
         rows = int(rows)
         offset = int(offset)
     except:
-        return {"code":1,"error":"rows/offset should be a number"}
+        raise Exception("rows/offset should be a number")
+        # return {"code":1,"error":"rows/offset should be a number"}
     perm,userDict = checkpermissions()
     if ((not perm >= 0) and not bypassPermissionChecking):
+        raise Exception("permission level is too low - probably not logged in")
         return {"code":1,"error":"permission level is too low - probably not logged in"}
     
-    try:
-        #here its volnoruble for sql injection but insert and search functions in database.py handles it
-        filters = utils.dictFromJson(request.headers.get("filters","{}"))
-        #checking for the permissions required
-        for x in permsForTypes:
-            if bypassPermissionChecking:
-                break
-            if _type in permsForTypes[x]:
-                if (not perm >= x):
-                    return {"code":1,"error":"permission level is too low"}
-        match (_type):
-            case "users":
-                #get users
-                usersList = users.getUsersList(maxRows=rows,offset=offset,filters=filters)
-                #get the columns that sent
-                #remove the password and token from the users to not show it
-                keys = users.removeFromUsersList(usersList,("password","token"))
-                        
-                return {"code":0,"columns":keys,"users":usersList}
-            case "controllers":
-                ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset,filters=filters)
-                keys = controllersActions.removeFromControllersList(ControllersList,("password"))
-                return {"code":0,"columns":keys,"controllers":ControllersList}
-            case "myControllers":
-                #acuire user from token then search with username for controllers
-                #uses previous checking for the user
-                return getList("controllers",rows,offset,{"ownerUsername":userDict.get("username","")},bypassPermissionChecking=True)
-            case "commands":
-                #gets the id of the controller from the request then send back the result from commands that match the requirements in the database
-                #get the id from the headers
-                uuid = request.headers.get("uuid","")
-                if (len(controllersActions.getControllersList(maxRows=2,offset=0,filters={"ownerUsername":userDict.get("username",""),"uuid":uuid}))!= 1):
-                    #multiple or no controllers fitting this info
-                    return {"error":1,"error":"multiple or no controllers rather then 1 unique controller"}
-                return {"code":0,"columns":constants.CONTROLLERSCOMMANDS_TABLE[1],"commands":controllersActions.getControllerCommands()}
-            case _:
-                return {"code":1,"error":f"no such type {_type}"}
-    except Exception as e:
-        return {"code":1,"error":e}
+    #here its volnoruble for sql injection but insert and search functions in database.py handles it
+    filters = utils.dictFromJson(request.headers.get("filters","{}"))
+    #checking for the permissions required
+    for x in permsForTypes:
+        if bypassPermissionChecking:
+            break
+        if _type in permsForTypes[x]:
+            if (not perm >= x):
+                raise Exception("permission level is too low")
+                # return {"code":1,"error":"permission level is too low"}
+    match (_type):
+        case "users":
+            #get users
+            usersList = users.getUsersList(maxRows=rows,offset=offset,filters=filters)
+            #get the columns that sent
+            #remove the password and token from the users to not show it
+            keys = users.removeFromUsersList(usersList,("password","token"))
+                    
+            return {"code":0,"columns":keys,"users":usersList}
+        case "controllers":
+            ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset,filters=filters)
+            keys = controllersActions.removeFromControllersList(ControllersList,("password"))
+            return {"code":0,"columns":keys,"controllers":ControllersList}
+        case "myControllers":
+            #acuire user from token then search with username for controllers
+            #uses previous checking for the user
+            return getList("controllers",rows,offset,{"ownerUsername":userDict.get("username","")},bypassPermissionChecking=True)
+        case "commands":
+            #gets the id of the controller from the request then send back the result from commands that match the requirements in the database
+            #get the id from the headers
+            uuid = request.headers.get("uuid","")
+            if (len(controllersActions.getControllersList(maxRows=2,offset=0,filters={"ownerUsername":userDict.get("username",""),"uuid":uuid}))!= 1):
+                #multiple or no controllers fitting this info
+                raise Exception("multiple or no controllers rather then 1 unique controller")
+                # return {"error":1,"error":"multiple or no controllers rather then 1 unique controller"}
+            return {"code":0,"columns":constants.CONTROLLERSCOMMANDS_TABLE[1],"commands":controllersActions.getControllerCommands()}
+        case _:
+            raise Exception(f"no such type {_type}")
+            # return {"code":1,"error":f"no such type {_type}"}
 
 def startServer():
     app.run(host=settings.GetSetting("restApi.listen"),port=settings.GetSetting("restApi.port"))
