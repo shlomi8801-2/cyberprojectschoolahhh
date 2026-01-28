@@ -40,6 +40,7 @@ function editBtnClick(){
     //its confirm
     editBtn.querySelector("div#face0").style.display = "block"
     editBtn.querySelector("div#face1").style.display = "none"
+    submitChanges();
   }else if (!editMode){
     //enter edit
     editBtn.querySelector("div#face0").style.display = "none"
@@ -65,10 +66,19 @@ function btnClick(thisBtn){
     thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.index("ID")]==btnUUID)
     thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
     //here add the columns to the editform
-    //then submit to the server
+    //then submit to the server - in other function
   }else {
   //send the command id to the server
   }
 }
+function submitChanges(){
+  const editForm = document.getElementById("editform");
+  if (editForm.style.display == "none"){
+    //the form is not shown(caused by the confirm edit button) then just skip because there is no pneding changes
+    return
 
-getCommands()
+  }
+  setTimeout(function(){},1000);
+  editForm.style.display = "none"
+}
+// getCommands()

@@ -25,6 +25,18 @@
         width: 100%;
         display: inline-block;
       }
+      #editform {
+        background-color: rgb(82, 58, 58); 
+        border: 5px; 
+        width: 400px; 
+        z-index: 999 !important; 
+        display:none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        padding: 5px 10px;
+        transform: translate(-50%, -50%); /* moves the element by half of its size*/
+      }
     </style>
   </head>
   <body>
@@ -61,6 +73,9 @@
       <!-- fixed on screen center and have couple of inputs then submitted to the clicked button-->
        <!-- get the effected button id as hidden input -->
         <input type="hidden" value="-1" id="BTNID">
+        <label>hello world!</label>
+        <input type="text" value="hello world! but in input">
+        <button type="button" onclick="submitChanges()">submit</button>
         
         
     </div>
