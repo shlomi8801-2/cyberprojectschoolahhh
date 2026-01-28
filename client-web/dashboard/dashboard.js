@@ -1,7 +1,7 @@
 editMode = false
 myControllers = []
 currentCommands = {"controllerId":0,"commands":[]}
-async function getMyControllers(){
+async function fetchMyControllers(){
     //get my controllers then get commands based on selected controller
     const maxrows=100;
     const offset = 0;
@@ -14,8 +14,8 @@ async function getMyControllers(){
   myControllers = res;
   return res
 }
-async function getCommands(controllerId){
-    //get my controllers then get commands based on selected controller
+async function fetchCommands(controllerId){
+    //get commands from the server based on controllerId(the server checks if it yours)
     const maxrows=100;
     const offset = 0;
   var res = await fetch(API_URL + `/list/commands/${maxrows}/${offset}`, {
@@ -26,15 +26,13 @@ async function getCommands(controllerId){
   res = await res.json();
   return res
 }
-function getRowWithColumn(columns,iterable,columnName, value){
+function getRowByColumn(columns,iterable,columnName, value){
   const rows =iterable.filter((row)=>row[columns.index(columnName)] == value);
   return rows.length==1 ? rows[0]:null;
 }
-function getCommands(controlleruuid){
-  return getRowWithColumn(myControllers.columns,myControllers.controllers,"ControllerId",controlleruuid);
-}
 function getCommandRow(commandTitle){
-  return getRowWithColumn(currentCommands.commands.columns,currentCommands.commands.commands,"title",commandTitle);
+  //gets a command tuple from currentCommands by commandTitle
+  return getRowByColumn(currentCommands.commands.columns,currentCommands.commands.commands,"title",commandTitle);
 }
 function editBtnClick(){
   const editBtn = document.getElementById("editBtn");
