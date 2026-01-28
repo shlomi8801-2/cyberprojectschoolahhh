@@ -10,14 +10,15 @@ class clientCommand:
     buttonTitle:str =""
     def __init__(self, sqlRow:tuple):
         sqlRow = utils.makeSqlDict(sqlRow,CONTROLLERSCOMMANDS_TABLE)
-        self.action = sqlRow.get("actions","")
-        self.controllerId = sqlRow.get("ControllerId","")
-        self.buttonTitle = sqlRow.get("title","")
+        self.action = sqlRow.get("actions",None)
+        self.controllerId = sqlRow.get("ControllerId",None)
+        self.buttonTitle = sqlRow.get("title",None)
     def toDict(self)->dict:
         """generates a dict from this object to add to database"""
         #{"ControllerId":"varchar(30)",
         #"title":"varchar(50)",
         #"actions":"varchar(255)"}
+        self.validateMissingData()
         return {"ControllerId":self.controllerId,"title":self.buttonTitle,"actions":self.action}
     def addToDatabase(self):
         database.Insert(CONTROLLERSCOMMANDS_TABLE[0],self.toDict())
@@ -25,6 +26,11 @@ class clientCommand:
         pass
     def updateDatabase(self):
         database.Update(CONTROLLERSCOMMANDS_TABLE[0],self.toDict(),{"ControllerId":self.controllerId,"title":self.buttonTitle})
+    def validateMissingData(self)->None:
+        """if any of the data members in the object is missing raises an error"""
+        if not (self.action and self.controllerId and self.buttonTitle):
+            raise Exception(f"missing data: {"action" if self.action else ""} {"controllerId" if self.controllerId else ""} {"title" if self.buttonTitle else ""}")
+
 
 
 class Controller:
@@ -32,7 +38,7 @@ class Controller:
     Csock:clientSock = None
     connected:bool = True
     availablePins:list = None
-    def __init__(self, sqlRow:tuple,Csock:clientSock):
+    def __init__(self, sqlRow:tuple,Csock:clientSock = None):
         if (len(sqlRow) ==0): #couldn't login the controller
             self.connected = False
             return
@@ -48,11 +54,11 @@ class Controller:
         if (not self.connected):
             return
         self.Csock.sendcmd(cmdtype,data)
-    def addCommand(cmd:clientCommand)->None:
-        cmd.addToDatabase()
-    def updateCommand(cmd:clientCommand)->None: 
-        """set in the database the command with the id of 'cmd' to the current values"""
-        cmd.updateDatabase()
+    # def addCommand(cmd:clientCommand)->None:
+    #     cmd.addToDatabase()
+    # def updateCommand(cmd:clientCommand)->None: 
+    #     """set in the database the command with the id of 'cmd' to the current values"""
+    #     cmd.updateDatabase()
 def getControllerCommands(controllerId:str,maxRows:int=100,offset:int=0) -> list:
     return database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId},maxRows,offset,"exact")
 def getControllersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:

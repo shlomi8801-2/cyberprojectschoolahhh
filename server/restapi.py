@@ -153,30 +153,30 @@ def controllerManagement(controllerId:int,option:str="get"):
             raise f"no such controller with id {controllerId}"
         controller = controller[0]
     
-    commandTitle = request.json().get("title","")
+    commandObj = controllersActions.clientCommand(request.json())
 
     if (request.method == "POST"):
         match (option):
             #only for the commands - no need to change the controller row
             case "update":
                 #check if a command have the same title already
-                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandTitle):
-                    raise f"command {commandTitle} does not exist for controller {controllerId}"
-                pass
+                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
+                    raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
+                commandObj.updateDatabase()
             case "add":
                 #check if a command have the same title already
-                if controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandTitle):
-                    raise f"command {commandTitle} already exists for controller {controllerId}"
-                pass
+                if controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
+                    raise f"command {commandObj.buttonTitle} already exists for controller {controllerId}"
+                commandObj.addToDatabase()
             case "delete":
                 #check if a command have the same title 
-                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandTitle):
-                    raise f"command {commandTitle} does not exist for controller {controllerId}"
-
-                pass
+                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
+                    raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
+                commandObj.deleteFromDatabase()
             case _:
                 raise f"no such option {option}"
     if (request.method == "GET"):
+        raise Exception("method not implamented")
         pass
             
         
