@@ -23,7 +23,9 @@ class clientCommand:
     def addToDatabase(self):
         database.Insert(CONTROLLERSCOMMANDS_TABLE[0],self.toDict())
     def deleteFromDatabase(self):
-        pass
+        if not (self.buttonTitle and self.controllerId):
+            raise Exception("missing controllerId and title to identify command")
+        database.Delete(CONTROLLERSCOMMANDS_TABLE[0],{"title":self.buttonTitle,"ControllerId":self.controllerId})
     def updateDatabase(self):
         database.Update(CONTROLLERSCOMMANDS_TABLE[0],self.toDict(),{"ControllerId":self.controllerId,"title":self.buttonTitle})
     def validateMissingData(self)->None:
