@@ -67,12 +67,7 @@ function btnClick(thisBtn){
     //then submit to the server - in other function
   }else {
   //send the command id to the server
-  fetch(API_URL + `/controllers/${selectedController.controllerId}/execute`,{headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      "Token":getCookie("token")
-    },
-    method: "POST",})
+  makeFetch(API_URL + `/controllers/${selectedController.controllerId}/execute`,{},"post")
   }
 }
 function submitChanges(){
