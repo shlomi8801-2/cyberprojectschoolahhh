@@ -44,7 +44,7 @@ def checkpermissions() -> tuple: # (int,dict)
 
 @app.errorhandler(Exception)
 def handle_bad_request(e):
-    return {"code":1,"error":str(e)}, 400
+    return {"code":1,"error":str(e)}, 418
 
 @app.route("/")
 def test()->str:

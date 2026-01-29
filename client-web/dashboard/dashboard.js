@@ -4,25 +4,25 @@ currentCommands = {"controllerId":0,"commands":[],"columns":[]}
 selectedController = null
 
 async function makeFetch(url,additionalHeaders={},method="get",body={}){
-  const res = fetch(url,{
+  const res = await fetch(url,{
     headers: {"Token":getCookie("token"),...additionalHeaders},
     method: method,
-    body:body
-  })
-  return (await res).json()
+    body:(method=="post" ?body:null)
+  });
+  return await res.json()
 }
 async function fetchMyControllers(){
     //get my controllers then get commands based on selected controller
     const maxrows=100;
     const offset = 0;
-  myControllers = makeFetch(API_URL + `/list/myControllers/${maxrows}/${offset}`);
+  myControllers = await makeFetch(API_URL + `/list/myControllers/${maxrows}/${offset}`);
   return myControllers
 }
 async function fetchCommands(controllerId){
     //get commands from the server based on controllerId(the server checks if it yours)
     const maxrows=100;
     const offset = 0;
-  return makeFetch(API_URL + `/list/commands/${maxrows}/${offset}`,{"uuid":controllerId},"get")
+  return await makeFetch(API_URL + `/list/commands/${maxrows}/${offset}`,{"uuid":controllerId},"get")
 }
 function getRowByColumn(columns,iterable,columnName, value){
   const rows =iterable.filter((row)=>row[columns.index(columnName)] == value);
@@ -86,6 +86,9 @@ function displayButtons(){
   const titleIndex = currentCommands.columns.index("title")
   const btnIdIndex = currentCommands.columns.index("title") // for now
   //       <button type="button" class="commandButton" onclick="btnClick(this)">test button1 <input type="hidden" value="id" id="BTNID"></button>
+  while (btnGrid.firstChild) { // clear childs in btnGrid
+        btnGrid.removeChild(btnGrid.firstChild);
+    }
   for (var i=0;i<currentCommands.commands.length;++i){
     var btn = document.createElement("button")
     var hiddenBtnInput = document.createElement("input")
@@ -99,15 +102,15 @@ function displayButtons(){
   }
 }
 
-function startup(){
+async function startup(){
 //fetch everything needed and display
-  fetchMyControllers()
+  await fetchMyControllers()
   if(myControllers.length ==0){
     //user has no controllers
     return
   }
   selectedController=myControllers[0]
-  fetchCommands(selectedController.controllerId)
+  await fetchCommands(selectedController.controllerId)
   displayButtons()
   
 }
