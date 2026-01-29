@@ -1,30 +1,28 @@
 editMode = false
 myControllers = []
-currentCommands = {"controllerId":0,"commands":[]}
+currentCommands = {"controllerId":0,"commands":[],"columns":[]}
+selectedController = null
+
+async function makeFetch(url,additionalHeaders={},method="get",body={}){
+  const res = fetch(url,{
+    headers: {"Token":getCookie("token"),...additionalHeaders},
+    method: method,
+    body:body
+  })
+  return (await res).json()
+}
 async function fetchMyControllers(){
     //get my controllers then get commands based on selected controller
     const maxrows=100;
     const offset = 0;
-  var res = await fetch(API_URL + `/list/myControllers/${maxrows}/${offset}`, {
-    method: "get",
-    headers: {"Token":getCookie("token")},
-    credentials: 'include' // not working for some reason may fix later for now using in header
-  });
-  res = await res.json();
-  myControllers = res;
-  return res
+  myControllers = makeFetch(API_URL + `/list/myControllers/${maxrows}/${offset}`);
+  return myControllers
 }
 async function fetchCommands(controllerId){
     //get commands from the server based on controllerId(the server checks if it yours)
     const maxrows=100;
     const offset = 0;
-  var res = await fetch(API_URL + `/list/commands/${maxrows}/${offset}`, {
-    method: "get",
-    headers: {"Token":getCookie("token"),"uuid":controllerId},
-    credentials: 'include' // not working for some reason may fix later for now using in header
-  });
-  res = await res.json();
-  return res
+  return makeFetch(API_URL + `/list/commands/${maxrows}/${offset}`,{"uuid":controllerId},"get")
 }
 function getRowByColumn(columns,iterable,columnName, value){
   const rows =iterable.filter((row)=>row[columns.index(columnName)] == value);
@@ -69,6 +67,12 @@ function btnClick(thisBtn){
     //then submit to the server - in other function
   }else {
   //send the command id to the server
+  fetch(API_URL + `/controllers/${selectedController.controllerId}/execute`,{headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      "Token":getCookie("token")
+    },
+    method: "POST",})
   }
 }
 function submitChanges(){
@@ -78,7 +82,38 @@ function submitChanges(){
     return
 
   }
-  setTimeout(function(){},1000);
+  setTimeout(function(){},1000); // delay before closing the form
   editForm.style.display = "none"
 }
-// getCommands()
+function displayButtons(){
+  //take from currentCommands.commands
+  const btnGrid = document.getElementById("btnGrid")
+  const titleIndex = currentCommands.columns.index("title")
+  const btnIdIndex = currentCommands.columns.index("title") // for now
+  //       <button type="button" class="commandButton" onclick="btnClick(this)">test button1 <input type="hidden" value="id" id="BTNID"></button>
+  for (var i=0;i<currentCommands.commands.length;++i){
+    var btn = document.createElement("button")
+    var hiddenBtnInput = document.createElement("input")
+    btn.class="commandButton"
+    btn.onclick="btnClick(this)"
+    btn.innerText=currentCommands.commands[i][titleIndex]
+    hiddenBtnInput.type="hidden"
+    hiddenBtnInput.value=currentCommands.commands[i][btnIdIndex]
+    btn.appendChild(hiddenBtnInput)
+    btnGrid.appendChild(btn)
+  }
+}
+
+function startup(){
+//fetch everything needed and display
+  fetchMyControllers()
+  if(myControllers.length ==0){
+    //user has no controllers
+    return
+  }
+  selectedController=myControllers[0]
+  fetchCommands(selectedController.controllerId)
+  displayButtons()
+  
+}
+startup()

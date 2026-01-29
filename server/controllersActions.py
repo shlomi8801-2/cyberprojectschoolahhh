@@ -8,11 +8,11 @@ class clientCommand:
     action:str = ""
     controllerId:str = ""
     buttonTitle:str =""
-    def __init__(self, sqlRow:tuple):
-        sqlRow = utils.makeSqlDict(sqlRow,CONTROLLERSCOMMANDS_TABLE)
-        self.action = sqlRow.get("actions",None)
-        self.controllerId = sqlRow.get("ControllerId",None)
-        self.buttonTitle = sqlRow.get("title",None)
+    def __init__(self, sqlDict:dict):
+        sqlDict = utils.makeSqlDict(sqlDict,CONTROLLERSCOMMANDS_TABLE)
+        self.action = sqlDict.get("actions",None)
+        self.controllerId = sqlDict.get("ControllerId",None)
+        self.buttonTitle = sqlDict.get("title",None)
     def toDict(self)->dict:
         """generates a dict from this object to add to database"""
         #{"ControllerId":"varchar(30)",

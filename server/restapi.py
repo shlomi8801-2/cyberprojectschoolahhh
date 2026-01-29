@@ -173,6 +173,9 @@ def controllerManagement(controllerId:int,option:str="get"):
                 if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
                     raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
                 commandObj.deleteFromDatabase()
+            case "excute":
+                #get the action id(title and controllerId) from the request body then send it to the controller
+                pass
             case _:
                 raise f"no such option {option}"
     if (request.method == "GET"):
