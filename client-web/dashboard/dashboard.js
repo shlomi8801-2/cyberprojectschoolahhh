@@ -105,7 +105,8 @@ function displayButtons(){
 async function startup(){
 //fetch everything needed and display
   await fetchMyControllers()
-  if(myControllers.length ==0){
+
+  if(myControllers.controllers && myControllers.controllers.length ==0){
     //user has no controllers
     return
   }
