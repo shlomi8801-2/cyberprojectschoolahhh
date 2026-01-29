@@ -64,7 +64,9 @@ function btnClick(thisBtn){
     thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.index("ID")]==btnUUID)
     thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
     //here add the columns to the editform
-    //then submit to the server - in other function
+    //then submit to the server - in submitChanges function
+   
+    
   }else {
   //send the command id to the server
   makeFetch(API_URL + `/controllers/${selectedController.controllerId}/execute`,{},"post")
@@ -101,17 +103,39 @@ function displayButtons(){
     btnGrid.appendChild(btn)
   }
 }
+function setupEditForm(){
+  const editForm = document.getElementById("editform");
+  const submitBtn = `<button type="button" onclick="submitChanges()">submit</button>`
+  while (btnGrid.firstChild) { // clear childs in editForm
+        btnGrid.removeChild(btnGrid.firstChild);
+  }
+  if (currentCommands.columns)
+  for (var i=0;i<currentCommands.columns;++i){
+    var inputElem = document.createElement("label")
+    inputElem.innerText=currentCommands.columns[i]
+    editForm.appendChild(inputElem)
+    inputElem = document.createElement("input")
+    inputElem.type="text"
+    inputElem.id=currentCommands.columns[i]
+  }
+  editForm.appendChild(submitBtn)
+
+}
 
 async function startup(){
 //fetch everything needed and display
   await fetchMyControllers()
-
+  
   if(myControllers.controllers && myControllers.controllers.length ==0){
-    //user has no controllers
+    // user has no controllers
     return
   }
   selectedController=myControllers[0]
   await fetchCommands(selectedController.controllerId)
+  if (!currentCommands.columns){
+    return
+  }
+  setupEditForm()
   displayButtons()
   
 }
