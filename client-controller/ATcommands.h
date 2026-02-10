@@ -1,0 +1,5 @@
+#pragma once
+
+#define GETSUBSCRIPTIONNUMBER "AT+CNUM"
+#define TESTCOMMAND "AT"
+#define ATCONSOLESPEED 115200

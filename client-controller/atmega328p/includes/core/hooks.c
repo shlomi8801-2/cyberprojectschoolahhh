@@ -29,5 +29,4 @@ static void __empty() {
 	// Empty
 }
 // void yield(void) __attribute__ ((weak, alias("__empty"))); // original
-void yield(void) { // empty 
-  }
+void yield(void) { /* empty */}

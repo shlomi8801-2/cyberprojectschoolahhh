@@ -4,13 +4,14 @@ cd "$PWD"
 # avr-g++ client.cpp -o main -lm -Iatmega328p/includes/core -Iatmega328p/includes/ -mmcu=atmega328 -DF_CPU=16000000UL -Os -D__AVR_ATmega328P__ &&
 FLAGS="-w -o main -Iatmega328p/includes/core -Iatmega328p/includes/ -lm -w -g -flto -fuse-linker-plugin -mmcu=atmega328 -DF_CPU=16000000UL -Os -Wl,--gc-sections -fdata-sections -ffunction-sections"
 ARDUINOPORT="/dev/ttyUSB0"
+sudo chmod 777 $ARDUINOPORT
 if [ $# -eq 0 ]; then #no input arguments given
 # echo "$(find atmega328p/includes/. -type f -iregex ".*\.cpp") $(find atmega328p/includes/. -type f -iregex ".*\.c") $FLAGS"
 avr-g++ client.cpp $(find atmega328p/includes/. -type f -iregex ".*\.cpp") $(find atmega328p/includes/. -type f -iregex ".*\.c") $FLAGS &&
 avr-objcopy main -O ihex main.hex &&
 fileSize="$(du --apparent-size --block-size=1  "main.hex" | awk '{ print $1}')"
 echo "sketch hex file size: $fileSize" &&
-if ((fileSize > 30720)); then
+if ((fileSize < 30720)); then
 avrdude -C atmega328p/prog.conf -v -p atmega328p -carduino -P $ARDUINOPORT -b 115200 -D -U flash:w:./main.hex:i;
 fi
 else

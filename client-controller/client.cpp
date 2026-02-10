@@ -26,15 +26,16 @@ int main()
     Serial.begin(115200);
     Serial.println("hello");
     Serial.flush();
-    analogWrite(PB0,1);
+    // analogWrite(PB0,1);
     // Set built-in LED pin as output
     DDRB |= (1 << DDB5); // just sets the pb register at bit 5 which is the led state to output for output
     DDRD = ~(0); //set pd2 to output  
       
     while (1) {
         toggleLed();
-        
-        // PORTB = 1<<PORT5;
+        Serial.println(Serial.available());
+        Serial.flush();
+        PORTB ^= 1<<PORT5;
         // PORTD = 0b00000100;
         sleep(250);
     }
