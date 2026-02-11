@@ -30,14 +30,16 @@ int main()
     // Set built-in LED pin as output
     DDRB |= (1 << DDB5); // just sets the pb register at bit 5 which is the led state to output for output
     DDRD = ~(0); //set pd2 to output  
-      
+      sei(); // makes interrupts available(but says it might be faster to make the interrupts our self's)
     while (1) {
         toggleLed();
-        Serial.println(Serial.available());
-        Serial.flush();
+        if(Serial.available()>0){Serial.println(Serial.read());
+        Serial.flush();}
+        
         PORTB ^= 1<<PORT5;
         // PORTD = 0b00000100;
-        sleep(250);
+        sleep(0);
+        
     }
     return 0;
 }
