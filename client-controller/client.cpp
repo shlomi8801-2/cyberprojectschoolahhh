@@ -24,6 +24,9 @@ void toggleLed()
 SoftwareSerial SerialAT(2, 3);
 int main()
 {
+    static uint32_t rates[] = {115200, 57600,  38400, 19200, 9600,  74400, 74880,
+                             230400, 460800, 2400,  4800,  14400, 28800};
+    sei();
     DDRB |= 1 << PORTB5;
     Serial.begin(115200);
     Serial.print("using speed:");
@@ -41,9 +44,18 @@ int main()
         F(" If it doesn't work, select \"Both NL & CR\" in Serial Monitor"));
     SerialMon.println(
         F("***********************************************************"));
-    sei();
+    SerialAT.print(SETSERIALSPEEDCMD);
+    SerialAT.print("=");
+    SerialAT.println(ATCONSOLESPEED);
+    SerialAT.flush();
     while (1)
     {
+        
+        //     if (SerialAT.available()){
+        //     SerialMon.write(SerialAT.read());
+        //     SerialMon.flush();
+        //     }
+        // }
         while (SerialMon.available())
         {
             char c = SerialMon.read();
@@ -51,17 +63,39 @@ int main()
             SerialMon.write(c);
             toggleLed();
         }
+        if (SerialAT.available()){
+            SerialAT.read();
         while (SerialAT.available())
         {
             
             SerialMon.write(SerialAT.read());
-        }
+        }}
         if (SerialMon.available()<=0 && SerialAT.available() <=0){
             Serial.flush();
             SerialAT.flush();
 
-        }
-        sleep(0);
+        }//12914813132261 751310 
+        // sleep(0); // 658413131079 751310
+
+// 129
+// 148
+// 13
+// 13
+// 26
+// 234
+// 86
+// 136
+// 240
+
+// 129
+// 148
+// 13
+// 13
+// 26
+// 234
+// 86
+// 136
+// 240
     }
     return 0;
 }
