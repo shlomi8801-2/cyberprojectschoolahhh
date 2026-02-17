@@ -160,17 +160,17 @@ def controllerManagement(controllerId:int,option:str="get"):
             #only for the commands - no need to change the controller row
             case "update":
                 #check if a command have the same title already
-                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
+                if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
                     raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
                 commandObj.updateDatabase()
             case "add":
                 #check if a command have the same title already
-                if controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
+                if controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
                     raise f"command {commandObj.buttonTitle} already exists for controller {controllerId}"
                 commandObj.addToDatabase()
             case "delete":
                 #check if a command have the same title 
-                if not controllersActions.checkCommandExistanceById(controllerId=controllerId,title=commandObj.buttonTitle):
+                if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
                     raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
                 commandObj.deleteFromDatabase()
             case "excute":

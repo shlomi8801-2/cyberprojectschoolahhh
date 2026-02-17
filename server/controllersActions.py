@@ -66,7 +66,7 @@ def getControllerCommands(controllerId:str,maxRows:int=100,offset:int=0) -> list
 def getControllersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
     output = database.Search(CARMODULES_TABLE[0],filters,maxRows,offset,algo)
     return [] if output is None else output
-def checkCommandExistanceById(controllerId:str,title:str) -> bool:
+def checkCommandExistanceByTitle(controllerId:str,title:str) -> bool:
     """returnes true if the command was found in the database else returns false"""
     return len(database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId,"title":title})) >=1
 def checkCommandExistanceByRow(controllerRow:tuple,title:str) -> bool:
