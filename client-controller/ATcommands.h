@@ -3,7 +3,7 @@
 //the modem starts at IP INITIAL status then requires to set apn with AT+CSTT or something
 //to switch to IP START then you can use the AT+CIICR then if successful switches to IP GPRSAC status
 
-#define APNNAME "internetg"
+#define APNNAME "iisp"
 #define GETSUBSCRIPTIONNUMBER "AT+CNUM"
 #define TESTCOMMAND "AT"
 #define STARTTCPCONNECTION "AT+CIPSTART" // section 8 in the document

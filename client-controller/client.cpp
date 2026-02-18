@@ -44,10 +44,10 @@ int main()
         F(" If it doesn't work, select \"Both NL & CR\" in Serial Monitor"));
     SerialMon.println(
         F("***********************************************************"));
-    SerialAT.print(SETSERIALSPEEDCMD);
-    SerialAT.print("=");
-    SerialAT.println(ATCONSOLESPEED);
-    SerialAT.flush();
+    // SerialAT.print(SETSERIALSPEEDCMD);
+    // SerialAT.print("=");
+    // SerialAT.println(ATCONSOLESPEED);
+    // SerialAT.flush();
     while (1)
     {
         
@@ -61,41 +61,41 @@ int main()
             char c = SerialMon.read();
             SerialAT.write(c);
             SerialMon.write(c);
-            toggleLed();
         }
         if (SerialAT.available()){
-            SerialAT.read();
+            
         while (SerialAT.available())
         {
             
-            SerialMon.write(SerialAT.read());
+            SerialMon.println(SerialAT.read());
         }}
         if (SerialMon.available()<=0 && SerialAT.available() <=0){
             Serial.flush();
             SerialAT.flush();
 
-        }//12914813132261 751310 
-        // sleep(0); // 658413131079 751310
-
+        }
+        
+//this for some reason it adds 10 instead of 1 at the end of a message recieved
 // 129
-// 148
+// 148 10010100
 // 13
 // 13
-// 26
-// 234
-// 86
-// 136
-// 240
+// 10
+// 143 10001111
+// 139 10001011
+// 13
+// 10
 
-// 129
-// 148
+//arduino ide
+//65
+// 84 1010100
 // 13
 // 13
-// 26
-// 234
-// 86
-// 136
-// 240
+// 10
+// 79 1001111
+// 75 1001011
+// 13
+// 10
     }
     return 0;
 }
