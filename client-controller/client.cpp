@@ -20,7 +20,11 @@ void toggleLed()
 {
     PORTB ^= 1 << PORTB5;
 }
-
+char fixATchar(char c){
+if (c & 1<<7)
+            c ^= 11<<6;
+            return c;
+}
 SoftwareSerial SerialAT(2, 3);
 int main()
 {
@@ -66,8 +70,9 @@ int main()
             
         while (SerialAT.available())
         {
+            char c = fixATchar(SerialAT.read());
             
-            SerialMon.println(SerialAT.read());
+            SerialMon.write(c);
         }}
         if (SerialMon.available()<=0 && SerialAT.available() <=0){
             Serial.flush();
