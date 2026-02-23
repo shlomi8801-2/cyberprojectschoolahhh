@@ -12,6 +12,8 @@
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include "ATcommands.h"
 #define SerialMon Serial
+typedef unsigned char byte; 
+
 inline void sleep(unsigned int ms)
 { // inline because _delay_ms throws error when its non inline function
     _delay_ms(ms);
@@ -24,6 +26,44 @@ char fixATchar(char c){
 if (c & 1<<7)
             c ^= 11<<6;
             return c;
+}
+inline void printAsBin(byte a){
+    // for (byte i = 0;i<8;i++){
+    //     Serial.print(a/(1<<(7-i)) == 1);
+    //     a = a<< 1;
+    // }
+    Serial.print((byte)a);
+    Serial.print("\n");
+}
+String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
+    //sends a string to the AT serial and then returns the reponse
+    static SoftwareSerial* _AT;
+    if (AT)
+        _AT = AT;
+    _AT->println(str);
+    _AT->flush();
+    while (Timeout >0 && _AT->available()<=0){
+        sleep(10);
+        Timeout -=10;
+    }
+    
+    if (Timeout <=0 && _AT->available()<=0){
+        return "NO RESPONSE";
+    }
+        
+    
+    String output = "";
+    while (_AT->available())
+    {
+        char c = _AT->read();
+        c = fixATchar(c);
+        output += c;
+    }
+    
+    return output;
+}
+void initialModem(SoftwareSerial* AT){
+    sleep(100);
 }
 SoftwareSerial SerialAT(2, 3);
 int main()
@@ -52,6 +92,8 @@ int main()
     // SerialAT.print("=");
     // SerialAT.println(ATCONSOLESPEED);
     // SerialAT.flush();
+    sleep(100);
+    Serial.println(SendAT("AT",10,&SerialAT));
     while (1)
     {
         
@@ -63,27 +105,21 @@ int main()
         while (SerialMon.available())
         {
             char c = SerialMon.read();
-            SerialAT.write(c);
-            SerialMon.write(c);
+            Serial.println(SendAT("AT"));
         }
-        if (SerialAT.available()){
             
-        while (SerialAT.available())
-        {
-            char c = fixATchar(SerialAT.read());
-            
-            SerialMon.write(c);
-        }}
+        
         if (SerialMon.available()<=0 && SerialAT.available() <=0){
             Serial.flush();
             SerialAT.flush();
 
         }
         
+        
 //this for some reason it adds 10 instead of 1 at the end of a message recieved
 // 129
 // 148 10010100
-// 13
+// 13  00001101
 // 13
 // 10
 // 143 10001111
@@ -91,8 +127,8 @@ int main()
 // 13
 // 10
 
-//arduino ide
-//65
+//arduino ide - "OK"
+//65 01000001
 // 84 1010100
 // 13
 // 13
@@ -100,6 +136,17 @@ int main()
 // 79 1001111
 // 75 1001011
 // 13
+// 10
+
+
+// 129 10000001
+// 172 1010110000110101
+// 53  
+// 13
+// 18
+// 61
+// 75
+// 29
 // 10
     }
     return 0;
