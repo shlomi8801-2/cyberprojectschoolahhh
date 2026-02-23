@@ -25,15 +25,8 @@ void toggleLed()
 char fixATchar(char c){
 if (c & 1<<7)
             c ^= 11<<6;
+else c &= 63; // 0011 1111
             return c;
-}
-inline void printAsBin(byte a){
-    // for (byte i = 0;i<8;i++){
-    //     Serial.print(a/(1<<(7-i)) == 1);
-    //     a = a<< 1;
-    // }
-    Serial.print((byte)a);
-    Serial.print("\n");
 }
 String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     //sends a string to the AT serial and then returns the reponse
@@ -64,6 +57,10 @@ String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
 }
 void initialModem(SoftwareSerial* AT){
     sleep(100);
+    Serial.println(SETAPNCMD+(String)"="+APNNAME);
+    SendAT(SETAPNCMD+(String)"="+APNNAME);
+    Serial.println(BRINGUPWIRELESSCONNECTIONGPRS);
+    SendAT(BRINGUPWIRELESSCONNECTIONGPRS);
 }
 SoftwareSerial SerialAT(2, 3);
 int main()
@@ -93,22 +90,27 @@ int main()
     // SerialAT.println(ATCONSOLESPEED);
     // SerialAT.flush();
     sleep(100);
-    Serial.println(SendAT("AT",10,&SerialAT));
+    // Serial.println(SendAT("AT",10,&SerialAT));
+    // initialModem(&SerialAT);
     while (1)
     {
         
-        //     if (SerialAT.available()){
-        //     SerialMon.write(SerialAT.read());
-        //     SerialMon.flush();
-        //     }
-        // }
+        
         while (SerialMon.available())
         {
             char c = SerialMon.read();
-            Serial.println(SendAT("AT"));
+            SerialAT.write(c);
+            SerialMon.write(c);
         }
+        if (SerialAT.available()){
             
-        
+        while (SerialAT.available())
+        {
+            byte c = SerialAT.read();
+            SerialMon.write(fixATchar(c));
+            
+            // SerialMon.println((byte)fixATchar(c));
+        }}
         if (SerialMon.available()<=0 && SerialAT.available() <=0){
             Serial.flush();
             SerialAT.flush();
@@ -117,37 +119,66 @@ int main()
         
         
 //this for some reason it adds 10 instead of 1 at the end of a message recieved
-// 129
-// 148 10010100
-// 13  00001101
+// AT+CSQ
+// 129 // 10000001
+// 148 // 10010100
+// 107
+// 131
+// 147
+// 145
+// 13
 // 13
 // 10
-// 143 10001111
-// 139 10001011
+// 107
+// 131
+// 147
+// 145
+// 122
+// 96
+// 119
+// 108
+// 121
+// 121
 // 13
 // 10
+// 13
+// 10
+// 143
+// 139
+// 13
+// 10
+
 
 //arduino ide - "OK"
-//65 01000001
-// 84 1010100
+// 65 // 01000001
+// 84 // 01010100
+// 43 // 
+// 67
+// 83
+// 81
 // 13
 // 13
 // 10
-// 79 1001111
-// 75 1001011
+// 43
+// 67
+// 83
+// 81
+// 58
+// 32
+// 55
+// 44
+// 57
+// 57
 // 13
 // 10
-
-
-// 129 10000001
-// 172 1010110000110101
-// 53  
 // 13
-// 18
-// 61
+// 10
+// 79
 // 75
-// 29
+// 13
 // 10
+
+
     }
     return 0;
 }

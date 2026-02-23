@@ -1,5 +1,6 @@
 #pragma once
 
+//https://m2msupport.net/m2msupport/atcscs-select-te-character-set/
 //the modem starts at IP INITIAL status then requires to set apn with AT+CSTT or something
 //to switch to IP START then you can use the AT+CIICR then if successful switches to IP GPRSAC status
 
