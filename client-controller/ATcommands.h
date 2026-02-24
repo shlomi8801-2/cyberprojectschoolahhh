@@ -15,3 +15,4 @@
 #define GETCURRSTATUSCMD "AT+CIPSTATUS" // 8.2.13 
 #define SETAPNCMD "AT+CSTT" // add = at the end to set the apn 5.2.27
 #define SETSERIALSPEEDCMD "AT+IPR" // use as AT+IPR=<rate> 2.2.32
+#define MODEMPOWERPIN PC0 // analog 0

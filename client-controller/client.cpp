@@ -14,6 +14,9 @@
 #define SerialMon Serial
 typedef unsigned char byte; 
 
+void changeModemPowerStart(byte state);
+
+
 inline void sleep(unsigned int ms)
 { // inline because _delay_ms throws error when its non inline function
     _delay_ms(ms);
@@ -28,22 +31,30 @@ if (c & 1<<7)
 else c &= 63; // 0011 1111
             return c;
 }
+template <class T>
+void dbg(T str){
+    //print to serial console
+    Serial.println(str);
+    Serial.flush();
+}
 String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     //sends a string to the AT serial and then returns the reponse
     static SoftwareSerial* _AT;
     if (AT)
         _AT = AT;
-    _AT->println(str);
+    else if (!_AT)
+        return "NO AT SERIAL OBJECT";
+    dbg(">> "+str);
+        _AT->println(str);
     _AT->flush();
+    
     while (Timeout >0 && _AT->available()<=0){
         sleep(10);
         Timeout -=10;
     }
-    
     if (Timeout <=0 && _AT->available()<=0){
         return "NO RESPONSE";
     }
-        
     
     String output = "";
     while (_AT->available())
@@ -55,27 +66,69 @@ String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     
     return output;
 }
+byte checkModemStatus(){
+    const String res = SendAT(GETCURRSTATUSCMD);
+    static const char* const modemStatues[] ={"IP INITIAL","IP START","IP CONFIG","IP GPRSACT","IP STATUS"," CONNECTING","SERVER LISTENING","CONNECT OK"," CLOSING"," CLOSED","PDP DEACT","IP PROCESSING"};
+    // const char * currStatus = nullptr; // const data in pointer but not the pointer
+    byte currStatus = ~0;
+    for (int i=0;i< sizeof(modemStatues)/sizeof(modemStatues[0]);++i ){
+        if (res.indexOf(modemStatues[i]) !=-1){
+            return i;
+        }
+    }
+    dbg(res +" status not defined");
+    return -1;
+    
+    // -1 status not defined
+    // 0 IP INITIAL
+    // 1 IP START
+    // 2 IP CONFIG
+    // 3 IP GPRSACT
+    // 4 IP STATU
+    // 5 TCP CONNECTING/UDP CONNECTING
+    // 6 SERVER LISTENING
+    // 7 CONNECT OK
+    // 8 TCP CLOSING/UDP CLOSING
+    // 9 TCP CLOSED/UDP CLOSED
+    // 10 PDP DEACT
+    // 11 IP PROCESSING
+}
 void initialModem(SoftwareSerial* AT){
     sleep(100);
-    Serial.println(SETAPNCMD+(String)"="+APNNAME);
-    SendAT(SETAPNCMD+(String)"="+APNNAME);
-    Serial.println(BRINGUPWIRELESSCONNECTIONGPRS);
-    SendAT(BRINGUPWIRELESSCONNECTIONGPRS);
+    String res =SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT);
+    // dbg(res);
+    byte tries = 10;
+    byte status = checkModemStatus();
+    while (status !=1 && --tries >0){
+        //if the modem is not on ip start mode
+        //then restart the modem
+        changeModemPowerStart(0);
+        //ping it - TODO
+        sleep(100);
+        changeModemPowerStart(1);
+        SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT);
+        sleep(100);
+        status = checkModemStatus();
+    }
+    if (status != 1){
+        
+    }
+    
+    
+    
+    //Serial.println(SendAT(BRINGUPWIRELESSCONNECTIONGPRS));
 }
-SoftwareSerial SerialAT(2, 3);
-int main()
-{
-    static uint32_t rates[] = {115200, 57600,  38400, 19200, 9600,  74400, 74880,
-                             230400, 460800, 2400,  4800,  14400, 28800};
-    sei();
-    DDRB |= 1 << PORTB5;
-    Serial.begin(115200);
-    Serial.print("using speed:");
-    Serial.println(ATCONSOLESPEED);
-    Serial.flush();
-    SerialAT.begin(115200);
-
-    // Access AT commands from Serial Monitor
+void changeModemPowerStart(byte state){
+    DDRC |= 1<< MODEMPOWERPIN; //analog direction
+    if (state){
+        PORTC |= 1 <<MODEMPOWERPIN;
+    }else{
+        PORTC &= ~(1<<MODEMPOWERPIN);
+    }
+    // DDRC |= ~0;
+    // PORTC |= ~0;
+}
+void startInteractiveConsoleWithModem(SoftwareSerial& SerialAT){
     SerialMon.println(
         F("***********************************************************"));
     SerialMon.println(F(" You can now send AT commands"));
@@ -85,14 +138,7 @@ int main()
         F(" If it doesn't work, select \"Both NL & CR\" in Serial Monitor"));
     SerialMon.println(
         F("***********************************************************"));
-    // SerialAT.print(SETSERIALSPEEDCMD);
-    // SerialAT.print("=");
-    // SerialAT.println(ATCONSOLESPEED);
-    // SerialAT.flush();
-    sleep(100);
-    // Serial.println(SendAT("AT",10,&SerialAT));
-    // initialModem(&SerialAT);
-    while (1)
+while (1)
     {
         
         
@@ -116,69 +162,32 @@ int main()
             SerialAT.flush();
 
         }
-        
-        
-//this for some reason it adds 10 instead of 1 at the end of a message recieved
-// AT+CSQ
-// 129 // 10000001
-// 148 // 10010100
-// 107
-// 131
-// 147
-// 145
-// 13
-// 13
-// 10
-// 107
-// 131
-// 147
-// 145
-// 122
-// 96
-// 119
-// 108
-// 121
-// 121
-// 13
-// 10
-// 13
-// 10
-// 143
-// 139
-// 13
-// 10
-
-
-//arduino ide - "OK"
-// 65 // 01000001
-// 84 // 01010100
-// 43 // 
-// 67
-// 83
-// 81
-// 13
-// 13
-// 10
-// 43
-// 67
-// 83
-// 81
-// 58
-// 32
-// 55
-// 44
-// 57
-// 57
-// 13
-// 10
-// 13
-// 10
-// 79
-// 75
-// 13
-// 10
-
-
     }
+}
+SoftwareSerial SerialAT(2, 3);
+int main()
+{
+    changeModemPowerStart(1);
+    static uint32_t rates[] = {115200, 57600,  38400, 19200, 9600,  74400, 74880,
+                             230400, 460800, 2400,  4800,  14400, 28800};
+    sei();
+    DDRB |= 1 << PORTB5;
+    Serial.begin(115200);
+    Serial.print("using speed:");
+    Serial.println(ATCONSOLESPEED);
+    Serial.flush();
+    SerialAT.begin(115200);
+
+    // Access AT commands from Serial Monitor
+    
+    // SerialAT.print(SETSERIALSPEEDCMD);
+    // SerialAT.print("=");
+    // SerialAT.println(ATCONSOLESPEED);
+    // SerialAT.flush();
+    sleep(100);
+    // Serial.println(SendAT("AT",10,&SerialAT));
+    initialModem(&SerialAT);
+startInteractiveConsoleWithModem(SerialAT);
+    
     return 0;
 }
