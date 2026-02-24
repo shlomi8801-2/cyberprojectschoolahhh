@@ -14,7 +14,9 @@
 #define SerialMon Serial
 typedef unsigned char byte; 
 
+//TODO move those to header file
 void changeModemPowerStart(byte state);
+void rebootModem(SoftwareSerial& Sim);
 
 
 inline void sleep(unsigned int ms)
@@ -93,6 +95,23 @@ byte checkModemStatus(){
     // 10 PDP DEACT
     // 11 IP PROCESSING
 }
+void waitForResponse(byte maxTimeout,SoftwareSerial* Sim){
+    //execute AT until response
+    while (--maxTimeout>0)
+    {
+        Sim->println("AT");
+        Sim->flush();
+        sleep(1000);
+        if (Serial.available()){
+        while (Serial.available()){
+            Serial.read();
+        }
+        sleep(100);//instead of checking if the response is "OK"
+        break;
+    }
+    }
+    
+}
 void initialModem(SoftwareSerial* AT){
     sleep(100);
     String res =SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT);
@@ -102,13 +121,12 @@ void initialModem(SoftwareSerial* AT){
     while (status !=1 && --tries >0){
         //if the modem is not on ip start mode
         //then restart the modem
-        changeModemPowerStart(0);
         //ping it - TODO
-        sleep(100);
-        changeModemPowerStart(1);
-        SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT);
+        rebootModem(*AT);
+        dbg(SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT));
         sleep(100);
         status = checkModemStatus();
+        dbg(tries);
     }
     if (status != 1){
         
@@ -118,15 +136,22 @@ void initialModem(SoftwareSerial* AT){
     
     //Serial.println(SendAT(BRINGUPWIRELESSCONNECTIONGPRS));
 }
-void changeModemPowerStart(byte state){
-    DDRC |= 1<< MODEMPOWERPIN; //analog direction
+void changeModemPowerStart(byte state){ // used reset command instead
+    //https://deepbluembedded.com/arduino-port-manipulation-registers-example/
+    DDRB |= 1<< MODEMPOWERPIN; //analog direction
     if (state){
-        PORTC |= 1 <<MODEMPOWERPIN;
+        PORTB |=1<<MODEMPOWERPIN;
     }else{
-        PORTC &= ~(1<<MODEMPOWERPIN);
+        PORTB &= ~(1<<MODEMPOWERPIN);
     }
     // DDRC |= ~0;
     // PORTC |= ~0;
+}
+void rebootModem(SoftwareSerial& Sim){
+    Sim.println(REBOOTMODEMCMD);
+    Sim.flush();
+    waitForResponse(-1,&Sim);
+    
 }
 void startInteractiveConsoleWithModem(SoftwareSerial& SerialAT){
     SerialMon.println(
@@ -167,7 +192,7 @@ while (1)
 SoftwareSerial SerialAT(2, 3);
 int main()
 {
-    changeModemPowerStart(1);
+    // changeModemPowerStart(1);
     static uint32_t rates[] = {115200, 57600,  38400, 19200, 9600,  74400, 74880,
                              230400, 460800, 2400,  4800,  14400, 28800};
     sei();
