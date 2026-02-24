@@ -123,14 +123,13 @@ void initialModem(SoftwareSerial* AT){
         //then restart the modem
         //ping it - TODO
         rebootModem(*AT);
-        dbg(SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT));
+        dbg(SendAT((String)SETAPNCMD+"="+APNNAME));
         sleep(100);
         status = checkModemStatus();
         dbg(tries);
     }
-    if (status != 1){
-        
-    }
+    SendAT(BRINGUPWIRELESSCONNECTIONGPRS);
+    
     
     
     
