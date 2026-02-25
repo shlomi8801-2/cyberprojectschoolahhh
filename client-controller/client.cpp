@@ -70,7 +70,7 @@ String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
 }
 byte checkModemStatus(){
     const String res = SendAT(GETCURRSTATUSCMD);
-    static const char* const modemStatues[] ={"IP INITIAL","IP START","IP CONFIG","IP GPRSACT","IP STATUS"," CONNECTING","SERVER LISTENING","CONNECT OK"," CLOSING"," CLOSED","PDP DEACT","IP PROCESSING"};
+    static const char* const modemStatues[] ={"IP INITIAL","IP START","IP CONFIG","IP GPSACT","IP STATUS"," CONNECTING","SERVER LISTENING","CONNECT OK"," CLOSING"," CLOSED","PDP DEACT","IP PROCESSING"};
     // const char * currStatus = nullptr; // const data in pointer but not the pointer
     byte currStatus = ~0;
     for (int i=0;i< sizeof(modemStatues)/sizeof(modemStatues[0]);++i ){
@@ -81,7 +81,7 @@ byte checkModemStatus(){
     dbg(res +" status not defined");
     return -1;
     
-    // -1 status not defined
+    // -1/255 status not defined
     // 0 IP INITIAL
     // 1 IP START
     // 2 IP CONFIG
@@ -95,40 +95,57 @@ byte checkModemStatus(){
     // 10 PDP DEACT
     // 11 IP PROCESSING
 }
-void waitForResponse(byte maxTimeout,SoftwareSerial* Sim){
-    //execute AT until response
-    while (--maxTimeout>0)
+byte waitForResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTimout in seconds max 650 secconds
+    //execute AT until response - not setting the serial object in SendAT function
+    maxTimeout *=100;
+    while (maxTimeout>0)
     {
         Sim->println("AT");
         Sim->flush();
-        sleep(1000);
+        sleep(50);
+        maxTimeout -=5; // maxtimeout is seconds times 100 so -5 means -50ms
         if (Serial.available()){
-        while (Serial.available()){
-            Serial.read();
+            while (Serial.available()){ // clear the buffer
+                Serial.read();
+            }
+            sleep(50);//instead of checking if the response is "OK"
+            return 1;
+            break;
         }
-        sleep(100);//instead of checking if the response is "OK"
-        break;
     }
-    }
+    //maxTimoue reached <=0
+    return 0; // no response
+    
     
 }
 void initialModem(SoftwareSerial* AT){
+    AT->begin(ATCONSOLESPEED);
     sleep(100);
+    if(!waitForResponse(5,AT)){
+        dbg("module not responding");
+        return;
+    }
+    byte status = checkModemStatus();
     String res =SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT);
     // dbg(res);
     byte tries = 10;
-    byte status = checkModemStatus();
+    status = checkModemStatus();
     while (status !=1 && --tries >0){
         //if the modem is not on ip start mode
         //then restart the modem
         //ping it - TODO
         rebootModem(*AT);
-        dbg(SendAT((String)SETAPNCMD+"="+APNNAME));
+        SendAT((String)SETAPNCMD+"="+APNNAME);
         sleep(100);
         status = checkModemStatus();
-        dbg(tries);
     }
     SendAT(BRINGUPWIRELESSCONNECTIONGPRS);
+    status = checkModemStatus();
+    if (status == 4){ // IP STATUS means connected
+        dbg("local ip is:"+SendAT(GETLOCALIPADDRESSCMD));
+    }else {
+        dbg("status is not 4\nstatus:"+status);
+    }
     
     
     
@@ -200,7 +217,6 @@ int main()
     Serial.print("using speed:");
     Serial.println(ATCONSOLESPEED);
     Serial.flush();
-    SerialAT.begin(115200);
 
     // Access AT commands from Serial Monitor
     
