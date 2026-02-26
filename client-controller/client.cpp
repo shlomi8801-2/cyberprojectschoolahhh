@@ -104,9 +104,9 @@ byte waitForResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTimou
         Sim->flush();
         sleep(50);
         maxTimeout -=5; // maxtimeout is seconds times 100 so -5 means -50ms
-        if (Serial.available()){
-            while (Serial.available()){ // clear the buffer
-                Serial.read();
+        if (Sim->available()){
+            while (Sim->available()){ // clear the buffer
+                Sim->read();
             }
             sleep(50);//instead of checking if the response is "OK"
             return 1;
