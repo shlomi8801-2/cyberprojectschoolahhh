@@ -7,7 +7,6 @@
 #include <util/delay.h>
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include "ATcommands.h"
-#define SerialMon Serial
 #include "client.h"
 
 
@@ -23,8 +22,10 @@ else c &= 63; // 0011 1111
 String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     //sends a string to the AT serial and then returns the reponse
     static SoftwareSerial* _AT;
-    if (AT)
+    if (AT){
         _AT = AT;
+        _AT->begin(ATCONSOLESPEED);
+    }
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
     dbg(">> "+str);
@@ -76,7 +77,7 @@ byte checkModemStatus(){
     // 10 PDP DEACT
     // 11 IP PROCESSING
 }
-byte waitForResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTimout in seconds max 650 secconds
+byte waitForATResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTimout in seconds max 650 secconds
     //execute AT until response - not setting the serial object in SendAT function
     maxTimeout *=100;
     while (maxTimeout>0)
@@ -100,9 +101,7 @@ byte waitForResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTimou
     
 }
 void initialModem(SoftwareSerial* AT){
-    AT->begin(ATCONSOLESPEED);
-    sleep(100);
-    if(!waitForResponse(5,AT)){
+    if(!waitForATResponse(5,AT)){
         dbg("module not responding");
         return;
     }
@@ -115,9 +114,8 @@ void initialModem(SoftwareSerial* AT){
         //if the modem is not on ip start mode
         //then restart the modem
         //ping it - TODO
-        rebootModem(*AT);
+        rebootModem();
         SendAT((String)SETAPNCMD+"="+APNNAME);
-        sleep(100);
         status = checkModemStatus();
     }
     SendAT(BRINGUPWIRELESSCONNECTIONGPRS);
@@ -133,42 +131,40 @@ void initialModem(SoftwareSerial* AT){
     
     //Serial.println(SendAT(BRINGUPWIRELESSCONNECTIONGPRS));
 }
-void rebootModem(SoftwareSerial& Sim){
-    Sim.println(REBOOTMODEMCMD);
-    Sim.flush();
-    waitForResponse(-1,&Sim);
+void rebootModem(){
+    SendAT(REBOOTMODEMCMD,30*1000);
     
 }
 void startInteractiveConsoleWithModem(SoftwareSerial& SerialAT){
-    SerialMon.println(
+    Serial.println(
         F("***********************************************************"));
-    SerialMon.println(F(" You can now send AT commands"));
-    SerialMon.println(
+    Serial.println(F(" You can now send AT commands"));
+    Serial.println(
         F(" Enter \"AT\" (without quotes), and you should see \"OK\""));
-    SerialMon.println(
+    Serial.println(
         F(" If it doesn't work, select \"Both NL & CR\" in Serial Monitor"));
-    SerialMon.println(
+    Serial.println(
         F("***********************************************************"));
 while (1)
     {
         
         
-        while (SerialMon.available())
+        while (Serial.available())
         {
-            char c = SerialMon.read();
+            char c = Serial.read();
             SerialAT.write(c);
-            SerialMon.write(c);
+            Serial.write(c);
         }
         if (SerialAT.available()){
             
         while (SerialAT.available())
         {
             byte c = SerialAT.read();
-            SerialMon.write(fixATchar(c));
+            Serial.write(fixATchar(c));
             
-            // SerialMon.println((byte)fixATchar(c));
+            // Serial.println((byte)fixATchar(c));
         }}
-        if (SerialMon.available()<=0 && SerialAT.available() <=0){
+        if (Serial.available()<=0 && SerialAT.available() <=0){
             Serial.flush();
             SerialAT.flush();
 
