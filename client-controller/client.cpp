@@ -1,9 +1,5 @@
 // my arduino chip is atmega328p
-#ifndef pc
-// #define mmcu atmega328p //must include those in the compiler line but keep it here for the intellisense
 #define __AVR_ATmega328P__
-// #define F_CPU 16000000UL
-#endif
 #include <avr/io.h>
 // #include <avr/iom328p.h>
 #include <Arduino.h>
@@ -12,33 +8,18 @@
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include "ATcommands.h"
 #define SerialMon Serial
-typedef unsigned char byte; 
-
-//TODO move those to header file
-void changeModemPowerStart(byte state);
-void rebootModem(SoftwareSerial& Sim);
+#include "client.h"
 
 
-inline void sleep(unsigned int ms)
-{ // inline because _delay_ms throws error when its non inline function
-    _delay_ms(ms);
-}
-void toggleLed()
-{
-    PORTB ^= 1 << PORTB5;
-}
+byte dataMode = 0;
 char fixATchar(char c){
+    if (dataMode) return c;
 if (c & 1<<7)
             c ^= 11<<6;
 else c &= 63; // 0011 1111
             return c;
 }
-template <class T>
-void dbg(T str){
-    //print to serial console
-    Serial.println(str);
-    Serial.flush();
-}
+
 String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     //sends a string to the AT serial and then returns the reponse
     static SoftwareSerial* _AT;
@@ -152,17 +133,6 @@ void initialModem(SoftwareSerial* AT){
     
     //Serial.println(SendAT(BRINGUPWIRELESSCONNECTIONGPRS));
 }
-void changeModemPowerStart(byte state){ // used reset command instead
-    //https://deepbluembedded.com/arduino-port-manipulation-registers-example/
-    DDRB |= 1<< MODEMPOWERPIN; //analog direction
-    if (state){
-        PORTB |=1<<MODEMPOWERPIN;
-    }else{
-        PORTB &= ~(1<<MODEMPOWERPIN);
-    }
-    // DDRC |= ~0;
-    // PORTC |= ~0;
-}
 void rebootModem(SoftwareSerial& Sim){
     Sim.println(REBOOTMODEMCMD);
     Sim.flush();
@@ -208,10 +178,7 @@ while (1)
 SoftwareSerial SerialAT(2, 3);
 int main()
 {
-    // changeModemPowerStart(1);
-    static uint32_t rates[] = {115200, 57600,  38400, 19200, 9600,  74400, 74880,
-                             230400, 460800, 2400,  4800,  14400, 28800};
-    sei();
+    sei(); // start listening to interrupts
     DDRB |= 1 << PORTB5;
     Serial.begin(115200);
     Serial.print("using speed:");
