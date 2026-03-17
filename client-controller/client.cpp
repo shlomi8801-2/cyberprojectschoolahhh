@@ -25,11 +25,13 @@ String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     if (AT){
         _AT = AT;
         _AT->begin(ATCONSOLESPEED);
+        dbg("using speed:");
+        dbg(ATCONSOLESPEED);
     }
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
     dbg(">> "+str);
-        _AT->println(str);
+    _AT->println(str);
     _AT->flush();
     
     while (Timeout >0 && _AT->available()<=0){
@@ -82,17 +84,11 @@ byte waitForATResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTim
     maxTimeout *=100;
     while (maxTimeout>0)
     {
-        Sim->println("AT");
-        Sim->flush();
-        sleep(50);
-        maxTimeout -=5; // maxtimeout is seconds times 100 so -5 means -50ms
-        if (Sim->available()){
-            while (Sim->available()){ // clear the buffer
-                Sim->read();
-            }
-            sleep(50);//instead of checking if the response is "OK"
+        String res = SendAT("AT",100,Sim);
+        
+        maxTimeout -=10; // maxtimeout is seconds times 100 so -5 means -50ms
+        if (res){
             return 1;
-            break;
         }
     }
     //maxTimoue reached <=0
@@ -171,15 +167,12 @@ while (1)
         }
     }
 }
-SoftwareSerial SerialAT(2, 3);
+SoftwareSerial SerialAT(2, 3); // connect the rxd to port 3 and the txd to port 2
 int main()
 {
     sei(); // start listening to interrupts
     DDRB |= 1 << PORTB5;
     Serial.begin(115200);
-    Serial.print("using speed:");
-    Serial.println(ATCONSOLESPEED);
-    Serial.flush();
 
     // Access AT commands from Serial Monitor
     
