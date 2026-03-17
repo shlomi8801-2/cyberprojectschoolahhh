@@ -10,6 +10,7 @@
 #include "client.h"
 
 
+
 byte dataMode = 0;
 char fixATchar(char c){
     if (dataMode) return c;
@@ -54,9 +55,11 @@ String SendAT(String str,int Timeout=1000,SoftwareSerial* AT=nullptr){
 }
 byte checkModemStatus(){
     byte tries =5;
-    gettingstatus:
+    while (--tries >0){
+
+    
     const String res = SendAT(GETCURRSTATUSCMD);
-    static const char* const modemStatues[] ={"IP INITIAL","IP START","IP CONFIG","IP GPSACT","IP STATUS"," CONNECTING","SERVER LISTENING","CONNECT OK"," CLOSING"," CLOSED","PDP DEACT","IP PROCESSING"};
+    static const char* const modemStatues[] ={"IP INITIAL","IP START","IP CONFIG","IP GPRSACT","IP STATUS"," CONNECTING","SERVER LISTENING","CONNECT OK"," CLOSING"," CLOSED","PDP DEACT","IP PROCESSING"};
     // const char * currStatus = nullptr; // const data in pointer but not the pointer
     byte currStatus = ~0;
     for (int i=0;i< sizeof(modemStatues)/sizeof(modemStatues[0]);++i ){
@@ -64,11 +67,10 @@ byte checkModemStatus(){
             return i;
         }
     }
+        dbg((String)res +" status not defined"); 
+        sleep(1000);
+    }
     
-    
-    if (--tries >0)
-        goto gettingstatus;// can sometimes fail due to serial being serial(may change one digit or so)
-    dbg((String)res +" status not defined"); 
     return -1;
     
     // -1/255 status not defined
@@ -90,9 +92,9 @@ byte waitForATResponse(unsigned int maxTimeout){ // maxTimout in seconds max 650
     maxTimeout *=100;
     while (maxTimeout>0)
     {
-        String res = SendAT("AT",100);
-        sleep(100);
-        maxTimeout -=10; // maxtimeout is seconds times 100 so -5 means -50ms
+        String res = SendAT("AT",1000);
+        sleep(1000);
+        maxTimeout -=100; // maxtimeout is seconds times 100 so -5 means -50ms
         if (res.indexOf("OK") != -1){
             return 1;
         }
@@ -103,51 +105,45 @@ byte waitForATResponse(unsigned int maxTimeout){ // maxTimout in seconds max 650
     
 }
 void initialModem(SoftwareSerial* AT){
+    //should bring the modem from any status to 3 which is IP GPRSACT
+    while (true){
     if(!waitForATResponse(5)){
         dbg("module not responding");
         return;
     }
-    gettingstatus1:
-    byte status = -1;
-    byte tries = 10;
-    while (--tries >0){
-        //if the modem is not on ip start mode
-        //then restart the modem
-        //ping it - TODO
-        SendAT((String)SETAPNCMD+"="+APNNAME);
-        status = checkModemStatus();
-        if (status == 1){
-            dbg("status found IP START");
-             break;
-        }
-         
+    byte status = checkModemStatus();
+    if (status ==3)
+        break;
+    //get status code 1 first
+    SendAT((String)SETAPNCMD+"="+APNNAME);
+    status = checkModemStatus();
+    if (status != 1){
         dbg("status is:"+(String)status);
-        dbg("Rebooting");
-        rebootModem();
-        waitForATResponse(10);
-        dbg((String)"try number "+(10-tries));
-
-        
+            dbg("Rebooting might take some time");
+            rebootModem();
+            while (!waitForATResponse(10)){ // while not responding
+                sleep(3000);
+            }
+            continue; // re run this block
     }
+    dbg("status found IP START");
+    //try to get to status code 3
     dbg("trying to use mobile data");
-    dbg(SendAT(BRINGUPWIRELESSCONNECTIONGPRS,65000));
+    SendAT(BRINGUPWIRELESSCONNECTIONGPRS,65000);
     status = checkModemStatus();
     dbg("status is:"+(String)status);
-
+    //finally
     if (status == 3){ // 3 IP GPRSACT means connected
         dbg("local ip is:"+SendAT(GETLOCALIPADDRESSCMD));
+        break;
     }else if (status ==10){
         dbg("yes its dact");
-        sleep(1000);
-        goto gettingstatus1;
+        continue;
     }else{
-        goto gettingstatus1;
+        continue;
         }
+    }
     dbg("modem initionlized!");
-    
-    
-    
-    //Serial.println(SendAT(BRINGUPWIRELESSCONNECTIONGPRS));
 }
 inline void rebootModem(){
     SendAT(REBOOTMODEMCMD,30*1000);    

@@ -10,7 +10,7 @@
 #include <util/delay.h>
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include "ATcommands.h"
-
+#define debug
 
 
 void changeModemPowerStart(byte state);
@@ -30,8 +30,10 @@ void toggleLed()
     PORTB ^= 1 << PORTB5;
 }
 template <class T>
-void dbg(T str){
+inline void dbg(T str){
+    #ifdef debug
     //print to serial console
     Serial.println(str);
     Serial.flush();
+    #endif
 }
