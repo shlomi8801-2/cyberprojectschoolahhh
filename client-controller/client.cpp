@@ -19,7 +19,7 @@ else c &= 63; // 0011 1111
             return c;
 }
 
-String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
+String SendAT(String str,int Timeout=1000,SoftwareSerial* AT=nullptr){
     //sends a string to the AT serial and then returns the reponse
     static SoftwareSerial* _AT;
     if (AT){
@@ -53,6 +53,8 @@ String SendAT(String str,byte Timeout=1000,SoftwareSerial* AT=nullptr){
     return output;
 }
 byte checkModemStatus(){
+    byte tries =5;
+    gettingstatus:
     const String res = SendAT(GETCURRSTATUSCMD);
     static const char* const modemStatues[] ={"IP INITIAL","IP START","IP CONFIG","IP GPSACT","IP STATUS"," CONNECTING","SERVER LISTENING","CONNECT OK"," CLOSING"," CLOSED","PDP DEACT","IP PROCESSING"};
     // const char * currStatus = nullptr; // const data in pointer but not the pointer
@@ -62,7 +64,11 @@ byte checkModemStatus(){
             return i;
         }
     }
-    dbg(res +" status not defined");
+    
+    
+    if (--tries >0)
+        goto gettingstatus;// can sometimes fail due to serial being serial(may change one digit or so)
+    dbg((String)res +" status not defined"); 
     return -1;
     
     // -1/255 status not defined
@@ -79,15 +85,15 @@ byte checkModemStatus(){
     // 10 PDP DEACT
     // 11 IP PROCESSING
 }
-byte waitForATResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTimout in seconds max 650 secconds
+byte waitForATResponse(unsigned int maxTimeout){ // maxTimout in seconds max 650 secconds
     //execute AT until response - not setting the serial object in SendAT function
     maxTimeout *=100;
     while (maxTimeout>0)
     {
-        String res = SendAT("AT",100,Sim);
-        
+        String res = SendAT("AT",100);
+        sleep(100);
         maxTimeout -=10; // maxtimeout is seconds times 100 so -5 means -50ms
-        if (res){
+        if (res.indexOf("OK") != -1){
             return 1;
         }
     }
@@ -97,39 +103,54 @@ byte waitForATResponse(unsigned short maxTimeout,SoftwareSerial* Sim){ // maxTim
     
 }
 void initialModem(SoftwareSerial* AT){
-    if(!waitForATResponse(5,AT)){
+    if(!waitForATResponse(5)){
         dbg("module not responding");
         return;
     }
-    byte status = checkModemStatus();
-    String res =SendAT((String)SETAPNCMD+"="+APNNAME,1000,AT);
-    // dbg(res);
+    gettingstatus1:
+    byte status = -1;
     byte tries = 10;
-    status = checkModemStatus();
-    while (status !=1 && --tries >0){
+    while (--tries >0){
         //if the modem is not on ip start mode
         //then restart the modem
         //ping it - TODO
-        rebootModem();
         SendAT((String)SETAPNCMD+"="+APNNAME);
         status = checkModemStatus();
+        if (status == 1){
+            dbg("status found IP START");
+             break;
+        }
+         
+        dbg("status is:"+(String)status);
+        dbg("Rebooting");
+        rebootModem();
+        waitForATResponse(10);
+        dbg((String)"try number "+(10-tries));
+
+        
     }
-    SendAT(BRINGUPWIRELESSCONNECTIONGPRS);
+    dbg("trying to use mobile data");
+    dbg(SendAT(BRINGUPWIRELESSCONNECTIONGPRS,65000));
     status = checkModemStatus();
-    if (status == 4){ // IP STATUS means connected
+    dbg("status is:"+(String)status);
+
+    if (status == 3){ // 3 IP GPRSACT means connected
         dbg("local ip is:"+SendAT(GETLOCALIPADDRESSCMD));
-    }else {
-        dbg("status is not 4\nstatus:"+status);
-    }
-    
+    }else if (status ==10){
+        dbg("yes its dact");
+        sleep(1000);
+        goto gettingstatus1;
+    }else{
+        goto gettingstatus1;
+        }
+    dbg("modem initionlized!");
     
     
     
     //Serial.println(SendAT(BRINGUPWIRELESSCONNECTIONGPRS));
 }
-void rebootModem(){
-    SendAT(REBOOTMODEMCMD,30*1000);
-    
+inline void rebootModem(){
+    SendAT(REBOOTMODEMCMD,30*1000);    
 }
 void startInteractiveConsoleWithModem(SoftwareSerial& SerialAT){
     Serial.println(
@@ -167,7 +188,6 @@ while (1)
         }
     }
 }
-SoftwareSerial SerialAT(2, 3); // connect the rxd to port 3 and the txd to port 2
 int main()
 {
     sei(); // start listening to interrupts
@@ -182,6 +202,8 @@ int main()
     // SerialAT.flush();
     sleep(100);
     // Serial.println(SendAT("AT",10,&SerialAT));
+    SoftwareSerial SerialAT(2, 3); // connect the rxd to port 3 and the txd to port 2
+    SendAT("AT",0,&SerialAT); // assign the object as static in the function
     initialModem(&SerialAT);
 startInteractiveConsoleWithModem(SerialAT);
     

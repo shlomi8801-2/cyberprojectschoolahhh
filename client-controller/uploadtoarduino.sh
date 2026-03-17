@@ -7,8 +7,8 @@ ARDUINOPORT="/dev/ttyUSB0"
 sudo chmod 777 $ARDUINOPORT
 if [ $# -eq 0 ]; then #no input arguments given
 # echo "$(find atmega328p/includes/. -type f -iregex ".*\.cpp") $(find atmega328p/includes/. -type f -iregex ".*\.c") $FLAGS"
-avr-g++ client.cpp $(find atmega328p/includes/. -type f -regextype awk -regex ".*\.(c|cpp)$") $FLAGS &&
-avr-objcopy main -O ihex main.hex &&
+avr-g++ client.cpp $(find atmega328p/includes/. -type f -regextype awk -regex ".*\.(c|cpp)$") $FLAGS || exit
+avr-objcopy main -O ihex main.hex || exit
 fileSize="$(du --apparent-size --block-size=1  "main.hex" | awk '{ print $1}')"
 echo "sketch hex file size: $fileSize" &&
 if ((fileSize < 30720)); then

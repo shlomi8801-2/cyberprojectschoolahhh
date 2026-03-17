@@ -15,9 +15,9 @@
 
 void changeModemPowerStart(byte state);
 void rebootModem();
-String SendAT(String str,byte Timeout,SoftwareSerial* AT);
+String SendAT(String str,int Timeout,SoftwareSerial* AT);
 byte checkModemStatus();
-byte waitForATResponse(unsigned short maxTimeout,SoftwareSerial* Sim);
+byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);
 
 
