@@ -2,7 +2,7 @@
 
 //https://m2msupport.net/m2msupport/atcscs-select-te-character-set/
 //the modem starts at IP INITIAL status then requires to set apn with AT+CSTT or something
-//to switch to IP START then you can use the AT+CIICR then if successful switches to IP GPRSAC status
+//to switch to IP START then you can use the AT+CIICR then if successful switches to IP GPRSAC/IP STATUS status
 
 #define APNNAME "iisp"
 #define GETSUBSCRIPTIONNUMBER "AT+CNUM"
@@ -21,3 +21,5 @@
 #define TCPEXAMPLECONNECTREMOTEECHOSERVER "AT+CIPSTART=\"TCP\",\"45.79.112.203\",\"4242\"" //https://tcpbin.com
 #define TCPCONNECTTOSERVERCMD "AT+CIPSTART=\"TCP\",\"192.168.161.170\",\"1234\""
 #define ENTERDATAMODECMD "AT+CIPSEND" // data received as normal 8 bit each time
+
+#define DEFAULT_TIMEOUT 5

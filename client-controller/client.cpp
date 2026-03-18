@@ -21,7 +21,7 @@ char fixATchar(char c)
     return c;
 }
 
-String SendAT(String str, int Timeout = 1000, SoftwareSerial *AT = nullptr)
+String SendAT(String str, int Timeoutms = 1000, SoftwareSerial *AT = nullptr)
 {
     // sends a string to the AT serial and then returns the reponse
     static SoftwareSerial *_AT;
@@ -38,12 +38,12 @@ String SendAT(String str, int Timeout = 1000, SoftwareSerial *AT = nullptr)
     _AT->println(str);
     _AT->flush();
 
-    while (Timeout > 0 && _AT->available() <= 0)
+    while (Timeoutms > 0 && _AT->available() <= 0)
     {
         sleep(10);
-        Timeout -= 10;
+        Timeoutms -= 10;
     }
-    if (Timeout <= 0 && _AT->available() <= 0)
+    if (Timeoutms <= 0 && _AT->available() <= 0)
     {
         return "NO RESPONSE";
     }
@@ -86,7 +86,7 @@ byte checkModemStatus()
     // 1 IP START
     // 2 IP CONFIG
     // 3 IP GPRSACT
-    // 4 IP STATU
+    // 4 IP STATUS
     // 5 TCP CONNECTING/UDP CONNECTING
     // 6 SERVER LISTENING
     // 7 CONNECT OK
@@ -95,15 +95,15 @@ byte checkModemStatus()
     // 10 PDP DEACT
     // 11 IP PROCESSING
 }
-byte waitForATResponse(unsigned int maxTimeout)
-{ // maxTimout in seconds max 650 secconds
+byte waitForATResponse(unsigned int maxTimeoutSec)
+{
     // execute AT until response - not setting the serial object in SendAT function
-    maxTimeout *= 100;
-    while (maxTimeout > 0)
+    maxTimeoutSec *= 100;
+    while (maxTimeoutSec > 0)
     {
         String res = SendAT("AT", 1000);
         sleep(1000);
-        maxTimeout -= 100; // maxtimeout is seconds times 100 so -5 means -50ms
+        maxTimeoutSec -= 100; // maxtimeout is seconds times 100 so -5 means -50ms
         if (res.indexOf("OK") != -1)
         {
             return 1;
@@ -112,12 +112,45 @@ byte waitForATResponse(unsigned int maxTimeout)
     // maxTimoue reached <=0
     return 0; // no response
 }
+void setModemAPN()
+{
+    SendAT((String)SETAPNCMD + "=" + APNNAME);
+}
+void resetModemAndWait()
+{
+    dbg("Rebooting might take some time");
+    rebootModem();
+    String res = SendAT("", 1000);
+    while (res.indexOf("SMS ") == -1 && res.indexOf("OK") == -1)
+    { // while not responding
+        dbg(res);
+        //try again each 3 seconds
+        sleep(3000);
+        res = SendAT("AT", 1000);
+    }
+}
+byte BringUpGPRSConnection(){
+    //must be in status 1 or 2 first
+    //output should be either 0 or 1 0 means it failed to connect 1 means it connected
+    dbg("trying to use mobile data");
+        SendAT(BRINGUPWIRELESSCONNECTIONGPRS, 65000);
+        byte status = checkModemStatus();
+        dbg("status is:" + (String)status);
+        // finally
+        if (status == 3)
+        { // 3 IP GPRSACT means connected
+            dbg("local ip is:" + SendAT(GETLOCALIPADDRESSCMD));
+            return 1;
+        }
+    return 0;
+}
 void initialModem(SoftwareSerial *AT)
 {
+    SendAT("AT", 0, AT); // assign the object as static in the function
     // should bring the modem from any status to 3 which is IP GPRSACT
-    while (true)
+    for( byte tries = 255;--tries > 0;/*SEGA*/)
     {
-        if (!waitForATResponse(5))
+        if (!waitForATResponse(DEFAULT_TIMEOUT))
         {
             dbg("module not responding");
             return;
@@ -125,41 +158,14 @@ void initialModem(SoftwareSerial *AT)
         byte status = checkModemStatus();
         if (status == 3)
             break;
-        // get status code 1 first
-        SendAT((String)SETAPNCMD + "=" + APNNAME);
+        setModemAPN();
         status = checkModemStatus();
-        if (status != 1)
-        {
+        if (status != 1){
             dbg("status is:" + (String)status);
-            dbg("Rebooting might take some time");
-            rebootModem();
-            while (!waitForATResponse(10))
-            { // while not responding
-                sleep(3000);
-            }
+            resetModemAndWait();
             continue; // re run this block
         }
-        dbg("status found IP START");
-        // try to get to status code 3
-        dbg("trying to use mobile data");
-        SendAT(BRINGUPWIRELESSCONNECTIONGPRS, 65000);
-        status = checkModemStatus();
-        dbg("status is:" + (String)status);
-        // finally
-        if (status == 3)
-        { // 3 IP GPRSACT means connected
-            dbg("local ip is:" + SendAT(GETLOCALIPADDRESSCMD));
-            break;
-        }
-        else if (status == 10)
-        {
-            dbg("yes its dact");
-            continue;
-        }
-        else
-        {
-            continue;
-        }
+       BringUpGPRSConnection();
     }
     dbg("modem initionlized!");
 }
@@ -220,7 +226,6 @@ int main()
     sleep(100);
     // Serial.println(SendAT("AT",10,&SerialAT));
     SoftwareSerial SerialAT(2, 3); // connect the rxd to port 3 and the txd to port 2
-    SendAT("AT", 0, &SerialAT);    // assign the object as static in the function
     initialModem(&SerialAT);
     startInteractiveConsoleWithModem(SerialAT);
 
