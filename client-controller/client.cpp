@@ -1,11 +1,9 @@
 // my arduino chip is atmega328p
 #define __AVR_ATmega328P__
 #include <avr/io.h>
-// #include <avr/iom328p.h>
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <util/delay.h>
-// #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include "ATcommands.h"
 #include "client.h"
 
@@ -28,9 +26,9 @@ String SendAT(String str, int Timeoutms = 1000, SoftwareSerial *AT = nullptr)
     if (AT)
     {
         _AT = AT;
-        _AT->begin(ATCONSOLESPEED);
+        _AT->begin(AT_CONSOLE_SPEED);
         dbg("using speed:");
-        dbg(ATCONSOLESPEED);
+        dbg(AT_CONSOLE_SPEED);
     }
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
@@ -64,7 +62,7 @@ byte checkModemStatus()
     while (--tries > 0)
     {
 
-        const String res = SendAT(GETCURRSTATUSCMD);
+        const String res = SendAT(GET_CURR_STATUS_CMD);
         static const char *const modemStatues[] = {"IP INITIAL", "IP START", "IP CONFIG", "IP GPRSACT", "IP STATUS", " CONNECTING", "SERVER LISTENING", "CONNECT OK", " CLOSING", " CLOSED", "PDP DEACT", "IP PROCESSING"};
         // const char * currStatus = nullptr; // const data in pointer but not the pointer
         byte currStatus = ~0;
@@ -109,12 +107,11 @@ byte waitForATResponse(unsigned int maxTimeoutSec)
             return 1;
         }
     }
-    // maxTimoue reached <=0
     return 0; // no response
 }
 void setModemAPN()
 {
-    SendAT((String)SETAPNCMD + "=" + APNNAME);
+    SendAT((String)SET_APN_CMD + "=" + APN_NAME);
 }
 void resetModemAndWait()
 {
@@ -123,23 +120,22 @@ void resetModemAndWait()
     String res = SendAT("", 1000);
     while (res.indexOf("SMS ") == -1 && res.indexOf("OK") == -1)
     { // while not responding
-        dbg(res);
         //try again each 3 seconds
         sleep(3000);
         res = SendAT("AT", 1000);
     }
 }
 byte BringUpGPRSConnection(){
-    //must be in status 1 or 2 first
+    //must be in status 1 or 2 before
     //output should be either 0 or 1 0 means it failed to connect 1 means it connected
     dbg("trying to use mobile data");
-        SendAT(BRINGUPWIRELESSCONNECTIONGPRS, 65000);
+        SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS, 65000);
         byte status = checkModemStatus();
         dbg("status is:" + (String)status);
         // finally
         if (status == 3)
         { // 3 IP GPRSACT means connected
-            dbg("local ip is:" + SendAT(GETLOCALIPADDRESSCMD));
+            dbg("local ip is:" + SendAT(GET_LOCAL_IP_ADDRESS_CMD));
             return 1;
         }
     return 0;
@@ -150,7 +146,7 @@ void initialModem(SoftwareSerial *AT)
     // should bring the modem from any status to 3 which is IP GPRSACT
     for( byte tries = 255;--tries > 0;/*SEGA*/)
     {
-        if (!waitForATResponse(DEFAULT_TIMEOUT))
+        if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
             dbg("module not responding");
             return;
@@ -171,10 +167,9 @@ void initialModem(SoftwareSerial *AT)
 }
 inline void rebootModem()
 {
-    SendAT(REBOOTMODEMCMD, 30 * 1000);
+    SendAT(REBOOT_MODEM_CMD, 30 * 1000);
 }
-void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT)
-{
+void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT){
     Serial.println(
         F("***********************************************************"));
     Serial.println(F(" You can now send AT commands"));
@@ -191,7 +186,7 @@ void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT)
         {
             char c = Serial.read();
             SerialAT.write(c);
-            Serial.write(c);
+            Serial.write(c); // replay
         }
         if (SerialAT.available())
         {
@@ -200,8 +195,6 @@ void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT)
             {
                 byte c = SerialAT.read();
                 Serial.write(fixATchar(c));
-
-                // Serial.println((byte)fixATchar(c));
             }
         }
         if (Serial.available() <= 0 && SerialAT.available() <= 0)
@@ -217,16 +210,11 @@ int main()
     DDRB |= 1 << PORTB5;
     Serial.begin(115200);
 
-    // Access AT commands from Serial Monitor
-
-    // SerialAT.print(SETSERIALSPEEDCMD);
-    // SerialAT.print("=");
-    // SerialAT.println(ATCONSOLESPEED);
-    // SerialAT.flush();
-    sleep(100);
-    // Serial.println(SendAT("AT",10,&SerialAT));
     SoftwareSerial SerialAT(2, 3); // connect the rxd to port 3 and the txd to port 2
     initialModem(&SerialAT);
+
+    // dbg(SendAT(TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER));
+    // dataMode = 1;
     startInteractiveConsoleWithModem(SerialAT);
 
     return 0;
