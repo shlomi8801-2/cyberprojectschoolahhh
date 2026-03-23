@@ -127,6 +127,9 @@ void resetModemAndWait()
         res = SendAT("AT", 1000);
     }
 }
+void resetPDPDeact(){
+    SendAT(RESET_PDP_DEACT_STATE_CMD);
+}
 byte BringUpGPRSConnection(){
     //must be in status 1 or 2 before
     //output should be either 0 or 1 0 means it failed to connect 1 means it connected
@@ -148,7 +151,7 @@ void initialModem(SoftwareSerial *AT)
     dbg("initializing modem!");
     SendAT("AT", 0, AT); // assign the object as static in the function
     // should bring the modem from any status to 3 which is IP GPRSACT
-    for( byte tries = 2;--tries > 0;/*SEGA*/)
+    for( byte tries = 10;--tries > 0;/*SEGA*/)
     {
         if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
@@ -164,9 +167,18 @@ void initialModem(SoftwareSerial *AT)
         status = checkModemStatus();
         if (status != 1){
             dbg("status is:" + (String)status);
-            resetModemAndWait();
+            switch (status){
+                case 10:{
+                    resetPDPDeact();
+                    break;
+                }
+                case 255:
+                    return;
+                default:
+                    resetModemAndWait();
             continue; // re run this block
         }
+    }
         if (BringUpGPRSConnection()) break;
     }
     dbg("modem initionlized!");
