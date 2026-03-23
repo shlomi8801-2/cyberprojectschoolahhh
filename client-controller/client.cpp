@@ -7,6 +7,7 @@
 #include "ATcommands.h"
 #include "client.h"
 
+
 byte dataMode = 0;
 char fixATchar(char c)
 {
@@ -19,7 +20,7 @@ char fixATchar(char c)
     return c;
 }
 
-String SendAT(String str, int Timeoutms = 1000, SoftwareSerial *AT = nullptr)
+String SendAT(String str, unsigned long Timeoutms = 1000, SoftwareSerial *AT = nullptr)
 {
     // sends a string to the AT serial and then returns the reponse
     static SoftwareSerial *_AT;
@@ -111,13 +112,14 @@ byte waitForATResponse(unsigned int maxTimeoutSec)
 }
 void setModemAPN()
 {
-    SendAT((String)SET_APN_CMD + "=" + APN_NAME);
+    dbg(SendAT((String)SET_APN_CMD + "=" + APN_NAME,APN_TASK_MAX_RESPONSE_TIME_SEC*1000));
+    
 }
 void resetModemAndWait()
 {
     dbg("Rebooting might take some time");
     rebootModem();
-    String res = SendAT("", 1000);
+    String res = SendAT("", 30*1000);
     while (res.indexOf("SMS ") == -1 && res.indexOf("OK") == -1)
     { // while not responding
         //try again each 3 seconds
@@ -142,9 +144,10 @@ byte BringUpGPRSConnection(){
 }
 void initialModem(SoftwareSerial *AT)
 {
+    dbg("initializing modem!");
     SendAT("AT", 0, AT); // assign the object as static in the function
     // should bring the modem from any status to 3 which is IP GPRSACT
-    for( byte tries = 255;--tries > 0;/*SEGA*/)
+    for( byte tries = 1;--tries > 0;/*SEGA*/)
     {
         if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
@@ -152,9 +155,12 @@ void initialModem(SoftwareSerial *AT)
             return;
         }
         byte status = checkModemStatus();
+        dbg("status is:" + (String)status);
         if (status == 3)
             break;
         setModemAPN();
+        status = checkModemStatus();
+        dbg("status is:" + (String)status);
         status = checkModemStatus();
         if (status != 1){
             dbg("status is:" + (String)status);
@@ -167,7 +173,7 @@ void initialModem(SoftwareSerial *AT)
 }
 inline void rebootModem()
 {
-    SendAT(REBOOT_MODEM_CMD, 30 * 1000);
+    SendAT(REBOOT_MODEM_CMD);
 }
 void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT){
     Serial.println(
@@ -181,7 +187,6 @@ void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT){
         F("***********************************************************"));
     while (1)
     {
-
         while (Serial.available())
         {
             char c = Serial.read();
@@ -215,6 +220,8 @@ int main()
 
     // dbg(SendAT(TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER));
     // dataMode = 1;
+    // SendAT("AT", 0, &SerialAT); // assign the object as static in the function
+
     startInteractiveConsoleWithModem(SerialAT);
 
     return 0;

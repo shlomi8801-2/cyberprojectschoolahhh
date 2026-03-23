@@ -15,7 +15,7 @@
 
 void changeModemPowerStart(byte state);
 void rebootModem();
-String SendAT(String str,int Timeout,SoftwareSerial* AT);
+String SendAT(String str,unsigned long Timeoutms,SoftwareSerial* AT);
 byte checkModemStatus();
 byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);
@@ -32,7 +32,6 @@ void toggleLed()
 template <class T>
 inline void dbg(T str){
     #ifdef debug
-    //print to serial console
     Serial.println(str);
     Serial.flush();
     #endif

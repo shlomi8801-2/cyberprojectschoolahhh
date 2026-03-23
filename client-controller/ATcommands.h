@@ -23,3 +23,4 @@
 #define ENTER_DATA_MODE_CMD "AT+CIPSEND" // data received as normal 8 bit each time and at every sent data it has to add 0x1a to execute the message sending
 
 #define DEFAULT_TIMEOUT_SEC 5
+#define APN_TASK_MAX_RESPONSE_TIME_SEC 120
