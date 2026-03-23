@@ -131,7 +131,8 @@ byte BringUpGPRSConnection(){
     //must be in status 1 or 2 before
     //output should be either 0 or 1 0 means it failed to connect 1 means it connected
     dbg("trying to use mobile data");
-        SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS, 65000);
+        SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS);
+        SendAT("",65000); // the BRING_UP_WIRELESS_CONNECTION_GPRS returnes an output when it gets it but its not the response after that returns the response then waiting for it like that
         byte status = checkModemStatus();
         dbg("status is:" + (String)status);
         // finally
@@ -147,27 +148,26 @@ void initialModem(SoftwareSerial *AT)
     dbg("initializing modem!");
     SendAT("AT", 0, AT); // assign the object as static in the function
     // should bring the modem from any status to 3 which is IP GPRSACT
-    for( byte tries = 1;--tries > 0;/*SEGA*/)
+    for( byte tries = 2;--tries > 0;/*SEGA*/)
     {
         if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
             dbg("module not responding");
             return;
         }
+        sleep(1000);
         byte status = checkModemStatus();
-        dbg("status is:" + (String)status);
         if (status == 3)
             break;
+        dbg("setting apn");
         setModemAPN();
-        status = checkModemStatus();
-        dbg("status is:" + (String)status);
         status = checkModemStatus();
         if (status != 1){
             dbg("status is:" + (String)status);
             resetModemAndWait();
             continue; // re run this block
         }
-       BringUpGPRSConnection();
+        if (BringUpGPRSConnection()) break;
     }
     dbg("modem initionlized!");
 }
