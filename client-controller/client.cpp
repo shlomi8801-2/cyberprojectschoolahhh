@@ -64,7 +64,7 @@ byte checkModemStatus()
     {
 
         const String res = SendAT(GET_CURR_STATUS_CMD);
-        static const char *const modemStatues[] = {"IP INITIAL", "IP START", "IP CONFIG", "IP GPRSACT", "IP STATUS", " CONNECTING", "SERVER LISTENING", "CONNECT OK", " CLOSING", " CLOSED", "PDP DEACT", "IP PROCESSING"};
+        static const char *const modemStatues[] = {"IP INITIAL", "IP START", "IP CONFIG", "IP GPRSACT", "IP STATUS", " CONNECTING", "SERVER LISTENING", "CONNECT OK", " CLOSING", " CLOSED", "PDP DEACT", "IP PROCESSING","ERROR"};
         // const char * currStatus = nullptr; // const data in pointer but not the pointer
         byte currStatus = ~0;
         for (int i = 0; i < sizeof(modemStatues) / sizeof(modemStatues[0]); ++i)
@@ -74,7 +74,7 @@ byte checkModemStatus()
                 return i;
             }
         }
-        dbg((String)res + " status not defined");
+        dbg((String)res + "status not defined");
         sleep(1000);
     }
 
@@ -93,6 +93,7 @@ byte checkModemStatus()
     // 9 TCP CLOSED/UDP CLOSED
     // 10 PDP DEACT
     // 11 IP PROCESSING
+    // 12 the modem responded with ERROR
 }
 byte waitForATResponse(unsigned int maxTimeoutSec)
 {
@@ -160,7 +161,7 @@ void initialModem(SoftwareSerial *AT)
         }
         sleep(1000);
         byte status = checkModemStatus();
-        if (status == 3)
+        if (status == 3 || status == 4)
             break;
         dbg("setting apn");
         setModemAPN();
@@ -227,7 +228,7 @@ int main()
     DDRB |= 1 << PORTB5;
     Serial.begin(115200);
 
-    SoftwareSerial SerialAT(14, 15); // connect the rxd of the modem to port 14(A0) and the txd to port 15(A1)
+    SoftwareSerial SerialAT(MODEM_RDX_PORT, MODEM_TDX_PORT); 
     initialModem(&SerialAT);
 
     // dbg(SendAT(TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER));
