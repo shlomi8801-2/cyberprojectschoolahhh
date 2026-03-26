@@ -135,7 +135,7 @@ byte BringUpGPRSConnection(){
     //output should be either 0 or 1 0 means it failed to connect 1 means it connected
     dbg("trying to use mobile data");
         SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS);
-        SendAT("",65000); // the BRING_UP_WIRELESS_CONNECTION_GPRS returnes an output when it gets it but its not the response after that returns the response then waiting for it like that
+        SendAT("AT",65000); // the BRING_UP_WIRELESS_CONNECTION_GPRS returnes an output when it gets it but its not the response after that returns the response then waiting for it like that
         byte status = checkModemStatus();
         dbg("status is:" + (String)status);
         // finally
@@ -227,7 +227,7 @@ int main()
     DDRB |= 1 << PORTB5;
     Serial.begin(115200);
 
-    SoftwareSerial SerialAT(2, 3); // connect the rxd to port 3 and the txd to port 2
+    SoftwareSerial SerialAT(14, 15); // connect the rxd of the modem to port 14(A0) and the txd to port 15(A1)
     initialModem(&SerialAT);
 
     // dbg(SendAT(TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER));

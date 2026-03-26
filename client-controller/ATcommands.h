@@ -16,7 +16,7 @@
 #define SET_APN_CMD "AT+CSTT" // add = at the end to set the apn 5.2.27
 #define SET_SERIAL_SPEED_CMD "AT+IPR" // use as AT+IPR=<rate> 2.2.32
 #define SET_MODEM_FUNCTIONALITY_CMD "AT+CFUN" //3.2.19
-#define REBOOT_MODEM_CMD "AT+CFUN=6" // AT+CIPSHUT maybe this changes pdp deact to normal
+#define REBOOT_MODEM_CMD "AT+CFUN=6"
 #define RESET_PDP_DEACT_STATE_CMD "AT+CIPSHUT"
 #define GET_LOCAL_IP_ADDRESS_CMD "AT+CIFSREX" //8.2.12
 #define TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER "AT+CIPSTART=\"TCP\",\"45.79.112.203\",4242" //https://tcpbin.com
