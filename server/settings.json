@@ -22,7 +22,7 @@
     "client": {
         "ip": "127.0.0..1",
         "port":1234,
-        "encoding":"utf-8",
+        "encoding":"utf-8", //default
         "header_size":4 //bytes
     }
 }
