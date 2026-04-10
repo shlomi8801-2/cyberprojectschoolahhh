@@ -10,6 +10,10 @@
 #define AT_CONSOLE_SPEED 115200
 #define MODEM_RDX_PORT 14 // connect the rxd of the modem to port 14(A0) and the txd to port 15(A1)
 #define MODEM_TDX_PORT 15
+#define SERVER_IP "192.168.161.170"
+#define SERVER_PORT 1234
+
+
 
 #define GET_SUBSCRIPTION_NUMBER "AT+CNUM"
 #define TEST_COMMAND "AT"
@@ -25,6 +29,7 @@
 #define RESET_PDP_DEACT_STATE_CMD "AT+CIPSHUT"
 #define GET_LOCAL_IP_ADDRESS_CMD "AT+CIFSREX" //8.2.12
 #define TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER "AT+CIPSTART=\"TCP\",\"45.79.112.203\",4242" //https://tcpbin.com
-#define TCP_CONNECT_TO_SERVER_CMD "AT+CIPSTART=\"TCP\",\"192.168.161.170\",\"1234\"" // must be at IP STATUS state witch executed by using AT+CIFSR 
+#define CONNECT_TO_SERVER_CMD "AT+CIPSTART"// must be at IP STATUS state witch executed by using AT+CIFSR, send with args for like this ...="<TCP/UDP>"","<host>",<port> 
+#define CONNECT_CMD_MAX_TIMEOUT_SEC 160
 #define ENTER_DATA_MODE_CMD "AT+CIPSEND" // data received as normal 8 bit each time and at every sent data it has to add 0x1a to execute the message sending
 

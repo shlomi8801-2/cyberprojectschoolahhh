@@ -4,31 +4,30 @@
 #define __AVR_ATmega328P__ // required for intellesense to work because avr/io.h adds the current module
 #endif
 #include <avr/io.h>
-// #include <avr/iom328p.h>
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 #include <util/delay.h>
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
 #include "ATcommands.h"
 #define debug
+#include <SoftwareSerial.h>
 
 
-void changeModemPowerStart(byte state);
-void rebootModem();
-String SendAT(String str,unsigned long Timeoutms,SoftwareSerial* AT);
-byte checkModemStatus();
-byte waitForATResponse(unsigned int maxTimeout);
-void initialModem(SoftwareSerial* AT);
 
 
+inline void(* resetFunc) (void) = 0; //declare reset function @ address 0 - jumps to address 0 in the program written to board
+inline void toggleLed()
+{
+    PORTB ^= 1 << PORTB5;
+}
+inline void stopProgram(){
+    toggleLed();
+    exit(0);
+}
 inline void sleep(unsigned int ms)
 { // inline because _delay_ms throws error when its non inline function
     _delay_ms(ms);
 }
-void toggleLed()
-{
-    PORTB ^= 1 << PORTB5;
-}
+
 template <class T>
 inline void dbg(T str){
     #ifdef debug
