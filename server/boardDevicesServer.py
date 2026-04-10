@@ -33,7 +33,7 @@ def expirId(_id:str)->None:
     
 def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     #msg is the message after the parsedata function applied to it
-    #when gettings register will generate unique id and password both will be sent to the controller
+    #when gettings register message it will generate unique id and password both will be sent to the controller
     #the controller must send the id and password back in order to complete the registration
     #the password will be saved as hash in the database
     #the id as unique key
@@ -104,6 +104,7 @@ def indentifyClient(clientSock:client_coms.clientSock):
                 break
 def listen(host:str,port:int)->None:
     #Reg - to register client to the database and give unique id
+    #Con - connect login the client
     #Action - tell the controller what to do on what pins
     #list - give the device details like available pins
     server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# ipv4,tcp
