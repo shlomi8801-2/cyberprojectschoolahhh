@@ -19,6 +19,7 @@ int main()
     SoftwareSerial SerialAT(MODEM_RDX_PORT, MODEM_TDX_PORT); 
     initialModem(&SerialAT);
     conncectToSerevr();
+    //here after you achive a connection in single ip mode(default) you either send data or just in a loop waiting for data to be sent(data is pushed without warning)
     
     startInteractiveConsoleWithModem(SerialAT);
 
