@@ -8,7 +8,7 @@
 #define DEFAULT_TIMEOUT_SEC 5
 #define APN_TASK_MAX_RESPONSE_TIME_SEC 120
 #define AT_CONSOLE_SPEED 115200
-#define MODEM_RDX_PORT 14 // connect the rxd of the modem to port 14(A0) and the txd to port 15(A1)
+#define MODEM_RDX_PORT 14 // connect the txd of the modem to port 14(A0) and the rxd to port 15(A1)
 #define MODEM_TDX_PORT 15
 #define SERVER_IP "192.168.161.170"
 #define SERVER_PORT 1234

@@ -136,6 +136,7 @@ void initialModem(SoftwareSerial *AT)
         if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
             dbg("module not responding");
+            stopProgram();
             return;
         }
         sleep(1000);
