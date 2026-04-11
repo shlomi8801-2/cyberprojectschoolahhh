@@ -1,7 +1,7 @@
 #pragma once
 #include "modemCore.h"
-#include "dict.h"
+#include <Hashtable.h>
 void registerClient();
 void loginClient();
-dict parseData(String data);
-String buildData(dict data);
+Hashtable<String,String> parseData(String data);
+String buildData(Hashtable<String,String> data);
