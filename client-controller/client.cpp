@@ -10,9 +10,20 @@
 
 
 
-
+#include <Hashtable.h>
 int main()
 {
+    Hashtable<String,String> test;
+    test.put("a","b");
+    for(auto i:test){
+        dbg(i.key);
+        dbg(i.value);
+
+    }
+
+
+
+
     sei(); // start listening to interrupts
     DDRB |= 1 << PORTB5; // sets builtin led to output mode
     Serial.begin(115200);
