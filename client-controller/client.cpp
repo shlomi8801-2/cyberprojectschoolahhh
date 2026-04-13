@@ -15,8 +15,7 @@ int main()
 {
     Serial.begin(115200);
     
-    Hashtable test(10);
-
+    Hashtable test;
     test["a"]="b";
     test["e"]="123";
     // test["a"]="6";

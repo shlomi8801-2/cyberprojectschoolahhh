@@ -1,24 +1,23 @@
 #include <Hashtable.h>
 
     String& Hashtable::operator[](const String str){
-        for(auto i:container){
-            if(i->key.equals(str)){
-                return i->value;
+
+        for(auto i=0;i<container.size();i++){
+            if(container[i]->key.equals(str)){
+                return container[i]->value;
             }
         }
         Pair* tmp = (Pair*)malloc(sizeof(Pair));
         tmp->key=str;
-        container.push_back(tmp);
+        container.add(tmp);
         return tmp->value;
     }
-    Hashtable::Hashtable(int _size=10) {
-        storage = (Pair**)malloc(sizeof(Pair*)*_size);
-        container.setStorage(storage,this->StorageSize,0);
-    }
+    Hashtable::Hashtable() {}
         const String Hashtable::ToString(){
             String output = "{\n";
-            for(auto i:*this){
-                output +="\t"+i->key+":\""+i->value+"\",\n";
+                    for(auto i=0;i<container.size();i++){
+
+                output +="\t"+container[i]->key+":\""+container[i]->value+"\",\n";
             }
             output +="}";
             return output;
