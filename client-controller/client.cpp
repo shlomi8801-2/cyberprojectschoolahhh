@@ -13,16 +13,16 @@
 
 int main()
 {
-    
     Serial.begin(115200);
+    
     Hashtable test(10);
 
-    test["a"].value="b";
-    for(auto i:test){
-        dbg("see this");
-        dbg(test["a"].value);
-        // dbg(i->value);
-    }
+    test["a"]="b";
+    test["e"]="123";
+    // test["a"]="6";
+    // dbg(test["a"]);
+    dbg(test["a"].length());
+
 
 
 
