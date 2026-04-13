@@ -17,11 +17,11 @@ int main()
     Serial.begin(115200);
     Hashtable test(10);
 
-    test["a"]="b";
+    test["a"].value="b";
     for(auto i:test){
         dbg("see this");
-        dbg(test["a"]);
-        dbg(i->value);
+        dbg(test["a"].value);
+        // dbg(i->value);
     }
 
 

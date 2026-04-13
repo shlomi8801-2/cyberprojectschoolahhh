@@ -10,7 +10,7 @@ class Hashtable{
     Pair* storage[10];
     Vector<Pair*> container;
     public:
-    String& operator[](const String str);
+    Pair& operator[](const String str);
     inline VectorIterator<Pair*> begin() noexcept { return container.begin(); }
     inline VectorIterator<Pair*> end() noexcept { return container.end(); }
     Hashtable(int _size);
