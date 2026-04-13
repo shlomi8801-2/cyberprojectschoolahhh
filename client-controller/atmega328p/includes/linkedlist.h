@@ -29,10 +29,10 @@ protected:
 	ListNode<T>* findEndOfSortedString(ListNode<T> *p, int (*cmp)(T &, T &));
 
 public:
+	
 	LinkedList();
 	LinkedList(int sizeIndex, T _t); //initiate list size and default value
 	virtual ~LinkedList();
-
 	/*
 		Returns current size of LinkedList
 	*/
@@ -94,7 +94,13 @@ public:
 	inline T& operator[](size_t& i) { return this->get(i); }
   	inline const T& operator[](const size_t& i) const { return this->get(i); }
 	
-	
+	void* operator new(size_t size) { return malloc(size); }
+	void* operator new[](size_t size) { return malloc(size); }
+	void operator delete(void* ptr) noexcept { free(ptr); }
+	void operator delete[](void* ptr) noexcept { free(ptr); }
+
+	void operator delete(void* ptr, size_t size) noexcept { free(ptr); }
+	void operator delete[](void* ptr, size_t size) noexcept { free(ptr); }
 
 };
 
