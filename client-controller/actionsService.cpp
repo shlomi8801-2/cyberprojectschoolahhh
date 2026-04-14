@@ -80,8 +80,8 @@ void RegisterToServer(){
     dbg("sending REG");
     String cmd((char*)buildData(test));
     
-    SendAT(cmd,0);
-    SendAT((String)(0x1a),1);
+    SendAT("hello world",0);
+    SendAT((String)(char)(0x1a));
     
 }
 void ConnectToServer();
