@@ -9,8 +9,10 @@ if [ $# -eq 0 ]; then #no input arguments given
 # echo "$(find atmega328p/includes/. -type f -iregex ".*\.cpp") $(find atmega328p/includes/. -type f -iregex ".*\.c") $FLAGS"
 avr-g++ *.cpp $(find atmega328p/includes/. -type f -regextype awk -regex ".*\.(c|cpp)$") $FLAGS || exit
 avr-objcopy main -O ihex main.hex || exit
+SIZE=$(avr-size main | tail -1)
 rm ./main;
-fileSize="$(du --apparent-size --block-size=1  "main.hex" | awk '{ print $1}')"
+
+fileSize=$(($(($(echo $SIZE | cut -d " " -f 1))) +$(($(echo $SIZE | cut -d " " -f 2))) ))
 echo "sketch hex file size: $fileSize" &&
 if ((fileSize < 30720)); then
 avrdude -C atmega328p/prog.conf -v -p atmega328p -carduino -P $ARDUINOPORT -b 115200 -D -U flash:w:./main.hex:i;
