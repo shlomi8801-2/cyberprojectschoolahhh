@@ -1,9 +1,10 @@
 #pragma once
-#include "client.h"
+#include <client.h>
+#include "ATcommands.h"
 
 void changeModemPowerStart(byte state);
 void rebootModem();
-String SendAT(String str,unsigned long Timeoutms,SoftwareSerial* AT);
+String SendAT(String str,unsigned long Timeoutms = 1000, SoftwareSerial *AT = nullptr);
 byte checkModemStatus();
 byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);

@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <util/delay.h>
 // #include <eeprom.h> // used to use the arduino rom(as much as i know)
-#include "ATcommands.h"
+// #include "ATcommands.h"
 #define debug
 #include <SoftwareSerial.h>
 

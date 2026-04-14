@@ -50,21 +50,39 @@ Hashtable parseData(byte* data,int size){
 //         return output;
 // }
 
-byte* buildData(Hashtable data,int* outputSize){
+byte* buildData(Hashtable data){
     //use HEADER_SIZE bytes for the length of the value
     // for 2^(8*HEADER_SIZE) of data support
     // takes the dict and turns into a simple string then bytearray
-    byte* output = new byte[4];
+    byte* output =  (byte*)malloc(sizeof(byte)*4);
+    unsigned int outputSize=4;
     unsigned int idx=0;
     for (auto i: data){
         output[idx++]=0;
         output[idx++]=0;//because int is 2 bytes in the arduino im using i set the first 2 to 0
         output[idx++]=i.key.length(); // writing 2 bytes i think(using buffer overflow)
-        *outputSize +=i.key.length();
-        realloc(output,*outputSize);
+        outputSize +=i.key.length();
+        realloc(output,outputSize);
         for(auto c :i.value){
             output[idx++]=c;
         }
     }
+    realloc(output,outputSize+1);
+    output[idx]=0;//ending char
     return output;
 }
+
+void RegisterToServer(){
+    dbg("registering to server");
+    SendAT(ENTER_DATA_MODE_CMD);
+    Hashtable test;
+    test["type"]="REG";
+    dbg("sending REG");
+    String cmd((char*)buildData(test));
+    
+    SendAT(cmd,0);
+    SendAT((String)(0x1a),1);
+    
+}
+void ConnectToServer();
+void StartConnectionToServer();

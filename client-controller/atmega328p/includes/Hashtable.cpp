@@ -1,4 +1,5 @@
 #include <Hashtable.h>
+#include <client.h>
 
     String& Hashtable::operator[](const String str){
 
@@ -9,7 +10,8 @@
         }
         Pair* tmp = (Pair*)malloc(sizeof(Pair));
         if (tmp == nullptr){
-            
+            dbg("unable to allocate memory for hashtable!");
+            stopProgram();
         }
         tmp->key=str;
         container.add(tmp);

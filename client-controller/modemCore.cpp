@@ -1,5 +1,6 @@
 #include "modemCore.h"
-String SendAT(String str, unsigned long Timeoutms = 1000, SoftwareSerial *AT = nullptr)
+
+String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT)
 {
     // sends a string to the AT serial and then returns the reponse
     static SoftwareSerial *_AT;
@@ -12,7 +13,8 @@ String SendAT(String str, unsigned long Timeoutms = 1000, SoftwareSerial *AT = n
     }
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
-    dbg(">> " + str);
+    if (1)
+        dbg<String>(">> " + (String)str);
     _AT->println(str);
     _AT->flush();
 
