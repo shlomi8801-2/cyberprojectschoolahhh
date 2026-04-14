@@ -68,7 +68,7 @@ byte* buildData(Hashtable data){
         }
     }
     realloc(output,outputSize+1);
-    output[idx]=0;//ending char
+    output[idx]=254;//ending char
     return output;
 }
 

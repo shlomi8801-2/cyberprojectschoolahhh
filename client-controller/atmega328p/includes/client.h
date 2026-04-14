@@ -35,3 +35,12 @@ inline void dbg(T str){
     Serial.flush();
     #endif
 }
+inline String ShowBytes(byte* arr,unsigned int size=0){
+    String output="";
+    size = size==0? strlen((char*)arr):size;
+    for(unsigned int i=0;i<size;i++){
+        output += (int)arr[i]+" ";
+        dbg((int)arr[i]);
+    }
+    return output;
+}
