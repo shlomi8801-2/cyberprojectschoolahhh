@@ -24,13 +24,15 @@ int main()
     byte* data =buildData(test);
     dbg((String)"size=");
     
-    // test = parseData(data+HEADER_SIZE_BYTES,*(unsigned long*)data);
-    // for (auto i:test){
-    //     dbg(i.key);
-    //     dbg(i.value);
-    // }
-    for(int i=0;i<*(long*)data;i++)
-        dbg((String)data[i]+" ",0);
+    dbg(getValue(data+4));
+    dbg(getValue(data+9));
+    test = parseData(data+HEADER_SIZE_BYTES,*(unsigned long*)data);
+    for (auto i:test){
+        dbg(i.key);
+        dbg(i.value);
+    }
+    // for(int i=0;i<*(long*)data;i++)
+    //     dbg((String)data[i]+" ",0);
     // for(auto c :(String)"a"){
     //         dbg(c);
     //     }

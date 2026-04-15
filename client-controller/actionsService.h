@@ -7,7 +7,7 @@ void loginClient();
 String getValue(byte* data);   
 byte* ToByteArr(String data,int* OutputSize);
 
-Hashtable parseData(byte* data,long size);
+Hashtable parseData(byte* data,unsigned long size);
 byte* buildData(Hashtable data);
 void RegisterToServer();
 void ConnectToServer();
