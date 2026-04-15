@@ -19,11 +19,18 @@
     Hashtable::Hashtable() {}
         const String Hashtable::ToString(){
             String output = "{\n";
-                    for(auto i=0;i<container.size();i++){
+                    // for(auto i=0;i<container.size();i++){
 
-                output +="\t"+container[i]->key+":\""+container[i]->value+"\",\n";
-                output +="\t"+(String)(int)&(container[i]->key)+":\""+(String)(int)&(container[i]->value)+"\",\n";
+                // output +="\t"+container[i]->key+":\""+container[i]->value+"\",\n";
+                // output +="\t"+(String)(int)&(container[i]->key)+":\""+(String)(int)&(container[i]->value)+"\",\n";
 
+            // }
+            for (auto i:*this){
+                output += "\t";
+                output+=i.key;
+                output += ":\"";
+                output+=i.value;
+                output += "\",\n";
             }
             output +="}";
             return output;

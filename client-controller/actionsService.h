@@ -4,10 +4,10 @@
 void registerClient();
 void loginClient();
 
-String getValue(byte* data);   
+String getValue(byte* data,int& CurrentIdx);   
 byte* ToByteArr(String data,int* OutputSize);
 
-Hashtable parseData(byte* data,unsigned long size);
+Hashtable parseData(byte* data);
 byte* buildData(Hashtable data);
 void RegisterToServer();
 void ConnectToServer();

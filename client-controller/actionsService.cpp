@@ -7,35 +7,35 @@ void registerClient(){
 void loginClient(){
 
 }
-    String getValue(byte* data){
+    String getValue(byte* data,int& CurrentIdx){
     unsigned long currSize =0;
         //get the size of the value
         // cout<<currSize;
         for (int _ =0; _<HEADER_SIZE_BYTES;_++){ //HEADER_SIZE_BYTES must be under 5
             currSize += data[0]<<sizeof(data[0])*(_);
-            data++;
+            ++data;
         }
         // data++; //skip the encode bit for now
         //read the value
         String output = "";
         for(long _=0;_<currSize;_++){
             output +=(char)*data;
-            data++;
+            ++data;
         }
         return output;
 }
-Hashtable parseData(byte* data,unsigned long size){
+Hashtable parseData(byte* data){
     //byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
     //encoded means is the data bin or chars
     //the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
     Hashtable output;
-    
-    for(int i =0;i<size;i++){
-        String key =getValue(data);
+    for(int i =HEADER_SIZE_BYTES;i<*(unsigned long*)data;i++){
+        String key =getValue(data+i,i);
         i+=key.length();
-        String value =getValue(data+i);
-        i+=key.length();
-
+        i+=HEADER_SIZE_BYTES;
+        String value =getValue(data+i,i);
+        i+=HEADER_SIZE_BYTES;
+        i+=value.length();
         output[key]=value;
     }
     return output;
