@@ -29,9 +29,12 @@ inline void sleep(unsigned int ms)
 }
 
 template <class T>
-inline void dbg(T str){
+inline void dbg(T str,bool nl=1){
     #ifdef debug
+    if( nl)
     Serial.println(str);
+    else
+    Serial.print(str);
     Serial.flush();
     #endif
 }

@@ -17,25 +17,23 @@ int main()
     Serial.begin(115200);
     dbg("program started!");
     Hashtable test;
-    test["hello"] = "REG";
-    test["Sega"]="sonic";
+    // test["hello"] = "REG";
+    // test["Sega"]="sonic";
     test["a"]="b";
     
     byte* data =buildData(test);
     dbg((String)"size=");
-    dbg(*(long*)data);
-    // for(int i=0;i<8;i++){
-    //     dbg(i);
-    //     dbg((byte)data[i]);
-        
-    // }
-    dbg((unsigned int)data[4]);
     
     // test = parseData(data+HEADER_SIZE_BYTES,*(unsigned long*)data);
     // for (auto i:test){
     //     dbg(i.key);
     //     dbg(i.value);
     // }
+    for(int i=0;i<*(long*)data;i++)
+        dbg((String)data[i]+" ",0);
+    // for(auto c :(String)"a"){
+    //         dbg(c);
+    //     }
     dbg("done");
     
 

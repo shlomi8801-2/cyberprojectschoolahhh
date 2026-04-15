@@ -62,33 +62,48 @@ byte* buildData(Hashtable data){
     //use HEADER_SIZE bytes for the length of the value
     // for 2^(8*HEADER_SIZE) of data support
     // takes the dict and turns into a simple string then bytearray
-    byte* output =  (byte*)calloc(sizeof(char)*HEADER_SIZE_BYTES,1);
-    unsigned int outputSize=HEADER_SIZE_BYTES;
+    byte* output =  (byte*)calloc(sizeof(char)*HEADER_SIZE_BYTES,2);
+    unsigned int outputSize=sizeof(char)*HEADER_SIZE_BYTES*2;
     unsigned int idx=HEADER_SIZE_BYTES;
     for (auto i:data){
-        clearNextBytes(output,HEADER_SIZE_BYTES);
+        clearNextBytes(output+idx,HEADER_SIZE_BYTES);
         output[idx]=i.key.length(); // using buffer overflow
+        // for(int x=0;x<outputSize;x++)
+        //     dbg((String)output[x]+" ",0);
+        //     dbg("",1);
         idx +=HEADER_SIZE_BYTES;
         outputSize +=i.key.length()+HEADER_SIZE_BYTES;
+        
         output = (byte*)realloc(output,outputSize);
+         
         for(auto c :i.key){
             output[idx++]=c;
         }
+       
+        
+        
         
         // idx +=1; adding encoding bit
         // outputSize+=1;
         
-        clearNextBytes(output,HEADER_SIZE_BYTES);
+        clearNextBytes(output+idx,HEADER_SIZE_BYTES);
+        
         output[idx]=i.value.length(); // using buffer overflow
+        
         idx +=HEADER_SIZE_BYTES;
+        
         outputSize +=i.value.length()+HEADER_SIZE_BYTES;
         output = (byte*)realloc(output,outputSize);
+        
         for(auto c :i.value){
             output[idx++]=c;
         }
+        
     }
-    output = (byte*)realloc(output,outputSize-HEADER_SIZE_BYTES);
-    output[0] = outputSize;
+    outputSize -= HEADER_SIZE_BYTES;
+    output = (byte*)realloc(output,outputSize);
+    *(unsigned long*)output = outputSize;
+    
     return output;
 }
  
