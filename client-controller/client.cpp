@@ -22,16 +22,21 @@ int main()
     test["a"]="b";
     
     byte* data =buildData(test);
-    // dbg((String)"size=");
-    // for(int i=0;i<*(long*)data;i++){
-    //     dbg((int)data[i]);
+    dbg((String)"size=");
+    dbg(*(long*)data);
+    // for(int i=0;i<8;i++){
+    //     dbg(i);
+    //     dbg((byte)data[i]);
+        
     // }
-    test = parseData(data+HEADER_SIZE_BYTES,*(long*)data);
-    for (auto i:test){
-        dbg(i.key);
-        dbg(i.value);
-    }
-
+    dbg((unsigned int)data[4]);
+    
+    // test = parseData(data+HEADER_SIZE_BYTES,*(unsigned long*)data);
+    // for (auto i:test){
+    //     dbg(i.key);
+    //     dbg(i.value);
+    // }
+    dbg("done");
     
 
 
