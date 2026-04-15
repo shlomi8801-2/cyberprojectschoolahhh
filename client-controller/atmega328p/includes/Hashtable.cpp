@@ -2,13 +2,12 @@
 #include <client.h>
 
     String& Hashtable::operator[](const String str){
-
         for(auto i=0;i<container.size();i++){
             if(container[i]->key.equals(str)){
                 return container[i]->value;
             }
         }
-        Pair* tmp = (Pair*)malloc(sizeof(Pair));
+        Pair* tmp = (Pair*)calloc(sizeof(Pair),1);
         if (tmp == nullptr){
             dbg("unable to allocate memory for hashtable!");
             stopProgram();

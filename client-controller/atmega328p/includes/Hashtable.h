@@ -25,7 +25,7 @@ class Hashtable{
 
     };
     inline Iterator begin(){ return Iterator(0,&container);}
-inline Iterator end(){ return Iterator(length()-1,&container);}
+inline Iterator end(){ return Iterator(length(),&container);}
     // inline Iteator<Pair> begin() noexcept { return container.begin(); }
     // inline VectorIterator<Pair> end() noexcept { return container.end(); }
     Hashtable();

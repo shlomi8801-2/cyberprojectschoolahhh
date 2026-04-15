@@ -7,19 +7,19 @@ void registerClient(){
 void loginClient(){
 
 }
-String getValue(byte* data){
+    String getValue(byte* data){
     long currSize =0;
         //get the size of the value
-        for (byte _ =0; _<HEADER_SIZE_BYTES;_++){ //HEADER_SIZE_BYTES must be under 5
-            currSize += data[0];
-            currSize <<= 8; // move 1 byte
+        // cout<<currSize;
+        for (int _ =0; _<HEADER_SIZE_BYTES;_++){ //HEADER_SIZE_BYTES must be under 5
+            currSize += data[0]<<sizeof(data[0])*(_);
             data++;
         }
-        data++; //skip the encode bit for now
+        // data++; //skip the encode bit for now
         //read the value
         String output = "";
         for(long _=0;_<currSize;_++){
-            output +=(char)data[0];
+            output +=*data;
             data++;
         }
         return output;
@@ -54,23 +54,33 @@ byte* buildData(Hashtable data){
     //use HEADER_SIZE bytes for the length of the value
     // for 2^(8*HEADER_SIZE) of data support
     // takes the dict and turns into a simple string then bytearray
-    byte* output =  (byte*)malloc(sizeof(byte)*4);
-    unsigned int outputSize=4;
-    unsigned int idx=0;
-    for (auto i: data){
-        output[idx++]=0;
-        output[idx++]=0;//because int is 2 bytes in the arduino im using i set the first 2 to 0
-        output[idx++]=i.key.length(); // writing 2 bytes i think(using buffer overflow)
-        outputSize +=i.key.length();
-        realloc(output,outputSize);
+    byte* output =  (byte*)calloc(sizeof(char)*HEADER_SIZE_BYTES,1);
+    unsigned int outputSize=HEADER_SIZE_BYTES;
+    unsigned int idx=HEADER_SIZE_BYTES;
+    for (auto i:data){
+        output[idx]=i.key.length(); // writing 2 bytes i think(using buffer overflow)
+        idx +=HEADER_SIZE_BYTES;
+        outputSize +=i.key.length()+HEADER_SIZE_BYTES;
+        output = (byte*)realloc(output,outputSize);
+        for(auto c :i.key){
+            output[idx++]=c;
+        }
+        dbg((String)i.key+" ");
+        dbg((String)i.value+" ");
+
+        output[idx]=i.value.length(); // writing 2 bytes i think(using buffer overflow)
+        idx +=HEADER_SIZE_BYTES;
+        outputSize +=i.value.length()+HEADER_SIZE_BYTES;
+        output = (byte*)realloc(output,outputSize);
         for(auto c :i.value){
             output[idx++]=c;
         }
     }
-    realloc(output,outputSize+1);
-    output[idx]=254;//ending char
+    output = (byte*)realloc(output,outputSize-HEADER_SIZE_BYTES);
+    output[0] = outputSize;
     return output;
 }
+ 
 
 void RegisterToServer(){
     dbg("registering to server");

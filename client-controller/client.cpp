@@ -19,9 +19,17 @@ int main()
     Hashtable test;
     test["hello"] = "REG";
     test["Sega"]="sonic";
+    test["a"]="b";
+    
     byte* data =buildData(test);
-    while(*data!=254){
-        dbg(*(data++));
+    // dbg((String)"size=");
+    // for(int i=0;i<*(long*)data;i++){
+    //     dbg((int)data[i]);
+    // }
+    test = parseData(data+HEADER_SIZE_BYTES,*(long*)data);
+    for (auto i:test){
+        dbg(i.key);
+        dbg(i.value);
     }
 
     
