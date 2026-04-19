@@ -102,9 +102,9 @@ void RegisterToServer(){
     test["type"]="REG";
     dbg("sending REG");
     // char* cmd = ((char*)buildData(test));
-    char cmd[] = {9,0,0,0,1,0,0,0,97};
+    char cmd[] = {9,0,0,0,1,97,97,97,97};
     dbg((String)"size:"+*(unsigned long*)cmd);
-    SendATArr(cmd,9);
+    dbg(SendATArr(cmd,9));
     SendAT((String)(char)(0x1a));    
 }
 void ConnectToServer();

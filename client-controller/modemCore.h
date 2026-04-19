@@ -9,7 +9,7 @@ String SendAT(String str,unsigned long Timeoutms = 1000, SoftwareSerial *AT = nu
 String SendAT(const char* str, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
 String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
 template <typename T> // support for strings and char arrays
-String SendATHelper(T str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
+String SendATHelper(const T str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
 byte checkModemStatus();
 byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);

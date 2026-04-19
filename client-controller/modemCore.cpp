@@ -9,17 +9,14 @@ String SendAT(const char* str, unsigned long Timeoutms, SoftwareSerial *AT){
     return SendAT((String)str,Timeoutms,AT);
 }
 String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT){
-    for(unsigned long i=0;i<size;i++){
-        dbg((char)str[i]);
-    }
-    return SendATHelper((String)str,size,Timeoutms,AT);
+    return SendATHelper(str,size,Timeoutms,AT);
 }
-
+static SoftwareSerial *_AT;
 template <typename T> // support for strings and char arrays
-String SendATHelper(T str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT)
+String SendATHelper(const T str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT)
 {
     // sends a string to the AT serial and then returns the reponse
-    static SoftwareSerial *_AT;
+    
     if (AT)
     {
         _AT = AT;
@@ -30,7 +27,7 @@ String SendATHelper(T str,unsigned long size, unsigned long Timeoutms, SoftwareS
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
     for(unsigned long i=0;i<size;i++){
-        _AT->print(str[i]);
+        _AT->print((char)str[i]);
     }
     _AT->print("\r\n");
     _AT->flush();
