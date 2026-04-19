@@ -104,10 +104,8 @@ void RegisterToServer(){
     // char* cmd = ((char*)buildData(test));
     char cmd[] = {9,0,0,0,1,0,0,0,97};
     dbg((String)"size:"+*(unsigned long*)cmd);
-    SendATArr(cmd,*(unsigned long*)cmd,0);
-    SendAT((String)(char)(0x1a));
-    SendAT((String)(char)(0x1a));
-    
+    SendATArr(cmd,9);
+    SendAT((String)(char)(0x1a));    
 }
 void ConnectToServer();
 void StartConnectionToServer();

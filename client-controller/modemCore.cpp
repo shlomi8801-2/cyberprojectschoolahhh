@@ -12,7 +12,7 @@ String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms, So
     for(unsigned long i=0;i<size;i++){
         dbg((char)str[i]);
     }
-    return SendATHelper(str,size,Timeoutms,AT);
+    return SendATHelper((String)str,size,Timeoutms,AT);
 }
 
 template <typename T> // support for strings and char arrays
@@ -30,7 +30,7 @@ String SendATHelper(T str,unsigned long size, unsigned long Timeoutms, SoftwareS
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
     for(unsigned long i=0;i<size;i++){
-        _AT->write(str[i]);
+        _AT->print(str[i]);
     }
     _AT->print("\r\n");
     _AT->flush();
