@@ -46,13 +46,10 @@ def parsedata(data: bytearray)->dict:
         #data[something] is the number of the bytes
         val_len = int.from_bytes(data[offset:offset + settings.GetSetting("client.header_size")]) #read settings.HEADER_SIZE bytes and returns a tuple so read the first element
         offset += settings.GetSetting("client.header_size")
-        encoded = int.from_bytes(data[offset:offset+1])#1 byte for the encoded variable
-        offset +=1
         #get the value
-        if encoded == 1:
-            val = data[offset:offset + val_len].decode(settings.GetSetting("client.encoding"))
-        else:
-            val = data[offset:offset + val_len]
+        #always decode because its encoded always string or not
+        val = data[offset:offset + val_len].decode(settings.GetSetting("client.encoding"))
+
         offset += val_len
         #make one key and then assign value
         if len(datastructure) == 0:
@@ -70,16 +67,16 @@ def buildata(data: dict)->bytearray:
     if len(data) ==0:
         raise ValueError(f"Data must be a dict with 1 or 2 items given:{len(data)}")
     for value in [x for y in data.items() for x in y]: #makes a list of keys and values combined
-        encoded = 0
+        # encoded = 0
         if not isinstance(value, (bytes, bytearray)):
-            encoded = 1
+            # encoded = 1
             if not value is str:
                 value=str(value)
             value= bytes(value,settings.GetSetting("client.encoding"))
         datalength = len(value)
         for x in datalength.to_bytes( settings.GetSetting("client.header_size"),'big'):
             output.append(x)
-        output.append(encoded)
+        # output.append(encoded)
         for x in value:
             output.append(x)
     
