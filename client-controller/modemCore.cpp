@@ -8,6 +8,12 @@ String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT){
 String SendAT(const char* str, unsigned long Timeoutms, SoftwareSerial *AT){
     return SendAT((String)str,Timeoutms,AT);
 }
+String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT){
+    for(unsigned long i=0;i<size;i++){
+        dbg((char)str[i]);
+    }
+    return SendATHelper(str,size,Timeoutms,AT);
+}
 
 template <typename T> // support for strings and char arrays
 String SendATHelper(T str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT)
@@ -23,9 +29,9 @@ String SendATHelper(T str,unsigned long size, unsigned long Timeoutms, SoftwareS
     }
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
-
-    for(unsigned long i=0;i<size;i++)
-        _AT->print(str[i]);
+    for(unsigned long i=0;i<size;i++){
+        _AT->write(str[i]);
+    }
     _AT->print("\r\n");
     _AT->flush();
      
@@ -96,6 +102,7 @@ byte waitForATResponse(unsigned int maxTimeoutSec)
     maxTimeoutSec *= 100;
     while (maxTimeoutSec > 0)
     {
+        SendAT((String)(char)(0x1a));
         String res = SendAT((String)"AT", 1000);
         sleep(1000);
         maxTimeoutSec -= 100; // maxtimeout is seconds times 100 so -5 means -50ms
@@ -169,6 +176,9 @@ void initialModem(SoftwareSerial *AT)
                     resetPDPDeact();
                     break;
                 }
+                case 3:
+                case 4:
+                    break;
                 case 255:
                     return;
                 default:

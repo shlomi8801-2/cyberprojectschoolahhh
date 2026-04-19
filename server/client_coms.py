@@ -20,9 +20,13 @@ class clientSock:
         gets the first couple of data for now (type:str:data:dict)"""
         if not self.connected:
             return ()
-        res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
-        res = self.sock.recv(res_len)
+        res_len:bytearray =self.sock.recv(settings.GetSetting("client.header_size"))
+        for x in range(settings.GetSetting("client.header_size")):
+            print(res_len[x])
         print(res_len)
+        res_len = int.from_bytes(res_len,"big") #the first one is without encoded byte which is the length
+        print(res_len)
+        res = self.sock.recv(res_len)
         print(res)
         try:
             output = parsedata(res)

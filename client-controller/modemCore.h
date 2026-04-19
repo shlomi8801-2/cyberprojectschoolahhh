@@ -7,6 +7,7 @@ void rebootModem();
 
 String SendAT(String str,unsigned long Timeoutms = 1000, SoftwareSerial *AT = nullptr);
 String SendAT(const char* str, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
+String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
 template <typename T> // support for strings and char arrays
 String SendATHelper(T str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
 byte checkModemStatus();

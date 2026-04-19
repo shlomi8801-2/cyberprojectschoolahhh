@@ -42,17 +42,7 @@ Hashtable parseData(byte* data){
         
 
 }
-// byte* ToByteArr(String data,int* OutputSize){
-//         if (data.equals("")){
-//             return 0;
-//         }
-//         byte* output = (byte*)malloc(1);
-//         *OutputSize = 0;
-//         for (byte i: data){
-//             output[*OutputSize++] = i;
-//         }
-//         return output;
-// }
+
 
 byte* buildData(Hashtable data){
     //use HEADER_SIZE bytes for the length of the value
@@ -105,14 +95,17 @@ byte* buildData(Hashtable data){
  
 
 void RegisterToServer(){
+
     dbg("registering to server");
     SendAT(ENTER_DATA_MODE_CMD);
     Hashtable test;
     test["type"]="REG";
     dbg("sending REG");
-    String cmd((char*)buildData(test));
-    
-    SendAT("hello world",0);
+    // char* cmd = ((char*)buildData(test));
+    char cmd[] = {9,0,0,0,1,0,0,0,97};
+    dbg((String)"size:"+*(unsigned long*)cmd);
+    SendATArr(cmd,*(unsigned long*)cmd,0);
+    SendAT((String)(char)(0x1a));
     SendAT((String)(char)(0x1a));
     
 }

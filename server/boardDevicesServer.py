@@ -84,7 +84,6 @@ def indentifyClient(clientSock:client_coms.clientSock):
     log.log("got new client!")
     while (not known):
         msg = clientSock.recievecmd() # (type:str,data:dict)
-        log.log(msg)
         if (len(msg) == 0):
             continue
         match (msg[0]): #commands are here
