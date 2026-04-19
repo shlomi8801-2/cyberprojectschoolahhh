@@ -101,11 +101,10 @@ void RegisterToServer(){
     Hashtable test;
     test["type"]="REG";
     dbg("sending REG");
-    // char* cmd = ((char*)buildData(test));
-    char cmd[] = {9,0,0,0,1,97,97,97,97};
+    char* cmd = ((char*)buildData(test));
     dbg((String)"size:"+*(unsigned long*)cmd);
-    dbg(SendATArr(cmd,9));
-    SendAT((String)(char)(0x1a));    
+    dbg(SendATArr(cmd,*(unsigned long*)cmd));
+    SendAT((String)(char)(0x1a));
 }
 void ConnectToServer();
 void StartConnectionToServer();

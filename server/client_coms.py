@@ -15,9 +15,8 @@ class clientSock:
             return
         if (cmdtype and data):
             self.sock.sendall(buildata({cmdtype:buildata(data)}))
-    def recievecmd(self)->tuple:
-        """run in a loop, waits for bytes from the client then parsing it and returning it(as tuple of type and dict)
-        gets the first couple of data for now (type:str:data:dict)"""
+    def recievecmd(self)->dict:
+        """run in a loop, waits for bytes from the client then parsing it and returning it as a dict mostly the first item should be tyoe:<type name>"""
         if not self.connected:
             return ()
         res_len:bytearray =self.sock.recv(settings.GetSetting("client.header_size"))
@@ -26,9 +25,9 @@ class clientSock:
         try:
             output = parsedata(res)
             if (len(output) ==0):
-                return {}
+                return output
                 raise Exception(f"blank after parsing!\n{output}")
-            return list(output.items())[0] #gets the first couple of data for now (type:data)
+            return output #gets the first couple of data for now (type:data)
         except Exception as e:
             #should be a warning not an error
             log.log(f"warning: an error occured reciving data from controller \n{e}")
@@ -36,7 +35,7 @@ class clientSock:
             raise Exception(f"error parsing data!\n{e}")
 
 def parsedata(data: bytearray)->dict:
-    '''byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
+    '''byte array which looks like this <length><data><length2><data2> for exanple:   \x00\x00\x00\x04code\x00\x00\x00\x05abcde
     the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
     DON'T FORGET TO REMOVE THE DATA LENGTH FROM THE START'''
     datastructure = []
@@ -45,12 +44,11 @@ def parsedata(data: bytearray)->dict:
     while offset < len(data):
         #get the length of the key
         #data[something] is the number of the bytes
-        val_len = int.from_bytes(data[offset:offset + settings.GetSetting("client.header_size")]) #read settings.HEADER_SIZE bytes and returns a tuple so read the first element
+        val_len = int.from_bytes(data[offset:offset + settings.GetSetting("client.header_size")],'little') #read settings.HEADER_SIZE bytes and returns a tuple so read the first element
         offset += settings.GetSetting("client.header_size")
         #get the value
         #always decode because its encoded always string or not
         val = data[offset:offset + val_len].decode(settings.GetSetting("client.encoding"))
-
         offset += val_len
         #make one key and then assign value
         if len(datastructure) == 0:

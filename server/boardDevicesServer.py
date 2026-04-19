@@ -13,7 +13,7 @@ connectedClients = dict() # id -> Controller object
 
 def getClients(args:dict,algo:str="exact")->list:
     #all the dict keys MUST be columns in the table in the database
-    if (len(args ==0)):
+    if (len(args) ==0):
         return []
     return database.Search(CARMODULES_TABLE[0],args)
 
@@ -67,14 +67,14 @@ def handleClient(controllerObj:controllersActions.Controller)->None:
         msg = controllerObj.Csock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
             continue
-        match (msg[0]): #commands are here
+        match (msg.get("type","NOTYPE")): #commands are here
             case "PING":
                 pass
             case "LOGOUT":
                 del connectedClients[controllerObj.Id]
                 return
             case _:
-                log.log(f"warning: uknown command {msg[0]}")
+                log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
                 break
     # del connectedClients[controller.Id] #client not connected
 
@@ -86,13 +86,13 @@ def indentifyClient(clientSock:client_coms.clientSock):
         msg = clientSock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
             continue
-        match (msg[0]): #commands are here
+        match (msg.get("type","NOTYPE")): #commands are here
             case "REG":
-                registerClient(clientSock,msg[1])
+                registerClient(clientSock,msg)
                 break
             case "CON": #connect - first message
                 #gets the id from the client and checks password
-                controllerRow = loginClient(msg[1].get("id",""),msg[1].get("password","")) #list of tuples of data
+                controllerRow = loginClient(msg.get("id",""),msg.get("password","")) #list of tuples of data
                 if (len(controllerRow) == 0):
                     continue
                 #logged in
@@ -101,7 +101,7 @@ def indentifyClient(clientSock:client_coms.clientSock):
                 handleClient(controller)
                 return #the controller is not connected anymore
             case _:
-                log.log(f"warning: uknown command {msg[0]}")
+                log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
                 break
 def listen(host:str,port:int)->None:
     #Reg - to register client to the database and give unique id
