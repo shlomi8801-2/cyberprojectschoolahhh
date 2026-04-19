@@ -1,6 +1,16 @@
 #include "modemCore.h"
 
-String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT)
+
+String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT){
+    dbg(">> "+str);
+    return SendATHelper(str,str.length(),Timeoutms,AT);
+}
+String SendAT(const char* str, unsigned long Timeoutms, SoftwareSerial *AT){
+    return SendAT((String)str,Timeoutms,AT);
+}
+
+template <typename T> // support for strings and char arrays
+String SendATHelper(T str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT)
 {
     // sends a string to the AT serial and then returns the reponse
     static SoftwareSerial *_AT;
@@ -13,11 +23,13 @@ String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT)
     }
     else if (!_AT)
         return "NO AT SERIAL OBJECT";
-    if (1)
-        dbg<String>(">> " + (String)str);
-    _AT->println(str);
-    _AT->flush();
 
+    for(unsigned long i=0;i<size;i++)
+        _AT->print(str[i]);
+    _AT->print("\r\n");
+    _AT->flush();
+     
+        
     while (Timeoutms > 0 && _AT->available() <= 0)
     {
         sleep(10);
@@ -26,8 +38,9 @@ String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT)
     if (Timeoutms <= 0 && _AT->available() <= 0)
     {
         return "NO RESPONSE";
-    }
+    }    
 
+   
     String output = "";
     while (_AT->available())
     {
@@ -35,9 +48,10 @@ String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT)
         c = fixATchar(c);
         output += c;
     }
-
+    
     return output;
 }
+
 byte checkModemStatus()
 {
     byte tries = 5;
@@ -82,7 +96,7 @@ byte waitForATResponse(unsigned int maxTimeoutSec)
     maxTimeoutSec *= 100;
     while (maxTimeoutSec > 0)
     {
-        String res = SendAT("AT", 1000);
+        String res = SendAT((String)"AT", 1000);
         sleep(1000);
         maxTimeoutSec -= 100; // maxtimeout is seconds times 100 so -5 means -50ms
         if (res.indexOf("OK") != -1)

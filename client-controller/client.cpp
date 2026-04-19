@@ -16,28 +16,6 @@ int main()
 {
     Serial.begin(115200);
     dbg("program started!");
-    Hashtable test;
-    // test["hello"] = "REG";
-    // test["Sega"]="sonic";
-    test["a"]="b";
-    
-    byte* data =buildData(test);
-    dbg((String)"size=");
-    int a;
-    dbg(getValue(data+4,a));
-    dbg(getValue(data+9,a));
-    test = parseData(data);
-    // for (auto i:test){
-    //     dbg(i.key);
-    //     dbg(i.value);
-    // }
-    dbg(test.ToString());
-    // for(int i=0;i<*(long*)data;i++)
-    //     dbg((String)data[i]+" ",0);
-    // for(auto c :(String)"a"){
-    //         dbg(c);
-    //     }
-    dbg("done");
     
 
 
@@ -46,13 +24,13 @@ int main()
 
 
 
-    // sei(); // start listening to interrupts
-    // DDRB |= 1 << PORTB5; // sets builtin led to output mode
-    // SoftwareSerial SerialAT(MODEM_RDX_PORT, MODEM_TDX_PORT); 
-    // initialModem(&SerialAT);
-    // conncectToSerevr();
-    // //here after you achive a connection in single ip mode(default) you either send data or just in a loop waiting for data to be sent(data is pushed without warning)
-    // RegisterToServer();
-    // startInteractiveConsoleWithModem(SerialAT);
+    sei(); // start listening to interrupts
+    DDRB |= 1 << PORTB5; // sets builtin led to output mode
+    SoftwareSerial SerialAT(MODEM_RDX_PORT, MODEM_TDX_PORT); 
+    initialModem(&SerialAT);
+    conncectToSerevr();
+    //here after you achive a connection in single ip mode(default) you either send data or just in a loop waiting for data to be sent(data is pushed without warning)
+    RegisterToServer();
+    startInteractiveConsoleWithModem(SerialAT);
     return 0;
 }
