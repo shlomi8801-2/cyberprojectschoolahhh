@@ -110,7 +110,7 @@ def listen(host:str,port:int)->None:
     #Action - tell the controller what to do on what pins
     #list - give the device details like available pins
     server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# ipv4,tcp
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #fixing the binding address again
     server.bind((host,port))
     server.listen(5)
     while (True):
