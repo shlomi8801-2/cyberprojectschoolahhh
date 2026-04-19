@@ -22,6 +22,8 @@ class clientSock:
             return ()
         res_len = int.from_bytes(self.sock.recv(settings.GetSetting("client.header_size")),"big") #the first one is without encoded byte which is the length
         res = self.sock.recv(res_len)
+        print(res_len)
+        print(res)
         try:
             output = parsedata(res)
             if (len(output) ==0):

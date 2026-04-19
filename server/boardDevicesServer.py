@@ -81,8 +81,10 @@ def handleClient(controllerObj:controllersActions.Controller)->None:
 def indentifyClient(clientSock:client_coms.clientSock):
     """used for client first messages only for REG and CON"""
     known:bool = False
+    log.log("got new client!")
     while (not known):
         msg = clientSock.recievecmd() # (type:str,data:dict)
+        log.log(msg)
         if (len(msg) == 0):
             continue
         match (msg[0]): #commands are here
@@ -108,6 +110,7 @@ def listen(host:str,port:int)->None:
     #Action - tell the controller what to do on what pins
     #list - give the device details like available pins
     server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# ipv4,tcp
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((host,port))
     server.listen(5)
     while (True):
