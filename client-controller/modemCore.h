@@ -1,7 +1,6 @@
 #pragma once
 #include <client.h>
 #include "ATcommands.h"
-#include <Hashtable.h>
 
 void changeModemPowerStart(byte state);
 void rebootModem();
@@ -12,7 +11,6 @@ byte* SendAT(const char str ,unsigned long& size, unsigned long Timeoutms=1000, 
 String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
 template <typename T> // support for strings and char arrays
 String SendATHelper(const T str,unsigned long size, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
-byte* SnedCMD(Hashtable& data);
 byte checkModemStatus();
 byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);

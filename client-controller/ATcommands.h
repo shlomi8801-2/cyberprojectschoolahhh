@@ -33,4 +33,4 @@
 #define CONNECT_TO_SERVER_CMD "AT+CIPSTART"// must be at IP STATUS state witch executed by using AT+CIFSR, send with args for like this ...="<TCP/UDP>"","<host>",<port> 
 #define CONNECT_CMD_MAX_TIMEOUT_SEC 160
 #define ENTER_DATA_MODE_CMD "AT+CIPSEND" // data received as normal 8 bit each time and at every sent data it has to add 0x1a to execute the message sending
-
+#define RAMTOTAL RAMEND-RAMSTART

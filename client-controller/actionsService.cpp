@@ -96,38 +96,44 @@ byte* buildData(Hashtable& data){
     return output;
 }
 
-byte* SnedCMD(Hashtable& data){
-    SendAT(ENTER_DATA_MODE_CMD);
+byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
+    SendAT(ENTER_DATA_MODE_CMD); // returnes ">"
     dataMode=1;
+    
     // dbg((String)"sending "+data["type"]);
-    dbg("before");
     byte* dataBytes = buildData(data);
-    dbg("after");
-    unsigned long dataSize = *(unsigned long*)dataBytes;
+    if (dataSize ==0 ){
+        if (*(unsigned long*)dataBytes >RAMTOTAL){
+            dbg((String)"data is too big "+*(unsigned long*)dataBytes);
+            return nullptr;
+        }
+        else
+            dataSize = *(unsigned long*)dataBytes;
+    }
     dbg((String)"size:"+dataSize);
-    SendATArr((char*)dataBytes,dataSize,100);
-    dataMode=1;
-    unsigned long size;
-    dbg("sending!");
-    byte* output = SendAT((0x1a),size,5000,nullptr);//5 sec timeout
-    // for (int i=0;i<(int)size;i++)
-        // dbg(output[i]);
+
+    SendATArr((char*)dataBytes,dataSize);
+    byte* output = SendAT((0x1a),outputSize,100,nullptr);
+    while (!SendAT("",2500).indexOf("OK")){ // wait until getting "SEND OK" from the modem
+        sleep(0);
+    }
+    output = SendAT((0x00),outputSize,5000,nullptr);//5 sec timeout
+
     // output = SendAT(' ',5000);
+    
     dataMode=0;
     return output;
 }
-
 void RegisterToServer(){
 
     dbg("registering to server");
-    
     Hashtable test;
     test["type"]="REG";
     char* dataBytes = (char*)buildData(test);
-    
-    SnedCMD(test);
-    SnedCMD(test);
-    dbg("done");
+    unsigned long outputSize;
+    byte* output = SnedCMD(test,outputSize);
+    for (int i=0;i<(int)outputSize;i++)
+        dbg((String)output[i]+ " "+(char)output[i]);
     // Hashtable res =parseData(SnedCMD(test));
     // for (auto i:res)
     // dbg(i.key);

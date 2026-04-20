@@ -21,7 +21,9 @@ byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, Softwa
     }
     if (Timeoutms <= 0 && _AT->available() <= 0)
     {
-        return nullptr;
+        byte* res = (byte*)malloc(11);
+        memcpy(res,"NO RESPONSE",11);
+        return res;
     }    
 
    
@@ -29,12 +31,11 @@ byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, Softwa
     for(byte i=0;i<4;i++)
             output[i]=_AT->read();
     // output = (byte*)realloc(output,sizeof(byte)* (*(unsigned long*)output));
-    size = HEADER_SIZE_BYTES+ _AT->available();
-        output = (byte*)realloc(output,size);
 
-    
-    for (unsigned long i=4;_AT->available();i++)
+    size=0;
+    for (unsigned long i=0;_AT->available();i++)
     {
+        output = (byte*)realloc(output,++size);
         char c = _AT->read();
         c = fixATchar(c);
         output[i]=c;
