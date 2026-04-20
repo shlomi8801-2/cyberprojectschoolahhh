@@ -38,6 +38,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     #the password will be saved as hash in the database
     #the id as unique key
     #the availablePins column will have max of 20 pins each is a char representing a number of pin
+    log.log("starting to register client")
     if not ("uuid" in msg and "password" in msg):
         #create a request to register new client
         _id = utils.generateToken()
@@ -45,6 +46,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         while (len(getClients({"uuid":_id}))==1): #acquiring a unique id
                 _id = utils.generateToken()
         waitingToRegister[_id] = utils.hashString(_password)
+        log.log("sending respose with login details")
         cSock.sendcmd("REG",{"uuid":_id,"password":_password})
         utils.makeThreadAndStart(expirId,[_id])
     else:
@@ -81,7 +83,7 @@ def handleClient(controllerObj:controllersActions.Controller)->None:
 def indentifyClient(clientSock:client_coms.clientSock):
     """used for client first messages only for REG and CON"""
     known:bool = False
-    log.log("got new client!")
+    # log.log("got new client!")
     while (not known):
         msg = clientSock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):

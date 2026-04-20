@@ -29,6 +29,7 @@ inline Iterator end(){ return Iterator(length(),&container);}
     // inline Iteator<Pair> begin() noexcept { return container.begin(); }
     // inline VectorIterator<Pair> end() noexcept { return container.end(); }
     Hashtable();
+    ~Hashtable();
     const String ToString();
     
 };

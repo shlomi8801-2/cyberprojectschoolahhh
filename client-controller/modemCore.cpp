@@ -12,6 +12,37 @@ String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms, So
     return SendATHelper(str,size,Timeoutms,AT);
 }
 static SoftwareSerial *_AT;
+byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, SoftwareSerial *AT){
+    SendATHelper(&str,1,0,AT);
+    while (Timeoutms > 0 && _AT->available() <= 0)
+    {
+        sleep(10);
+        Timeoutms -= 10;
+    }
+    if (Timeoutms <= 0 && _AT->available() <= 0)
+    {
+        return nullptr;
+    }    
+
+   
+    byte* output = (byte*)malloc(sizeof(byte)*HEADER_SIZE_BYTES);
+    for(byte i=0;i<4;i++)
+            output[i]=_AT->read();
+    // output = (byte*)realloc(output,sizeof(byte)* (*(unsigned long*)output));
+    size = HEADER_SIZE_BYTES+ _AT->available();
+        output = (byte*)realloc(output,size);
+
+    
+    for (unsigned long i=4;_AT->available();i++)
+    {
+        char c = _AT->read();
+        c = fixATchar(c);
+        output[i]=c;
+    }
+    
+    return output;
+}
+
 template <typename T> // support for strings and char arrays
 String SendATHelper(const T str,unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT)
 {

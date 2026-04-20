@@ -8,7 +8,7 @@ String getValue(byte* data,int& CurrentIdx);
 byte* ToByteArr(String data,int* OutputSize);
 
 Hashtable parseData(byte* data);
-byte* buildData(Hashtable data);
+byte* buildData(Hashtable& data);
 void RegisterToServer();
 void ConnectToServer();
 void StartConnectionToServer();

@@ -35,6 +35,10 @@
             output +="}";
             return output;
         }
-
+    Hashtable::~Hashtable(){
+        for(auto i=0;i<container.size();i++){
+            free(this->container[i]);
+        }
+    }
 
 

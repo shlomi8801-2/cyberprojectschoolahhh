@@ -28,7 +28,7 @@ Hashtable parseData(byte* data){
     //byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
     //encoded means is the data bin or chars
     //the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
-    Hashtable output;
+    Hashtable output;   
     for(int i =HEADER_SIZE_BYTES;i<*(unsigned long*)data;i++){
         String key =getValue(data+i,i);
         i+=key.length();
@@ -44,7 +44,7 @@ Hashtable parseData(byte* data){
 }
 
 
-byte* buildData(Hashtable data){
+byte* buildData(Hashtable& data){
     //use HEADER_SIZE bytes for the length of the value
     // for 2^(8*HEADER_SIZE) of data support
     // takes the dict and turns into a simple string then bytearray
@@ -52,59 +52,85 @@ byte* buildData(Hashtable data){
     unsigned int outputSize=sizeof(char)*HEADER_SIZE_BYTES*2;
     unsigned int idx=HEADER_SIZE_BYTES;
     for (auto i:data){
-        clearNextBytes(output+idx,HEADER_SIZE_BYTES);
+        clearNextBytes(output+idx,sizeof(byte)*HEADER_SIZE_BYTES);
         output[idx]=i.key.length(); // using buffer overflow
-        // for(int x=0;x<outputSize;x++)
-        //     dbg((String)output[x]+" ",0);
-        //     dbg("",1);
         idx +=HEADER_SIZE_BYTES;
         outputSize +=i.key.length()+HEADER_SIZE_BYTES;
-        
-        output = (byte*)realloc(output,outputSize);
-         
+        output = (byte*)realloc(output,sizeof(byte)*outputSize);
+
         for(auto c :i.key){
             output[idx++]=c;
         }
-       
-        
-        
-        
+    
         // idx +=1; adding encoding bit
+        
         // outputSize+=1;
         
-        clearNextBytes(output+idx,HEADER_SIZE_BYTES);
+        
+        
+        clearNextBytes(output+idx,sizeof(byte)*HEADER_SIZE_BYTES);
+        
         
         output[idx]=i.value.length(); // using buffer overflow
         
+        
         idx +=HEADER_SIZE_BYTES;
         
+        
         outputSize +=i.value.length()+HEADER_SIZE_BYTES;
-        output = (byte*)realloc(output,outputSize);
+        
+        output = (byte*)realloc(output,sizeof(byte)*outputSize);
+        
         
         for(auto c :i.value){
             output[idx++]=c;
         }
-        
     }
+    
     outputSize -= HEADER_SIZE_BYTES;
-    output = (byte*)realloc(output,outputSize);
+    
+    output = (byte*)realloc(output,sizeof(byte)*outputSize);
+    
     *(unsigned long*)output = outputSize;
     
     return output;
 }
- 
+
+byte* SnedCMD(Hashtable& data){
+    SendAT(ENTER_DATA_MODE_CMD);
+    dataMode=1;
+    // dbg((String)"sending "+data["type"]);
+    dbg("before");
+    byte* dataBytes = buildData(data);
+    dbg("after");
+    unsigned long dataSize = *(unsigned long*)dataBytes;
+    dbg((String)"size:"+dataSize);
+    SendATArr((char*)dataBytes,dataSize,100);
+    dataMode=1;
+    unsigned long size;
+    dbg("sending!");
+    byte* output = SendAT((0x1a),size,5000,nullptr);//5 sec timeout
+    // for (int i=0;i<(int)size;i++)
+        // dbg(output[i]);
+    // output = SendAT(' ',5000);
+    dataMode=0;
+    return output;
+}
 
 void RegisterToServer(){
 
     dbg("registering to server");
-    SendAT(ENTER_DATA_MODE_CMD);
+    
     Hashtable test;
     test["type"]="REG";
-    dbg("sending REG");
-    char* cmd = ((char*)buildData(test));
-    dbg((String)"size:"+*(unsigned long*)cmd);
-    dbg(SendATArr(cmd,*(unsigned long*)cmd));
-    SendAT((String)(char)(0x1a));
+    char* dataBytes = (char*)buildData(test);
+    
+    SnedCMD(test);
+    SnedCMD(test);
+    dbg("done");
+    // Hashtable res =parseData(SnedCMD(test));
+    // for (auto i:res)
+    // dbg(i.key);
 }
 void ConnectToServer();
 void StartConnectionToServer();
