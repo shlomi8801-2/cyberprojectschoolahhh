@@ -96,7 +96,7 @@ byte* buildData(Hashtable& data){
     return output;
 }
 
-byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
+byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){// TODO fix this function catching after 4 bytes
     SendAT(ENTER_DATA_MODE_CMD); // returnes ">"
     dataMode=1;
     
@@ -114,9 +114,13 @@ byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
 
     SendATArr((char*)dataBytes,dataSize);
     byte* output = SendAT((0x1a),outputSize,100,nullptr);
-    while (!SendAT("",2500).indexOf("OK")){ // wait until getting "SEND OK" from the modem
+    String tmp = SendAT("",100);
+    while (tmp.indexOf("OK")==-1){ // wait until getting "SEND OK" from the modem
+        tmp=SendAT("",100);
         sleep(0);
     }
+    for (int i=0;i<4;i++)//temperory
+        dbg((String)tmp[i]+ " "+(char)tmp[i]);
     output = SendAT((0x00),outputSize,5000,nullptr);//5 sec timeout
 
     // output = SendAT(' ',5000);

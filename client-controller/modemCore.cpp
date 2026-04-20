@@ -40,7 +40,6 @@ byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, Softwa
         c = fixATchar(c);
         output[i]=c;
     }
-    
     return output;
 }
 
