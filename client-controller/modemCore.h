@@ -4,6 +4,7 @@
 
 void changeModemPowerStart(byte state);
 void rebootModem();
+char fixATchar(const char c,byte dataMode=2);
 
 String SendAT(String str,unsigned long Timeoutms = 1000, SoftwareSerial *AT = nullptr);
 String SendAT(const char* str, unsigned long Timeoutms=1000, SoftwareSerial *AT=nullptr);
@@ -19,15 +20,6 @@ byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);
 void connectToServer();
 void conncectToSerevr();
-static byte dataMode=0;
-constexpr char fixATchar(char c)
-{
-    if (dataMode)
-        return c;
-    if (c & 1 << 7)
-        c ^= 11 << 6;
-    else
-        c &= 63; // 0011 1111
-    return c;
-}
+
+
 void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT);

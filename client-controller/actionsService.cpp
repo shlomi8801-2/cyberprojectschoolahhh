@@ -96,50 +96,25 @@ byte* buildData(Hashtable& data){
     return output;
 }
 
-byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){// TODO fix this function catching after 4 bytes
+void SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){// TODO fix this function catching after 4 bytes
     SendAT(ENTER_DATA_MODE_CMD,0); // returnes ">"
-    dataMode=1;
+    
     
     // dbg((String)"sending "+data["type"]);
     byte* dataBytes = buildData(data);
     if (dataSize ==0 ){
         if (*(unsigned long*)dataBytes >RAMTOTAL){
             dbg((String)"data is too big "+*(unsigned long*)dataBytes);
-            return nullptr;
+            return;
         }
         else
             dataSize = *(unsigned long*)dataBytes;
     }
     dbg("sending command");
     SendATArr((char*)dataBytes,dataSize,0);
-    byte* output = SendAT((0x1a),outputSize,1000);
-    // SkipNATCharacters(strlen("AT+CIPSEND>"));// should echo back the send command with >
-    
-    // while (tmp.indexOf("OK")==-1){ // wait until getting "SEND OK" from the modem
-    //     tmp=SendAT("",100);
-    //     sleep(0);
-    // }
-    
-    //         dbg("waiting for data");
-    //         output = GetATResponse(outputSize,10000);//10 sec timeout
-    //         if (outputSize>=RAMTOTAL){
-    //             dbg("error in sendATArr");
-    //             stopProgram();
-    //         }
-            
-    //         for (int i=0;i<outputSize;i++){
-    //     dbg((char)output[i]);
-    // }
-    
-    dbg("size:",0);
-    dbg(outputSize);
-    dbg((char*)output);
+    byte* output = SendAT((0x1a),outputSize,1000);// because the modem doesn't wait for the server aknowlagment it should respond instantly
     free(output);
-    return output;
-    
 
-    // output = SendAT(' ',5000);
-    
     
 }
 void RegisterToServer(){
@@ -150,30 +125,24 @@ void RegisterToServer(){
     char* dataBytes = (char*)buildData(test);
     unsigned long outputSize;
     int n = 5;
-    while (--n>0){
-    byte* output = SnedCMD(test,outputSize);
+    SnedCMD(test,outputSize);
     sleep(1000);
             dbg("waiting for data");
-            output = GetATResponse(outputSize,10000);//10 sec timeout
+            fixATchar('0',1);
+            byte* output = GetATResponse(outputSize,10000);//10 sec timeout
+            fixATchar('0',0);
+
             if (outputSize>=RAMTOTAL){
                 dbg("error in sendATArr");
                 stopProgram();
             }
-            
-    //         for (int i=0;i<outputSize;i++){
-    //     dbg((char)output[i]);
-    // }
 
     dbg((char*)output);
     for (int i=0;i<(int)outputSize;i++)
         dbg((String)output[i]+ " "+(char)output[i]);
 
-    free(output);
-    sleep(3000);
-    }
-    // Hashtable res =parseData(SnedCMD(test));
-    // for (auto i:res)
-    // dbg(i.key);
+    free(output);    
+
 }
 void ConnectToServer();
 void StartConnectionToServer();

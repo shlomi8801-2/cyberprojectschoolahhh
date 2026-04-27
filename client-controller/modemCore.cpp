@@ -1,6 +1,19 @@
 #include "modemCore.h"
+char fixATchar(const char c,byte dataMode)
+{
+    // bitSet(UCSR0A,U2X0);
+    static byte _dataMode;
+    if(dataMode !=2)
+        _dataMode=dataMode;
 
-
+    dbg(_dataMode);
+    if (_dataMode)
+        return c;
+    if (c & 1 << 7)
+        return  c ^ (11 << 6);
+    else
+        return c & 63; // 0011 1111
+}
 String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT){
     dbg(">> "+str);
     return SendATHelper(str,str.length(),Timeoutms,AT);
@@ -53,6 +66,8 @@ byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial 
             stopProgram();
         }
         char c = _AT->read();
+        dbg("got:",0);
+        dbg((unsigned char)c);
         c = fixATchar(c);
         output[i]=c;
     }
@@ -202,6 +217,8 @@ byte BringUpGPRSConnection(){
 void initialModem(SoftwareSerial *AT)
 {
     dbg("initializing modem!");
+    fixATchar('0',0);
+
     SendAT("AT", 0, AT); // assign the object as static in the function
     // should bring the modem from any status to 3 which is IP GPRSACT
     for( byte tries = 10;--tries > 0;/*SEGA*/)
