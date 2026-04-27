@@ -5,10 +5,8 @@ char fixATchar(const char c,byte dataMode)
     static byte _dataMode;
     if(dataMode !=2)
         _dataMode=dataMode;
-
-    dbg(_dataMode);
     if (_dataMode)
-        return c;
+        return c ^ (1<<7);
     if (c & 1 << 7)
         return  c ^ (11 << 6);
     else
