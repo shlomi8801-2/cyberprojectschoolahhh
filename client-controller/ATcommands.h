@@ -11,7 +11,7 @@
 #define MODEM_RDX_PORT 14 // connect the txd of the modem to port 14(A0) and the rxd to port 15(A1)
 #define MODEM_TDX_PORT 15
 
-#define SERVER_IP "10.5.3.15"
+#define SERVER_IP "10.8.5.121"
 #define SERVER_PORT 1234
 #define HEADER_SIZE_BYTES 4 //HEADER_SIZE_BYTES must be under 5
 
@@ -33,4 +33,5 @@
 #define CONNECT_TO_SERVER_CMD "AT+CIPSTART"// must be at IP STATUS state witch executed by using AT+CIFSR, send with args for like this ...="<TCP/UDP>"","<host>",<port> 
 #define CONNECT_CMD_MAX_TIMEOUT_SEC 160
 #define ENTER_DATA_MODE_CMD "AT+CIPSEND" // data received as normal 8 bit each time and at every sent data it has to add 0x1a to execute the message sending
+#define WAIT_FOR_SERVER_AKNOLAGEMENTCMD "AT+CIPQSEND" // = either 0 or 1 https://electronics.stackexchange.com/questions/508699/sim7000e-modem-stops-sending-send-ok-reply
 #define RAMTOTAL RAMEND-RAMSTART

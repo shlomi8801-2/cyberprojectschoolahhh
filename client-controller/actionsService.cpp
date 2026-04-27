@@ -97,7 +97,7 @@ byte* buildData(Hashtable& data){
 }
 
 byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){// TODO fix this function catching after 4 bytes
-    SendAT(ENTER_DATA_MODE_CMD); // returnes ">"
+    SendAT(ENTER_DATA_MODE_CMD,0); // returnes ">"
     dataMode=1;
     
     // dbg((String)"sending "+data["type"]);
@@ -110,23 +110,37 @@ byte* SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
         else
             dataSize = *(unsigned long*)dataBytes;
     }
-    dbg((String)"size:"+dataSize);
-
-    SendATArr((char*)dataBytes,dataSize);
-    byte* output = SendAT((0x1a),outputSize,100,nullptr);
-    String tmp = SendAT("",100);
-    while (tmp.indexOf("OK")==-1){ // wait until getting "SEND OK" from the modem
-        tmp=SendAT("",100);
-        sleep(0);
-    }
-    for (int i=0;i<4;i++)//temperory
-        dbg((String)tmp[i]+ " "+(char)tmp[i]);
-    output = SendAT((0x00),outputSize,5000,nullptr);//5 sec timeout
+    dbg("sending command");
+    SendATArr((char*)dataBytes,dataSize,0);
+    byte* output = SendAT((0x1a),outputSize,1000);
+    // SkipNATCharacters(strlen("AT+CIPSEND>"));// should echo back the send command with >
+    
+    // while (tmp.indexOf("OK")==-1){ // wait until getting "SEND OK" from the modem
+    //     tmp=SendAT("",100);
+    //     sleep(0);
+    // }
+    
+    //         dbg("waiting for data");
+    //         output = GetATResponse(outputSize,10000);//10 sec timeout
+    //         if (outputSize>=RAMTOTAL){
+    //             dbg("error in sendATArr");
+    //             stopProgram();
+    //         }
+            
+    //         for (int i=0;i<outputSize;i++){
+    //     dbg((char)output[i]);
+    // }
+    
+    dbg("size:",0);
+    dbg(outputSize);
+    dbg((char*)output);
+    free(output);
+    return output;
+    
 
     // output = SendAT(' ',5000);
     
-    dataMode=0;
-    return output;
+    
 }
 void RegisterToServer(){
 
@@ -135,9 +149,28 @@ void RegisterToServer(){
     test["type"]="REG";
     char* dataBytes = (char*)buildData(test);
     unsigned long outputSize;
+    int n = 5;
+    while (--n>0){
     byte* output = SnedCMD(test,outputSize);
+    sleep(1000);
+            dbg("waiting for data");
+            output = GetATResponse(outputSize,10000);//10 sec timeout
+            if (outputSize>=RAMTOTAL){
+                dbg("error in sendATArr");
+                stopProgram();
+            }
+            
+    //         for (int i=0;i<outputSize;i++){
+    //     dbg((char)output[i]);
+    // }
+
+    dbg((char*)output);
     for (int i=0;i<(int)outputSize;i++)
         dbg((String)output[i]+ " "+(char)output[i]);
+
+    free(output);
+    sleep(3000);
+    }
     // Hashtable res =parseData(SnedCMD(test));
     // for (auto i:res)
     // dbg(i.key);

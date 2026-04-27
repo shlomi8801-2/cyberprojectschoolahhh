@@ -12,8 +12,20 @@ String SendATArr(const char* str,unsigned long size, unsigned long Timeoutms, So
     return SendATHelper(str,size,Timeoutms,AT);
 }
 static SoftwareSerial *_AT;
-byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, SoftwareSerial *AT){
-    SendATHelper(&str,1,0,AT);
+
+void SkipNATCharacters(int n,unsigned long Timeoutms){
+    //waits for n characters from the modem with max timeout
+    while (Timeoutms > 0 && _AT->available() <= 0 && n>0)
+    {
+        sleep(10);
+        Timeoutms -= 10;
+        while(_AT->available()){//sometimes it comes with delay from each character
+            _AT->read();
+            --n;
+        }
+    }
+}
+byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial *AT){
     while (Timeoutms > 0 && _AT->available() <= 0)
     {
         sleep(10);
@@ -27,20 +39,28 @@ byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, Softwa
     }    
 
    
-    byte* output = (byte*)malloc(sizeof(byte)*HEADER_SIZE_BYTES);
-    for(byte i=0;i<4;i++)
-            output[i]=_AT->read();
+    byte* output = (byte*)malloc(sizeof(byte));
+    // for(byte i=0;i<4;i++)
+    //         output[i]=_AT->read();
     // output = (byte*)realloc(output,sizeof(byte)* (*(unsigned long*)output));
 
-    size=0;
+    size=1;
     for (unsigned long i=0;_AT->available();i++)
     {
         output = (byte*)realloc(output,++size);
+        if (output == nullptr){
+            dbg("out of memory in GetATResponse");
+            stopProgram();
+        }
         char c = _AT->read();
         c = fixATchar(c);
         output[i]=c;
     }
     return output;
+}
+byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, SoftwareSerial *AT){
+    SendATHelper(&str,1,0,AT);
+ return GetATResponse(size,Timeoutms,AT);
 }
 
 template <typename T> // support for strings and char arrays
@@ -177,6 +197,8 @@ byte BringUpGPRSConnection(){
         }
     return 0;
 }
+
+
 void initialModem(SoftwareSerial *AT)
 {
     dbg("initializing modem!");
@@ -190,7 +212,10 @@ void initialModem(SoftwareSerial *AT)
             stopProgram();
             return;
         }
-        sleep(1000);
+        //set modem settings here
+        SendAT((String)WAIT_FOR_SERVER_AKNOLAGEMENTCMD+"=1");
+        SendAT("ATE0"); // disable command echo(the modem usually echoing the command used)
+
         byte status = checkModemStatus();
         if (status == 3 || status == 4)
             break;
