@@ -58,14 +58,14 @@ byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial 
     size=1;
     for (unsigned long i=0;_AT->available();i++)
     {
-        output = (byte*)realloc(output,++size);
+        output = (byte*)reallocSafe(output,++size);
         if (output == nullptr){
             dbg("out of memory in GetATResponse");
             stopProgram();
         }
         char c = _AT->read();
-        dbg("got:",0);
-        dbg((unsigned char)c);
+        // dbg("got:",0);
+        // dbg((unsigned char)c);
         c = fixATchar(c);
         output[i]=c;
     }

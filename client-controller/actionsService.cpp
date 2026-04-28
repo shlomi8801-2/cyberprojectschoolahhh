@@ -56,7 +56,7 @@ byte* buildData(Hashtable& data){
         output[idx]=i.key.length(); // using buffer overflow
         idx +=HEADER_SIZE_BYTES;
         outputSize +=i.key.length()+HEADER_SIZE_BYTES;
-        output = (byte*)realloc(output,sizeof(byte)*outputSize);
+        output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
 
         for(auto c :i.key){
             output[idx++]=c;
@@ -79,7 +79,7 @@ byte* buildData(Hashtable& data){
         
         outputSize +=i.value.length()+HEADER_SIZE_BYTES;
         
-        output = (byte*)realloc(output,sizeof(byte)*outputSize);
+        output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
         
         
         for(auto c :i.value){
@@ -89,7 +89,7 @@ byte* buildData(Hashtable& data){
     
     outputSize -= HEADER_SIZE_BYTES;
     
-    output = (byte*)realloc(output,sizeof(byte)*outputSize);
+    output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
     
     *(unsigned long*)output = outputSize;
     
@@ -137,9 +137,9 @@ void RegisterToServer(){
                 stopProgram();
             }
 
-    dbg((char*)output);
+    dbg((int)outputSize);
     for (int i=0;i<(int)outputSize;i++)
-        dbg((String)output[i]+ " "+(char)output[i]);
+        dbg((char)output[i],0);
 
     free(output);    
 

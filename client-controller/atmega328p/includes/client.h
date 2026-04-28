@@ -47,3 +47,9 @@ inline String ShowBytes(byte* arr,unsigned int size=0){
     }
     return output;
 }
+inline void* reallocSafe(void *__ptr, size_t __size){// if fails to allocate new memory free the last one so you dont lose the pointer
+    void* tmp = realloc(__ptr,__size);
+    if(tmp==nullptr)
+        free(__ptr);
+    return tmp;
+}
