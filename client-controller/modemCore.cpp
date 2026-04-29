@@ -5,12 +5,20 @@ char fixATchar(const char c,byte dataMode)
     static byte _dataMode;
     if(dataMode !=2)
         _dataMode=dataMode;
-    if (_dataMode)
-        return c ^ (1<<7);
-    if (c & 1 << 7)
+    switch (_dataMode)
+    {
+    case 3:
+        return c;
+
+    case 0:{
+        if (c & 1 << 7)
         return  c ^ (11 << 6);
-    else
-        return c & 63; // 0011 1111
+        else
+            return c & 63; // 0011 1111
+    }
+    default:
+        return c ^ (1<<7);
+    }   
 }
 String SendAT(String str, unsigned long Timeoutms, SoftwareSerial *AT){
     dbg(">> "+str);
@@ -137,7 +145,7 @@ byte checkModemStatus()
             }
         }
         dbg((String)res + "status not defined");
-        sleep(1000);
+        sleep(250);
     }
 
     return -1;
