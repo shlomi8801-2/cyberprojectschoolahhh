@@ -24,16 +24,25 @@ void loginClient(){
         }
         return output;
 }
+
 Hashtable parseData(byte* data){
     //byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
     //encoded means is the data bin or chars
     //the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
-    Hashtable output;   
+    Hashtable output;
+    dbg("size:",0);
+    dbg(*(unsigned long*)data);
+    dbg((int)*data );
+    dbg((int)*(data+1));
+    dbg((int)*(data+2));
+    dbg((int)*(data+3));
     for(int i =HEADER_SIZE_BYTES;i<*(unsigned long*)data;i++){
         String key =getValue(data+i,i);
+        dbg(key);
         i+=key.length();
         i+=HEADER_SIZE_BYTES;
         String value =getValue(data+i,i);
+        dbg(value);
         i+=HEADER_SIZE_BYTES;
         i+=value.length();
         output[key]=value;
@@ -128,20 +137,30 @@ void RegisterToServer(){
     SnedCMD(test,outputSize);
     sleep(1000);
             dbg("waiting for data");
-            fixATchar('0',1);
+            fixATchar('0',4);
             byte* output = GetATResponse(outputSize,10000);//10 sec timeout
             fixATchar('0',0);
-
-            if (outputSize>=RAMTOTAL){
+            if (output == nullptr){
                 dbg("error in sendATArr");
                 stopProgram();
             }
 
     dbg((int)outputSize);
-    for (int i=0;i<(int)outputSize;i++)
-        dbg((char)output[i],0);
-
-    free(output);    
+    for (int i=0;i<(int)outputSize;i++){
+         dbg((char)output[i],0);
+         dbg("    ",0);
+        dbg(output[i]);
+    }
+       
+    test.~Hashtable();
+    dbg(0[output]);
+    // test = parseData(output);
+    // for(auto i: test){
+    //     dbg(i.key,0);
+    //     dbg(": ",0);
+    //     dbg(i.value);
+    // }
+    free(output);
 
 }
 void ConnectToServer();

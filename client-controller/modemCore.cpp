@@ -16,6 +16,11 @@ char fixATchar(const char c,byte dataMode)
         else
             return c & 63; // 0011 1111
     }
+    case 4:
+        if (c & 1 << 7)
+        return c ^ (1<<7);
+        else
+        return c;
     default:
         return c ^ (1<<7);
     }   
@@ -44,6 +49,9 @@ void SkipNATCharacters(int n,unsigned long Timeoutms){
         }
     }
 }
+
+
+
 byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial *AT){
     while (Timeoutms > 0 && _AT->available() <= 0)
     {
