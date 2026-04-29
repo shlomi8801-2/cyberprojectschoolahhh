@@ -20,13 +20,12 @@ byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);
 void connectToServer();
 void conncectToSerevr();
+
 inline bool confirmDataSize(byte* data,size_t packageSize){
-    
     for (byte i=0;i<HEADER_SIZE_BYTES&&i<packageSize;++i){
-        if (fixATchar((char)data[i],1) !=packageSize/(8<<(HEADER_SIZE_BYTES-i)))
+        if (data[i] !=packageSize/(8<<(HEADER_SIZE_BYTES-i)))
             return false;
     }
-    fixATchar(0,0);
     return true;
 }
 void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT);

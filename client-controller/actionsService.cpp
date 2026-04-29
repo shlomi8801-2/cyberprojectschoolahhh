@@ -32,17 +32,11 @@ Hashtable parseData(byte* data){
     Hashtable output;
     dbg("size:",0);
     dbg(*(unsigned long*)data);
-    dbg((int)*data );
-    dbg((int)*(data+1));
-    dbg((int)*(data+2));
-    dbg((int)*(data+3));
     for(int i =HEADER_SIZE_BYTES;i<*(unsigned long*)data;i++){
         String key =getValue(data+i,i);
-        dbg(key);
         i+=key.length();
         i+=HEADER_SIZE_BYTES;
         String value =getValue(data+i,i);
-        dbg(value);
         i+=HEADER_SIZE_BYTES;
         i+=value.length();
         output[key]=value;
@@ -135,17 +129,29 @@ void RegisterToServer(){
     unsigned long outputSize;
     int n = 5;
     SnedCMD(test,outputSize);
-    sleep(1000);
             dbg("waiting for data");
             fixATchar('0',4);
             byte* output = GetATResponse(outputSize,10000);//10 sec timeout
-            fixATchar('0',0);
+            dbg(outputSize);
+            GetATResponse(outputSize,10000);//10 sec timeout
+            dbg(outputSize);
+            GetATResponse(outputSize,10000);//10 sec timeout
+            dbg(outputSize);
+            GetATResponse(outputSize,10000);//10 sec timeout
+            dbg(outputSize);
+            GetATResponse(outputSize,10000);//10 sec timeout
+            dbg(outputSize);
+            GetATResponse(outputSize,10000);//10 sec timeout
+            dbg(outputSize);
+            GetATResponse(outputSize,10000);//10 sec timeout
+            dbg(outputSize);
+            
+            
             if (output == nullptr){
                 dbg("error in sendATArr");
                 stopProgram();
             }
 
-    dbg((int)outputSize);
     for (int i=0;i<(int)outputSize;i++){
          dbg((char)output[i],0);
          dbg("    ",0);
@@ -153,8 +159,10 @@ void RegisterToServer(){
     }
        
     test.~Hashtable();
-    dbg(0[output]);
-    // test = parseData(output);
+    bool verified = confirmDataSize(output,outputSize+4);
+    dbg(verified);
+    if (verified)
+    test = parseData(output);
     // for(auto i: test){
     //     dbg(i.key,0);
     //     dbg(": ",0);

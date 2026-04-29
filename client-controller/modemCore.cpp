@@ -64,7 +64,6 @@ byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial 
         memcpy(res,"NO RESPONSE",11);
         return res;
     }    
-
    
     byte* output = (byte*)malloc(sizeof(byte));
     // for(byte i=0;i<4;i++)
