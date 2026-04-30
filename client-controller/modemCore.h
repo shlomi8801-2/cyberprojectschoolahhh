@@ -20,10 +20,22 @@ byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);
 void connectToServer();
 void conncectToSerevr();
+void closeConnectionToServer();
 
 inline bool confirmDataSize(byte* data,size_t packageSize){
-    for (byte i=0;i<HEADER_SIZE_BYTES&&i<packageSize;++i){
-        if (data[i] !=packageSize/(8<<(HEADER_SIZE_BYTES-i)))
+    dbg(packageSize);
+    for (byte i=0;i<HEADER_SIZE_BYTES- sizeof(size_t);++i){
+        //if the data header is bigger then the size of the packageSize then the first bytes must be 0
+        if (data[i]!=0) return false;
+    }
+    for (byte i=HEADER_SIZE_BYTES-sizeof(size_t);i<HEADER_SIZE_BYTES&&i<packageSize;++i){
+        dbg("compairing ",0);
+        dbg(i,0);
+        dbg(" byte:",0);
+        dbg(data[i],0);
+        dbg(" -> ",0);
+        dbg(((byte*)(&packageSize))[i]);
+        if (data[i] != ((byte*)(&packageSize))[i])
             return false;
     }
     return true;

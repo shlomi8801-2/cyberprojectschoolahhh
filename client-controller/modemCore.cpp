@@ -216,15 +216,18 @@ byte BringUpGPRSConnection(){
         byte status = checkModemStatus();
         dbg("status is:" + (String)status);
         // finally
-        if (status == 3)
+        String localIp = SendAT(GET_LOCAL_IP_ADDRESS_CMD);
+        if (localIp.indexOf('.')!=-1) // 
         { // 3 IP GPRSACT means connected
-            dbg("local ip is:" + SendAT(GET_LOCAL_IP_ADDRESS_CMD));
+            dbg("local ip is:" + localIp);
             return 1;
         }
     return 0;
 }
 
-
+void closeConnectionToServer(){
+    SendAT(CLOSE_CONNECTION_CMD);
+}
 void initialModem(SoftwareSerial *AT)
 {
     dbg("initializing modem!");
@@ -257,8 +260,14 @@ void initialModem(SoftwareSerial *AT)
                     resetPDPDeact();
                     break;
                 }
+                case 8:
+                    sleep(100);
+                case 9:
                 case 3:
                 case 4:
+                    break;
+                case 7:
+                    closeConnectionToServer();
                     break;
                 case 255:
                     return;
