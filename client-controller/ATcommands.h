@@ -35,3 +35,6 @@
 #define ENTER_DATA_MODE_CMD "AT+CIPSEND" // data received as normal 8 bit each time and at every sent data it has to add 0x1a to execute the message sending
 #define WAIT_FOR_SERVER_AKNOLAGEMENTCMD "AT+CIPQSEND" // = either 0 or 1 https://electronics.stackexchange.com/questions/508699/sim7000e-modem-stops-sending-send-ok-reply
 #define RAMTOTAL RAMEND-RAMSTART
+
+// #define _SS_MAX_RX_BUFF 256 // packets arriving are stored in a buffer for now at least because the modem just sends all of the data at once so change the max buffer from 64
+//changed in the upload to arduino script as compiler flag

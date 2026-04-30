@@ -79,8 +79,6 @@ byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial 
             stopProgram();
         }
         char c = _AT->read();
-        // dbg("got:",0);
-        // dbg((unsigned char)c);
         c = fixATchar(c);
         output[i]=c;
     }

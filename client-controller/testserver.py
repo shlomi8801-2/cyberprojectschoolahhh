@@ -20,7 +20,7 @@ def handle_client(client_socket):
 #    print(f"[+] Recieved: {request}")
     #sending back the packet
 #    client_socket.send(bytes(1))
-    client_socket.send(("a"*500).encode())
+    client_socket.send(("a"*100).encode())
 #    client_socket.send(bytes((103).to_bytes(4,'little')))
     client_socket.send(b'abcdefg')
     client_socket.close()

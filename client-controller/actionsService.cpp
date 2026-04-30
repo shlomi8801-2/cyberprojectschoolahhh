@@ -133,20 +133,6 @@ void RegisterToServer(){
             fixATchar('0',4);
             byte* output = GetATResponse(outputSize,10000);//10 sec timeout
             dbg(outputSize);
-            GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
-            GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
-            GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
-            GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
-            GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
-            GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
-            
-            
             if (output == nullptr){
                 dbg("error in sendATArr");
                 stopProgram();
@@ -154,8 +140,8 @@ void RegisterToServer(){
 
     for (int i=0;i<(int)outputSize;i++){
          dbg((char)output[i],0);
-         dbg("    ",0);
-        dbg(output[i]);
+        //  dbg("    ",0);
+        // dbg(output[i]);
     }
        
     test.~Hashtable();
