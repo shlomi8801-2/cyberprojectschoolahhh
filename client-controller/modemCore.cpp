@@ -98,7 +98,7 @@ String SendATHelper(const T str,unsigned long size, unsigned long Timeoutms, Sof
     {
         _AT = AT;
         _AT->begin(AT_CONSOLE_SPEED);
-        dbg("using speed:");
+        dbg("using speed:",0);
         dbg(AT_CONSOLE_SPEED);
     }
     else if (!_AT)
@@ -269,6 +269,9 @@ void initialModem(SoftwareSerial *AT)
                 case 7:
                     closeConnectionToServer();
                     break;
+                case 12:
+                    dbg("error occoured in the modem whil quiring status see 8.2.13 starting interactive shell...");
+                    startInteractiveConsoleWithModem(*AT);
                 case 255:
                     return;
                 default:

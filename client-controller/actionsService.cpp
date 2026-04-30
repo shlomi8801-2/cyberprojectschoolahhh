@@ -8,13 +8,10 @@ void loginClient(){
 
 }
     String getValue(byte* data,int& CurrentIdx){
-    unsigned long currSize =0;
+    size_t currSize =getSizeFromHeader(data);
         //get the size of the value
         // cout<<currSize;
-        for (int _ =0; _<HEADER_SIZE_BYTES;_++){ //HEADER_SIZE_BYTES must be under 5
-            currSize += data[0]<<sizeof(data[0])*(_);
-            ++data;
-        }
+        
         // data++; //skip the encode bit for now
         //read the value
         String output = "";
@@ -30,9 +27,10 @@ Hashtable parseData(byte* data){
     //encoded means is the data bin or chars
     //the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
     Hashtable output;
+    size_t dataSize =getSizeFromHeader(data);
     dbg("size:",0);
-    dbg(*(unsigned long*)data);
-    for(int i =HEADER_SIZE_BYTES;i<*(unsigned long*)data;i++){
+    dbg(dataSize);
+    for(int i =HEADER_SIZE_BYTES;i<dataSize;i++){
         String key =getValue(data+i,i);
         i+=key.length();
         i+=HEADER_SIZE_BYTES;
@@ -138,10 +136,11 @@ void RegisterToServer(){
             }
 
     
-    printArr(output,outputSize);
-    dbg("done");
+
     test.~Hashtable();
     bool verified = confirmDataSize(output,outputSize);
+    dbg("verified:",0);
+    dbg(verified);
     if (verified)
     test = parseData(output);
     // for(auto i: test){
