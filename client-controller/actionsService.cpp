@@ -132,21 +132,16 @@ void RegisterToServer(){
             dbg("waiting for data");
             fixATchar('0',4);
             byte* output = GetATResponse(outputSize,10000);//10 sec timeout
-            dbg(outputSize);
             if (output == nullptr){
                 dbg("error in sendATArr");
                 stopProgram();
             }
 
-    for (int i=0;i<(int)outputSize;i++){
-         dbg((char)output[i],0);
-        //  dbg("    ",0);
-        // dbg(output[i]);
-    }
-       
+    
+    printArr(output,outputSize);
+    dbg("done");
     test.~Hashtable();
-    bool verified = confirmDataSize(output,outputSize+4);
-    dbg(verified);
+    bool verified = confirmDataSize(output,outputSize);
     if (verified)
     test = parseData(output);
     // for(auto i: test){

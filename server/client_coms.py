@@ -40,7 +40,7 @@ class clientSock:
 def parsedata(data: bytearray)->dict:
     '''byte array which looks like this <length><data><length2><data2> for exanple:   \x00\x00\x00\x04code\x00\x00\x00\x05abcde
     the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
-    DON'T FORGET TO REMOVE THE DATA LENGTH FROM THE START'''
+    DON'T FORGET TO REMOVE THE DATA LENGTH FROM THE START PYTHON DOESNT NEED IT'''
     datastructure = []
     output = {}
     offset = 0
@@ -84,7 +84,7 @@ def buildata(data: dict)->bytearray:
     
     #add the whole array length without the first number before as only header value
     #as unsigned int at the size of client.header_size with big indian
-    msglength = len(output)
+    msglength = len(output)+settings.GetSetting("client.header_size")
     if msglength > (1<<8*settings.GetSetting("client.header_size")): #checking if we are able to have all of the dict in one byte-array
         raise "data length is too big! (may need to increase the header size)"
     output = msglength.to_bytes(settings.GetSetting("client.header_size"),"big",signed=False)+output    

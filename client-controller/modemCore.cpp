@@ -82,7 +82,7 @@ byte* GetATResponse(unsigned long& size,unsigned long Timeoutms, SoftwareSerial 
         c = fixATchar(c);
         output[i]=c;
     }
-    return output;
+    return (byte*)reallocSafe(output,--size);
 }
 byte* SendAT(const char str ,unsigned long& size,unsigned long Timeoutms, SoftwareSerial *AT){
     SendATHelper(&str,1,0,AT);

@@ -53,3 +53,10 @@ inline void* reallocSafe(void *__ptr, size_t __size){// if fails to allocate new
         free(__ptr);
     return tmp;
 }
+inline void printArr(void* data,size_t length){
+    for (int i=0;i<length;i++){
+         dbg(((byte*)data)[i],0);
+         dbg("    ",0);
+        dbg(((char*)data)[i]);
+    }
+}
