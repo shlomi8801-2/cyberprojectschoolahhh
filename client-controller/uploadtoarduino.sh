@@ -4,6 +4,7 @@ cd "$PWD"
 # avr-g++ client.cpp -o main -lm -Iatmega328p/includes/core -Iatmega328p/includes/ -mmcu=atmega328 -DF_CPU=16000000UL -Os -D__AVR_ATmega328P__ &&
 FLAGS="-w -o main -Iatmega328p/includes/core -Iatmega328p/includes/ -lm -w -g -flto -fuse-linker-plugin -mmcu=atmega328 -DF_CPU=16000000UL -Os -Wl,--gc-sections -fdata-sections -ffunction-sections -D_SS_MAX_RX_BUFF=256"
 ARDUINOPORT="/dev/ttyUSB0"
+# ARDUINOPORT="/dev/ttyACM0"
 sudo chmod 777 $ARDUINOPORT
 if [ $# -eq 0 ]; then #no input arguments given
 # echo "$(find atmega328p/includes/. -type f -iregex ".*\.cpp") $(find atmega328p/includes/. -type f -iregex ".*\.c") $FLAGS"
