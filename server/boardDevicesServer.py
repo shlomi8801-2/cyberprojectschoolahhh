@@ -24,7 +24,7 @@ def loginClient(_id:str,password:str)->tuple:
 
 def addClientToDatabase(_id:str,password:str,availablePins:str) ->None:
     database.AddTable(*CARMODULES_TABLE)
-    database.Insert(CARMODULES_TABLE[0],{"uuid":_id,"password":password,"availablePins":"".join(sorted(list(set(x for x in availablePins))))}) # the availablePins compacting is to prevent sql injection and use the laest amount of chars
+    database.Insert(CARMODULES_TABLE[0],{"uuid":_id,"password":password,"availablePins":"".join(sorted(list(set(chr(x) for x in availablePins))))}) # the availablePins compacting is to prevent sql injection and use the laest amount of chars
 def expirId(_id:str)->None:
     #used as thread waits until MAXREGISTERWAIT seconds pass then removs the id from the waitingToRegister dict
     time.sleep(MAXREGISTERWAIT)

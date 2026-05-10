@@ -97,14 +97,19 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
         offset = int(offset)
     except:
         raise Exception("rows/offset should be a number")
-        # return {"code":1,"error":"rows/offset should be a number"}
     perm,userDict = checkpermissions()
-    if ((not perm >= 0) and not bypassPermissionChecking):
-        raise Exception("permission level is too low - probably not logged in")
-        return {"code":1,"error":"permission level is too low - probably not logged in"}
-    
+    #no need for that because we get the user's controllers and if they have admin perms then give all controllers
+    # if ((not perm >= 0) and not bypassPermissionChecking):
+    #     raise Exception("permission level is too low - probably not logged in")
+        
     #here its volnoruble for sql injection but insert and search functions in database.py handles it
     filters = utils.dictFromJson(request.headers.get("filters","{}"))
+    #get the user requesting from the token sent then add to filter
+    ownerUsername = users.searchUser(None,request.headers.get("Token",""))
+    if (len(ownerUsername) <=0):
+        raise Exception("User not logged in!")
+    ownerUsername = users.makeUserDict(ownerUsername[0]).get("username","")
+    filters["ownerUsername"] = ownerUsername
     #checking for the permissions required
     for x in permsForTypes:
         if bypassPermissionChecking:
@@ -142,6 +147,7 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
         case _:
             raise Exception(f"no such endpoint /list/{_type}")
             # return {"code":1,"error":f"no such type {_type}"}
+    
 
 @app.route("/controllers/<controllerId>/<option>",methods=['GET', 'POST'])
 def controllerManagement(controllerId:int,option:str="get"):
@@ -181,6 +187,8 @@ def controllerManagement(controllerId:int,option:str="get"):
     if (request.method == "GET"):
         raise Exception("method not implamented")
         pass
+    else:
+        raise Exception("method not allowed")
             
         
 
