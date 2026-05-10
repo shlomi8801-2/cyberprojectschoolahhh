@@ -25,6 +25,10 @@ async function fetchMyControllers(){
     const maxrows=100;
     const offset = 0;
   myControllers = await makeFetch(API_URL + `/list/myControllers/${maxrows}/${offset}`);
+  if (myControllers.code===1){
+    alert("error fetching myControllers: "+myControllers.error);
+    return []
+  }
   return myControllers
 }
 async function fetchCommands(controllerId){
@@ -34,7 +38,7 @@ async function fetchCommands(controllerId){
   return await makeFetch(API_URL + `/list/commands/${maxrows}/${offset}`,{"uuid":controllerId},"get")
 }
 function getRowByColumn(columns,iterable,columnName, value){
-  const rows =iterable.filter((row)=>row[columns.index(columnName)] == value);
+  const rows =iterable.filter((row)=>row[columns.indexOf(columnName)] == value);
   return rows.length==1 ? rows[0]:null;
 }
 function getCommandRow(commandTitle){
@@ -70,7 +74,7 @@ function btnClick(thisBtn){
     const editForm = document.getElementById("editform");
     editForm.style.display="block"
     console.log(myControllers.controllers)
-    thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.index("ID")]==btnUUID)
+    thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.indexOf("uuid")]==btnUUID)
     thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
     //here add the columns to the editform
     //then submit to the server - in submitChanges function
@@ -94,8 +98,8 @@ function submitChanges(){
 function displayButtons(){
   //take from currentCommands.commands
   const btnGrid = document.getElementById("btnGrid")
-  const titleIndex = currentCommands.columns.index("title")
-  const btnIdIndex = currentCommands.columns.index("title") // for now
+  const titleIndex = currentCommands.columns.indexOf("title")
+  const btnIdIndex = currentCommands.columns.indexOf("title") // for now
   //       <button type="button" class="commandButton" onclick="btnClick(this)">test button1 <input type="hidden" value="id" id="BTNID"></button>
   while (btnGrid.firstChild) { // clear childs in btnGrid
         btnGrid.removeChild(btnGrid.firstChild);
@@ -112,9 +116,18 @@ function displayButtons(){
     btnGrid.appendChild(btn)
   }
 }
+function createElementFromHTML(htmlString) {
+  //credit to Crescent Fresh and Jay Taylor https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
+  var div = document.createElement('div');
+  div.innerHTML = htmlString.trim();
+
+  // Change this to div.childNodes to support multiple top-level nodes.
+  return div.firstChild;
+}
 function setupEditForm(){
   const editForm = document.getElementById("editform");
-  const submitBtn = `<button type="button" onclick="submitChanges()">submit</button>`
+  const submitBtn = createElementFromHTML(`<button type="button" onclick="submitChanges()">submit</button>`)
+  
   while (btnGrid.firstChild) { // clear childs in editForm
         btnGrid.removeChild(btnGrid.firstChild);
   }
@@ -141,7 +154,7 @@ async function startup(){
   }
 
   selectedController= new controllerClass(myControllers.controllers[0],myControllers.columns)
-  await fetchCommands(selectedController.uuid)
+  currentCommands = await fetchCommands(selectedController.uuid)
   if (!currentCommands.columns){
     return
   }
