@@ -1,6 +1,15 @@
 editMode = false
 myControllers = []
 currentCommands = {"controllerId":0,"commands":[],"columns":[]}
+class controllerClass{
+  constructor(data,columns) {
+  
+  this.uuid = data[columns.indexOf("uuid")]
+  this.OwnerUsername =data[columns.indexOf("ownerUsername")]
+  this.availablePins= data[columns.indexOf("availablePins")].split("").map((x) => {x.charCodeAt(0)})
+  }
+ 
+}
 selectedController = null
 
 async function makeFetch(url,additionalHeaders={},method="get",body={}){
@@ -130,7 +139,8 @@ async function startup(){
     // user has no controllers
     return
   }
-  selectedController=myControllers[0]
+
+  selectedController= new controllerClass(myControllers.controllers[0],myControllers.columns)
   await fetchCommands(selectedController.controllerId)
   if (!currentCommands.columns){
     return
