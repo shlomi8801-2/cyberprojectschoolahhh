@@ -101,10 +101,9 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
 
     filters = utils.dictFromJson(request.headers.get("filters","{}"))
     #get the user requesting from the token sent then add to filter
-    ownerUsername = users.searchUser(None,request.headers.get("Token",""))
-    if (len(ownerUsername) <=0):
+    if (len(userDict) <=0):
         raise Exception("User not logged in!")
-    ownerUsername = users.makeUserDict(ownerUsername[0]).get("username","")
+    ownerUsername = userDict.get("username","")
     filters["ownerUsername"] = ownerUsername
     #checking for the permissions required
     for x in permsForTypes:

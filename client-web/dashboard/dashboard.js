@@ -78,7 +78,7 @@ function btnClick(thisBtn){
     
   }else {
   //send the command id to the server
-  makeFetch(API_URL + `/controllers/${selectedController.controllerId}/execute`,{},"post")
+  makeFetch(API_URL + `/controllers/${selectedController.uuid}/execute`,{},"post")
   }
 }
 function submitChanges(){
@@ -141,7 +141,7 @@ async function startup(){
   }
 
   selectedController= new controllerClass(myControllers.controllers[0],myControllers.columns)
-  await fetchCommands(selectedController.controllerId)
+  await fetchCommands(selectedController.uuid)
   if (!currentCommands.columns){
     return
   }
