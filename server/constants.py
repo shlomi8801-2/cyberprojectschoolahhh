@@ -1,7 +1,7 @@
 import hashlib
 
 HASHINGALGO = hashlib.sha512
-REMEMBERTOKENTIME = 5*60 # 5 mins
+REMEMBERTOKENTIME = 24*60*60 # 24 hours
 MAXREGISTERWAIT = 60 # 1 min
 #tables: Users, Carmodules
 USERS_TABLE = ["Users",

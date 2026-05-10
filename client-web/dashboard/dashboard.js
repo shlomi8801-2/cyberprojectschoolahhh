@@ -67,15 +67,23 @@ function getBtnId(htmlBtn){
   const inputElem = htmlBtn.querySelector("input#BTNID");
   return inputElem ? inputElem.value : null;
 }
-
+function getCommandByTitle(title){
+  let i=0;
+  for(i=0;i<currentCommands.commands.length;++i){
+    console.log(title)
+    if (currentCommands.commands[i][currentCommands.columns.indexOf("title")]===title)
+      break;
+  }
+  return currentCommands.commands[i];
+}
 function btnClick(thisBtn){
-  btnUUID =getBtnId(thisBtn)
+  const btnUUID =getBtnId(thisBtn)
   if (editMode){
     const editForm = document.getElementById("editform");
     editForm.style.display="block"
-    console.log(myControllers.controllers)
     thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.indexOf("uuid")]==btnUUID)
     thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
+    setupEditForm(btnUUID)
     //here add the columns to the editform
     //then submit to the server - in submitChanges function
    
@@ -85,14 +93,15 @@ function btnClick(thisBtn){
   makeFetch(API_URL + `/controllers/${selectedController.uuid}/execute`,{},"post")
   }
 }
-function submitChanges(){
+function submitChanges(btnData){
+  //run on submit in edit form
   const editForm = document.getElementById("editform");
   if (editForm.style.display == "none"){
-    //the form is not shown(caused by the confirm edit button) then just skip because there is no pneding changes
+    //send the btnData to the server where it recognizes the btn by the id and changes what needed
     return
 
   }
-  setTimeout(function(){},1000); // delay before closing the form
+  setTimeout(function(){},500); // delay before closing the form
   editForm.style.display = "none"
 }
 function displayButtons(){
@@ -105,12 +114,11 @@ function displayButtons(){
         btnGrid.removeChild(btnGrid.firstChild);
     }
   for (var i=0;i<currentCommands.commands.length;++i){
-    var btn = document.createElement("button")
+    var btn = createElementFromHTML(`      <button type="button" class="commandButton" onclick="btnClick(this)">test button</button>`)
     var hiddenBtnInput = document.createElement("input")
-    btn.class="commandButton"
-    btn.onclick="btnClick(this)"
     btn.innerText=currentCommands.commands[i][titleIndex]
     hiddenBtnInput.type="hidden"
+    hiddenBtnInput.id = "BTNID"
     hiddenBtnInput.value=currentCommands.commands[i][btnIdIndex]
     btn.appendChild(hiddenBtnInput)
     btnGrid.appendChild(btn)
@@ -124,21 +132,29 @@ function createElementFromHTML(htmlString) {
   // Change this to div.childNodes to support multiple top-level nodes.
   return div.firstChild;
 }
-function setupEditForm(){
+function setupEditForm(btnTitle){
+  //run everytime needs to open the edit menu
   const editForm = document.getElementById("editform");
   const submitBtn = createElementFromHTML(`<button type="button" onclick="submitChanges()">submit</button>`)
   
-  while (btnGrid.firstChild) { // clear childs in editForm
-        btnGrid.removeChild(btnGrid.firstChild);
+  while (editForm.firstChild) { // clear childs in editForm
+        editForm.removeChild(editForm.firstChild);
   }
-  if (currentCommands.columns)
-  for (var i=0;i<currentCommands.columns;++i){
-    var inputElem = document.createElement("label")
-    inputElem.innerText=currentCommands.columns[i]
+  if (currentCommands.columns){
+    const btnData = getCommandByTitle(btnTitle);
+      for (var i=0;i<currentCommands.columns.length;++i){
+        var inputElem = document.createElement("label");
+        inputElem.innerText=currentCommands.columns[i];
+        editForm.appendChild(inputElem)
+        inputElem = document.createElement("input")
+        inputElem.type="text"
+        inputElem.id=currentCommands.columns[i]
+        inputElem.value = btnData[i];
+//disable the unchangeable value(id)
+    if (currentCommands.columns[i] === "ControllerId")
+      inputElem.disabled ="disabled";
     editForm.appendChild(inputElem)
-    inputElem = document.createElement("input")
-    inputElem.type="text"
-    inputElem.id=currentCommands.columns[i]
+  }
   }
   editForm.appendChild(submitBtn)
 
@@ -158,7 +174,6 @@ async function startup(){
   if (!currentCommands.columns){
     return
   }
-  setupEditForm()
   displayButtons()
   
 }
