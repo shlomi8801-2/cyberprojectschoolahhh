@@ -137,11 +137,9 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
             if (len(controllersActions.getControllersList(maxRows=2,offset=0,filters={"ownerUsername":userDict.get("username",""),"uuid":uuid}))!= 1):
                 #multiple or no controllers fitting this info
                 raise Exception("multiple or no controllers rather then 1 unique controller")
-                # return {"error":1,"error":"multiple or no controllers rather then 1 unique controller"}
-            return {"code":0,"columns":constants.CONTROLLERSCOMMANDS_TABLE[1],"commands":controllersActions.getControllerCommands()}
+            return {"code":0,"columns":constants.CONTROLLERSCOMMANDS_TABLE[1],"commands":controllersActions.getControllerCommands(uuid)} # max 100 commands by default(hard codded)
         case _:
             raise Exception(f"no such endpoint /list/{_type}")
-            # return {"code":1,"error":f"no such type {_type}"}
     
 
 @app.route("/controllers/<controllerId>/<option>",methods=['GET', 'POST'])
