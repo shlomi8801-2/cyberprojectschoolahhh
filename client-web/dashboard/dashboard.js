@@ -106,7 +106,7 @@ function getDataFromEditForm(){
 function submitChanges(){
   //run on submit in edit form
   const editForm = document.getElementById("editform");
-  makeFetch(API_URL + `/controllers/${selectedController.uuid}/update`,{},"POST",JSON.stringify(getDataFromEditForm()))
+  makeFetch(API_URL + `/controllers/${selectedController.uuid}/update`,{"content-type":"application/json"},"POST",JSON.stringify(getDataFromEditForm()))
 
   setTimeout(function(){},500); // delay before closing the form
   editForm.style.display = "none"
