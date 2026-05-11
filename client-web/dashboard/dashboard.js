@@ -16,7 +16,7 @@ async function makeFetch(url,additionalHeaders={},method="get",body={}){
   const res = await fetch(url,{
     headers: {"Token":getCookie("token"),...additionalHeaders},
     method: method,
-    body:(method=="post" ?body:null)
+    body:(method.toLowerCase()==="post" ?body:null)
   });
   return await res.json()
 }
@@ -51,7 +51,7 @@ function editBtnClick(){
     //its confirm
     editBtn.querySelector("div#face0").style.display = "block"
     editBtn.querySelector("div#face1").style.display = "none"
-    submitChanges();
+    // submitChanges(); moved to every submit clicked on the form
   }else if (!editMode){
     //enter edit
     editBtn.querySelector("div#face0").style.display = "none"
@@ -70,7 +70,6 @@ function getBtnId(htmlBtn){
 function getCommandByTitle(title){
   let i=0;
   for(i=0;i<currentCommands.commands.length;++i){
-    console.log(title)
     if (currentCommands.commands[i][currentCommands.columns.indexOf("title")]===title)
       break;
   }
@@ -93,14 +92,22 @@ function btnClick(thisBtn){
   makeFetch(API_URL + `/controllers/${selectedController.uuid}/execute`,{},"post")
   }
 }
-function submitChanges(btnData){
+function getDataFromEditForm(){
+    const editForm = document.getElementById("editform");
+    //the edit form is built in a loop so read it like it
+    const output = {}
+    editForm.childNodes.forEach(Node => {
+      if (Node.tagName==="INPUT"){
+        output[Node.name] = Node.value
+      }
+    });
+    return output 
+}
+function submitChanges(){
   //run on submit in edit form
   const editForm = document.getElementById("editform");
-  if (editForm.style.display == "none"){
-    //send the btnData to the server where it recognizes the btn by the id and changes what needed
-    return
+  makeFetch(API_URL + `/controllers/${selectedController.uuid}/update`,{},"POST",JSON.stringify(getDataFromEditForm()))
 
-  }
   setTimeout(function(){},500); // delay before closing the form
   editForm.style.display = "none"
 }
@@ -141,7 +148,7 @@ function setupEditForm(btnTitle){
         editForm.appendChild(inputElem)
         inputElem = document.createElement("input")
         inputElem.type="text"
-        inputElem.id=currentCommands.columns[i]
+        inputElem.name=currentCommands.columns[i]
         inputElem.value = btnData[i];
 //disable the unchangeable value(id)
     if (currentCommands.columns[i] === "ControllerId")
