@@ -151,36 +151,34 @@ def controllerManagement(controllerId:int,option:str="get"):
     perm,user = checkpermissions()
     if (perm ==-1):#user not logged in
         raise Exception("not logged in")
-    with getList("controllers",1,0,{"ownerUsername":user.get("username",""),"uuid":controllerId},bypassPermissionChecking=True) as controller:
-        if (len(controller) == 0):
-            raise f"no such controller with id {controllerId}"
-        controller = controller[0]
-    
-    commandObj = controllersActions.clientCommand(request.json())
-
+    controller =  getList("controllers",1,0,{"ownerUsername":user.get("username",""),"uuid":controllerId},bypassPermissionChecking=True)
+    if (len(controller.get("controllers",[])) == 0):
+        raise Exception(f"no such controller with id {controllerId}")
     if (request.method == "POST"):
+        commandObj = controllersActions.clientCommand(dict(request.get_json(force=True)))
         match (option):
             #only for the commands - no need to change the controller row
             case "update":
                 #check if a command have the same title already
                 if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
-                    raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
+                    raise Exception(f"command {commandObj.buttonTitle} does not exist for controller {controllerId}")
                 commandObj.updateDatabase()
             case "add":
                 #check if a command have the same title already
                 if controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
-                    raise f"command {commandObj.buttonTitle} already exists for controller {controllerId}"
+                    raise Exception(f"command {commandObj.buttonTitle} already exists for controller {controllerId}")
                 commandObj.addToDatabase()
             case "delete":
                 #check if a command have the same title 
                 if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
-                    raise f"command {commandObj.buttonTitle} does not exist for controller {controllerId}"
+                    raise Exception(f"command {commandObj.buttonTitle} does not exist for controller {controllerId}")
                 commandObj.deleteFromDatabase()
             case "excute":
                 #get the action id(title and controllerId) from the request body then send it to the controller
                 pass
             case _:
-                raise f"no such option {option}"
+                raise Exception(f"no such option {option}")
+        return {"code":0}
     if (request.method == "GET"):
         raise Exception("method not implamented")
         pass

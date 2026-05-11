@@ -8,8 +8,10 @@ class clientCommand:
     action:str = ""
     controllerId:str = ""
     buttonTitle:str =""
-    def __init__(self, sqlDict:dict):
-        sqlDict = utils.makeSqlDict(sqlDict,CONTROLLERSCOMMANDS_TABLE)
+    def __init__(self, sqlDict:dict|tuple):
+        if (isinstance(sqlDict,tuple)):
+            sqlDict = utils.makeSqlDict(sqlDict,CONTROLLERSCOMMANDS_TABLE)
+
         self.action = sqlDict.get("actions",None)
         self.controllerId = sqlDict.get("ControllerId",None)
         self.buttonTitle = sqlDict.get("title",None)
@@ -26,12 +28,14 @@ class clientCommand:
         if not (self.buttonTitle and self.controllerId):
             raise Exception("missing controllerId and title to identify command")
         database.Delete(CONTROLLERSCOMMANDS_TABLE[0],{"title":self.buttonTitle,"ControllerId":self.controllerId})
+    
     def updateDatabase(self):
         database.Update(CONTROLLERSCOMMANDS_TABLE[0],self.toDict(),{"ControllerId":self.controllerId,"title":self.buttonTitle})
+    
     def validateMissingData(self)->None:
         """if any of the data members in the object is missing raises an error"""
         if not (self.action and self.controllerId and self.buttonTitle):
-            raise Exception(f"missing data: {"action" if self.action else ""} {"controllerId" if self.controllerId else ""} {"title" if self.buttonTitle else ""}")
+            raise Exception(f"missing data:{" action" if not self.action else ""}{" controllerId" if not self.controllerId else ""} {" title" if not self.buttonTitle else ""}")
 
 
 
