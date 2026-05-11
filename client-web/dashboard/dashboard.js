@@ -51,7 +51,6 @@ function editBtnClick(){
     //its confirm
     editBtn.querySelector("div#face0").style.display = "block"
     editBtn.querySelector("div#face1").style.display = "none"
-    // submitChanges(); moved to every submit clicked on the form
   }else if (!editMode){
     //enter edit
     editBtn.querySelector("div#face0").style.display = "none"
@@ -103,10 +102,15 @@ function getDataFromEditForm(){
     });
     return output 
 }
-function submitChanges(){
+async function submitChanges(btnTitle){
   //run on submit in edit form
   const editForm = document.getElementById("editform");
-  makeFetch(API_URL + `/controllers/${selectedController.uuid}/update`,{"content-type":"application/json"},"POST",JSON.stringify(getDataFromEditForm()))
+  const res = await makeFetch(API_URL + `/controllers/${selectedController.uuid}/update`,{"content-type":"application/json","OldTitle":btnTitle},"POST",JSON.stringify(getDataFromEditForm()))
+  console.log(res)
+  if(res.code===0){//refresh all buttons
+    currentCommands = await fetchCommands(selectedController.uuid)
+    displayButtons()
+  }
 
   setTimeout(function(){},500); // delay before closing the form
   editForm.style.display = "none"
@@ -135,7 +139,7 @@ function displayButtons(){
 function setupEditForm(btnTitle){
   //run everytime needs to open the edit menu
   const editForm = document.getElementById("editform");
-  const submitBtn = createElementFromHTML(`<button type="button" onclick="submitChanges()">submit</button>`)
+  const submitBtn = createElementFromHTML(`<button type="button" onclick="submitChanges('${btnTitle}')">submit</button>`)
   
   while (editForm.firstChild) { // clear childs in editForm
         editForm.removeChild(editForm.firstChild);

@@ -160,9 +160,13 @@ def controllerManagement(controllerId:int,option:str="get"):
             #only for the commands - no need to change the controller row
             case "update":
                 #check if a command have the same title already
-                if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
+                oldTitle =commandObj.buttonTitle
+                if (handleHeaders().get("OldTitle")):
+                    #if the user wants to change the title they might as well send the old title in the headers
+                    oldTitle = handleHeaders().get("OldTitle")
+                if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=oldTitle):
                     raise Exception(f"command {commandObj.buttonTitle} does not exist for controller {controllerId}")
-                commandObj.updateDatabase()
+                commandObj.updateDatabase(oldTitle) #oldTitle acts like an id for the command
             case "add":
                 #check if a command have the same title already
                 if controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):

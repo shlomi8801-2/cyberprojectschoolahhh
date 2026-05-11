@@ -29,8 +29,8 @@ class clientCommand:
             raise Exception("missing controllerId and title to identify command")
         database.Delete(CONTROLLERSCOMMANDS_TABLE[0],{"title":self.buttonTitle,"ControllerId":self.controllerId})
     
-    def updateDatabase(self):
-        database.Update(CONTROLLERSCOMMANDS_TABLE[0],self.toDict(),{"ControllerId":self.controllerId,"title":self.buttonTitle})
+    def updateDatabase(self,oldTitle=None):
+        database.Update(CONTROLLERSCOMMANDS_TABLE[0],self.toDict(),{"ControllerId":self.controllerId,"title":oldTitle})
     
     def validateMissingData(self)->None:
         """if any of the data members in the object is missing raises an error"""
