@@ -58,7 +58,19 @@ function editBtnClick(){
   }
   editMode = !editMode
 }
-
+async function addCommandBtnClick(){
+  //send setupEditForm with blank data so it will add
+  setupEditForm(["","",""])
+}
+async function addCommand(){
+  const formData = getDataFromEditForm()
+  formData.ControllerId = selectedController.uuid
+  const res = await makeFetch(API_URL + `/controllers/${selectedController.uuid}/add`,{"content-type":"application/json"},"POST",JSON.stringify(formData))
+  if(res.code===0){//refresh all buttons
+    currentCommands = await fetchCommands(selectedController.uuid)
+    displayButtons()
+  }
+}
 
 function getBtnId(htmlBtn){
   //get hidden input with id "BTNID" and get its value
@@ -74,18 +86,15 @@ function getCommandByTitle(title){
   }
   return currentCommands.commands[i];
 }
+
 function btnClick(thisBtn){
   const btnUUID =getBtnId(thisBtn)
   if (editMode){
     const editForm = document.getElementById("editform");
-    editForm.style.display="block"
     thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.indexOf("uuid")]==btnUUID)
     thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
-    setupEditForm(btnUUID)
-    //here add the columns to the editform
-    //then submit to the server - in submitChanges function
-   
-    
+    const btnData = getCommandByTitle(btnUUID);
+    setupEditForm(btnData)
   }else {
   //send the command id to the server
   makeFetch(API_URL + `/controllers/${selectedController.uuid}/execute`,{},"post")
@@ -112,8 +121,7 @@ async function submitChanges(btnTitle){
     displayButtons()
   }
 
-  setTimeout(function(){},500); // delay before closing the form
-  editForm.style.display = "none"
+  
 }
 function displayButtons(){
   //take from currentCommands.commands
@@ -134,14 +142,18 @@ function displayButtons(){
   }
 }
 
-function setupEditForm(btnTitle){
+function setupEditForm(btnData){
   //run everytime needs to open the edit menu
   const editForm = document.getElementById("editform");
-  const submitBtn = createElementFromHTML(`<button type="button" onclick="submitChanges('${btnTitle}')">submit</button>`)
+  var submitBtn;
+  if (btnData.length ===currentCommands.columns.length && btnData[0].length>=1){ // if full of data means all editing at least for now
+    submitBtn = createElementFromHTML(`<button type="button" onclick="{submitChanges('${btnData[currentCommands.columns.indexOf("title")]}'); this.parentNode.style.display = 'none';}">submit</button>`)
+  }else{
+    submitBtn = createElementFromHTML(`<button type="button" onclick="{addCommand(); this.parentNode.style.display = 'none';}">submit</button>`)
+  }
   
   clearChildElements(editForm)
   if (currentCommands.columns){
-    const btnData = getCommandByTitle(btnTitle);
       for (var i=0;i<currentCommands.columns.length;++i){
         var inputElem = document.createElement("label");
         inputElem.innerText=currentCommands.columns[i];
@@ -157,7 +169,7 @@ function setupEditForm(btnTitle){
   }
   }
   editForm.appendChild(submitBtn)
-
+  editForm.style.display="block" //show the form
 }
 
 async function startup(){
