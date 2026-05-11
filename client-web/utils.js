@@ -85,3 +85,15 @@ async function getUsers() {
   }
   return null
 }
+function closeParent(elem){
+  //meant for the little x on top of a form(dialog)
+  while (elem.tagName!=="DIALOG"){
+    elem = elem.parentNode
+  }
+  elem.open=false
+}
+function clearChildElements(elem){
+   while (elem.firstChild) { // clear childs in btnGrid
+        elem.removeChild(elem.firstChild);
+    }
+}

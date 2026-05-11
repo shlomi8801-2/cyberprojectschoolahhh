@@ -30,6 +30,7 @@ async function getClients() { // controllers
   }
   return res;
 }
+
 function displayClients(res){
   const container = document.createElement("table")
       var row = document.createElement("tr")
@@ -96,6 +97,7 @@ async function openAttachForm(controllerUUID){
   }
     
   const container = document.getElementById("attachControllerSelect")
+  clearChildElements(container)
   for(let i=0;i<usersRes.users.length;++i){
     const tmp = document.createElement("option")
     tmp.value=usersRes.users[i][usernameIdx]

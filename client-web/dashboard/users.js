@@ -27,7 +27,6 @@ function displayUsers(res){
             tmpElem.type = "date";
             tmpElem.disabled = true
             tmpElem.value =epocToYYYYMMDD(currentDataValue);
-            console.log(tmpElem.value)
             valueElement = tmpElem;
           }else{
             // put as is for other

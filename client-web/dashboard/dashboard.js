@@ -121,9 +121,7 @@ function displayButtons(){
   const titleIndex = currentCommands.columns.indexOf("title")
   const btnIdIndex = currentCommands.columns.indexOf("title") // for now
   //       <button type="button" class="commandButton" onclick="btnClick(this)">test button1 <input type="hidden" value="id" id="BTNID"></button>
-  while (btnGrid.firstChild) { // clear childs in btnGrid
-        btnGrid.removeChild(btnGrid.firstChild);
-    }
+  clearChildElements(btnGrid)
   for (var i=0;i<currentCommands.commands.length;++i){
     var btn = createElementFromHTML(`      <button type="button" class="commandButton" onclick="btnClick(this)">test button</button>`)
     var hiddenBtnInput = document.createElement("input")
@@ -141,9 +139,7 @@ function setupEditForm(btnTitle){
   const editForm = document.getElementById("editform");
   const submitBtn = createElementFromHTML(`<button type="button" onclick="submitChanges('${btnTitle}')">submit</button>`)
   
-  while (editForm.firstChild) { // clear childs in editForm
-        editForm.removeChild(editForm.firstChild);
-  }
+  clearChildElements(editForm)
   if (currentCommands.columns){
     const btnData = getCommandByTitle(btnTitle);
       for (var i=0;i<currentCommands.columns.length;++i){
