@@ -14,7 +14,24 @@ async function getClients() { // controllers
       break;
     case 0: // success
       //put them in the table
-      const container = document.createElement("table")
+      
+      if (!res.controllers) {
+        alert("controllers were not found in the server response")
+        break;
+      }
+      if (!res.columns) {
+        alert("columns were not found in the server response")
+        break;
+      }
+      displayClients(res)
+      break;
+    default:
+      alert("error getting users list: unexpected code");
+  }
+  return res;
+}
+function displayClients(res){
+  const container = document.createElement("table")
       var row = document.createElement("tr")
       document.getElementById("container").appendChild(container)
       container.appendChild(row)
@@ -23,25 +40,31 @@ async function getClients() { // controllers
           elem.innerText=res.columns[x]
           row.appendChild(elem)
       }
-      if (!res.controllers) {
-        alert("controllers were not found in the server response")
-        break;
-      }
       for (var x=0;x<res.controllers.length;++x){
         row = document.createElement("tr")
-        if (!res.columns) {
-        alert("columns were not found in the server response")
-        break;
-      }
+        const uuidInputElement = createElementFromHTML(`<input type=hidden id="uuid">`)
+      
         for (var i=0;i<res.columns.length;i++){ // columns
           var elem = document.createElement("td");
           //here parse the value acording to the column
           const column = res.columns[i]
+          
           var currentDataValue = res.controllers[x][i]
           var valueElement;
-          if (column.includes("username") && 0){ // currently "&& 0" because for now its skipping it
-            //translate from base64
-          }else if (column.includes("date")){
+          var controllerUUID;
+          if(column.toLowerCase().includes("uuid")){
+            //once gets controller uuid save it
+            controllerUUID = currentDataValue;
+            uuidInputElement.value = controllerUUID
+          }
+          if (column.includes("ownerUsername") && !currentDataValue){
+            valueElement = createElementFromHTML(`<input type="submit" value="Attach" onclick="openAttachForm(this)">`)
+          valueElement.appendChild(uuidInputElement)
+            elem.appendChild(valueElement);
+            row.appendChild(elem)
+            continue; // exceptional write no data to cell because of the button
+          }
+          if (column.includes("date")){
             const tmpElem = document.createElement("input")
             tmpElem.type = "date";
             tmpElem.disabled = true
@@ -52,16 +75,19 @@ async function getClients() { // controllers
             valueElement = document.createElement("a")
             valueElement.innerText = currentDataValue;
           }
-          
+          // append attach button
           elem.appendChild(valueElement);
+          
+          
           row.appendChild(elem)
         }
+        
         container.appendChild(row)
       }
-      break;
-    default:
-      alert("error getting users list: unexpected code");
-  }
-  return res;
+
+}
+function openAttachForm(controllerUUID){
+  const model = document.getElementById("attachForm");
+  model.open=true
 }
 getClients();

@@ -124,6 +124,9 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
         case "controllers":
             ownerUsername = userDict.get("username","")
             filters["ownerUsername"] = ownerUsername
+            
+            if (perm >=1):
+                del filters["ownerUsername"]
             ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset,filters=filters)
             keys = controllersActions.removeFromControllersList(ControllersList,("password"))
             return {"code":0,"columns":keys,"controllers":ControllersList}

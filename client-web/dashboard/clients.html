@@ -12,5 +12,21 @@
     <input type="search" id="search" name="search" placeholder="Search">
      <div id="container">
      </div>
+
+<dialog id="attachForm">
+  <article>
+    <header>
+      <button aria-label="Close" rel="prev"></button>
+      <p>
+        <strong>Select user to attach the Controller to</strong>
+      </p>
+    </header>
+    <p>
+     <select name="select" aria-label="Select" required id="attachControllerSelect">
+      <option selected disabled value="">Select user</option>
+    </select>
+    </p>
+  </article>
+</dialog>
   </body>
 </html>
