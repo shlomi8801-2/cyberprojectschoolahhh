@@ -1,34 +1,4 @@
-async function getUsers() {
-    const maxrows=100;
-    const offset = 0;
-    var filters = JSON.stringify({}) // exmaple: {"username":"c2hsb21p"}
-  var res = await fetch(API_URL + `/list/users/${maxrows}/${offset}`, {
-    method: "get",
-    headers: {"Token":getCookie("token"),"Filters":filters},
-    credentials: 'include' // not working for some reason may fix later for now using in header
-  });
-  res = await res.json();
-  switch (res.code) {
-    case 1: //error
-      alert("error gettings users list");
-      console.error(res.error)
-      break;
-    case 0: // success
-      //put them in the table
-      if (!res.users) {
-        alert("users were not found in the server response")
-        break;
-      }
-      if (!res.columns) {
-        alert("columns were not found in the server response")
-        break;
-      }
-      displayUsers(res)
-      break;
-    default:
-      alert("error getting users list: unexpected code");
-  }
-}
+
 function displayUsers(res){
   const container = document.createElement("table")
       var row = document.createElement("tr")
@@ -83,8 +53,9 @@ function epocToYYYYMMDD(epocTimeInSeconds){
 
 
 
+async function setup(){
+  displayUsers(await getUsers())
+}
+setup()
 
 
-
-
-getUsers()

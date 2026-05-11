@@ -86,8 +86,21 @@ function displayClients(res){
       }
 
 }
-function openAttachForm(controllerUUID){
+async function openAttachForm(controllerUUID){
   const model = document.getElementById("attachForm");
   model.open=true
+  var usersRes = await getUsers()
+  var usernameIdx=0;
+  for(let i=0;i<usersRes.columns.length;++i){
+    usernameIdx =usersRes.columns[i]==="username" ? i:usernameIdx;
+  }
+    
+  const container = document.getElementById("attachControllerSelect")
+  for(let i=0;i<usersRes.users.length;++i){
+    const tmp = document.createElement("option")
+    tmp.value=usersRes.users[i][usernameIdx]
+    tmp.innerText=usersRes.users[i][usernameIdx]
+    container.appendChild(tmp);
+  }
 }
 getClients();
