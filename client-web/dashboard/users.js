@@ -15,7 +15,22 @@ async function getUsers() {
       break;
     case 0: // success
       //put them in the table
-      const container = document.createElement("table")
+      if (!res.users) {
+        alert("users were not found in the server response")
+        break;
+      }
+      if (!res.columns) {
+        alert("columns were not found in the server response")
+        break;
+      }
+      displayUsers(res)
+      break;
+    default:
+      alert("error getting users list: unexpected code");
+  }
+}
+function displayUsers(res){
+  const container = document.createElement("table")
       var row = document.createElement("tr")
       document.getElementById("container").appendChild(container)
       container.appendChild(row)
@@ -24,23 +39,18 @@ async function getUsers() {
           elem.innerText=res.columns[x]
           row.appendChild(elem)
       }
-      if (!res.users) {
-        alert("users were not found in the server response")
-        break;
-      }
-      for (var x=0;x<res.users.length;++x){
+      
+
+  for (var x=0;x<res.users.length;++x){
         row = document.createElement("tr")
-        if (!res.columns) {
-        alert("columns were not found in the server response")
-        break;
-      }
+        
         for (var i=0;i<res.columns.length;i++){ // columns
           var elem = document.createElement("td");
           //here parse the value acording to the column
           const column = res.columns[i]
           var currentDataValue = res.users[x][i]
           var valueElement;
-          if (column.includes("username") && 0){ // currently "&& 0" because for now its skipping it
+          if (column.includes("username") && 0){ // currently "&& 0" because for now it doesn't use base64
             //translate from base64
           }else if (column.includes("date")){
             const tmpElem = document.createElement("input")
@@ -50,6 +60,7 @@ async function getUsers() {
             console.log(tmpElem.value)
             valueElement = tmpElem;
           }else{
+            // put as is for other
             valueElement = document.createElement("a")
             valueElement.innerText = currentDataValue;
           }
@@ -59,10 +70,6 @@ async function getUsers() {
         }
         container.appendChild(row)
       }
-      break;
-    default:
-      alert("error getting users list: unexpected code");
-  }
 }
 
 function epocToYYYYMMDD(epocTimeInSeconds){

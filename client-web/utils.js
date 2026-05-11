@@ -27,3 +27,11 @@ function getCurrentHash() {
 function changeTheme(){
  //change the  data-theme property of the html element of the whole page to "light" or "dark"
 }
+function createElementFromHTML(htmlString) {
+  //credit to Crescent Fresh and Jay Taylor https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
+  var div = document.createElement('div');
+  div.innerHTML = htmlString.trim();
+
+  // Change this to div.childNodes to support multiple top-level nodes.
+  return div.firstChild;
+}
