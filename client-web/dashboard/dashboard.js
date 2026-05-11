@@ -161,12 +161,12 @@ async function startup(){
     // user has no controllers
     return
   }
-
-  selectedController= new controllerClass(myControllers.controllers[0],myControllers.columns)
+  currentCommands.code=1 //set failed status for current commands
+  for(let i=0;i<myControllers.controllers.length && currentCommands.code===1;++i) { // if failed to get commands for a controller try each one - for now there is no way of choosing controller in the user interface
+    selectedController= new controllerClass(myControllers.controllers[i],myControllers.columns)
   currentCommands = await fetchCommands(selectedController.uuid)
-  if (!currentCommands.columns){
-    return
   }
+  
   displayButtons()
   
 }
