@@ -103,8 +103,7 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
     #get the user requesting from the token sent then add to filter
     if (len(userDict) <=0):
         raise Exception("User not logged in!")
-    ownerUsername = userDict.get("username","")
-    filters["ownerUsername"] = ownerUsername
+    
     #checking for the permissions required
     for x in permsForTypes:
         if bypassPermissionChecking:
@@ -123,6 +122,8 @@ def getList(_type:str,rows:int = 100,offset:int=0,filters:dict={},bypassPermissi
                     
             return {"code":0,"columns":keys,"users":usersList}
         case "controllers":
+            ownerUsername = userDict.get("username","")
+            filters["ownerUsername"] = ownerUsername
             ControllersList = controllersActions.getControllersList(maxRows=rows,offset=offset,filters=filters)
             keys = controllersActions.removeFromControllersList(ControllersList,("password"))
             return {"code":0,"columns":keys,"controllers":ControllersList}
