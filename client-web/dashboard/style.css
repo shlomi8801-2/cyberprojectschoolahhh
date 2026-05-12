@@ -4,33 +4,20 @@
   position: fixed;
   width: 100%;
   top: 0px;
-  background-color: #ffffff15;
+  background-color: #ffffff15 !important;
   overflow: hidden;
 }
-
 /* Style the links inside the navigation bar */
-.topnav a {
+.topnav button {
   float: left;
-  color: #f2f2f2;
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
   font-size: 17px;
+  border-radius: 0%;
+  border-color: black;
 }
 
-/* Change the color of links on hover */
-.topnav a:hover {
-  background-color: #ddd;
-  color: black;
-}
-
-/* Add a color to the active/current link */
-.topnav a.active {
-  background-color: var(
-    --pico-primary-hover-background
-  ); /* from the pico style*/
-  color: white;
-}
 
 .logoutbtn {
   background: var(--pico-del-color);

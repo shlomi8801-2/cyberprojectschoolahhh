@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme>
   <!-- this is like the template the html files use -->
   <head>
     <meta charset="UTF-8" />
@@ -10,19 +10,27 @@
     <script type="text/javascript" src="../utils.js"></script>
     <script type="text/javascript" src="../constants.js"></script>
     <script type="text/javascript" src="index.js"></script>
+    
     <link rel="stylesheet" href="../css/pico.min.css" />
   </head>
   <body>
     <div class="topnav">
-      <a class="active" href=".">Dashboard</a>
-      <a href="#clients">clients</a>
-      <a href="#users">users</a>
-      <a href="#about">About</a>
-      <a onclick="logout()" class="logoutbtn"> logout</a>
+      <button class="active" onclick="window.location='.'">Dashboard</button>
+
+      <button onclick="window.location='#clients'" class="contrast">clients</button>
+      <button onclick="window.location='#users'" class="contrast">users</button>
+      <button onclick="window.location='#about'" class="contrast">About</button>
+      
+      <button class="contrast" name="data-theme-switcher">change theme</button>
+      <button onclick="logout()" class="logoutbtn"> logout</button>
     </div>
+    
     <div class="loaderBg" id="loader">
       <div class="loader"></div>
     </div>
     <iframe id="container" src="dashboard.html"></iframe>
   </body>
+  
+  <!-- must be after to catch all elements -->
+   <script src="../css/minimal-theme-switcher.js"></script> 
 </html>
