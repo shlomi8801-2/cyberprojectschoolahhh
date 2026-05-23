@@ -23,6 +23,7 @@ def handle_client(client_socket):
     client_socket.send(("a"*100).encode())
 #    client_socket.send(bytes((103).to_bytes(4,'little')))
     client_socket.send(b'abcdefg')
+    print(client_socket.recv(1024))
     client_socket.close()
 
 while True:
