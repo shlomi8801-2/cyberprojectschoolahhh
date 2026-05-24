@@ -97,7 +97,7 @@ byte* buildData(Hashtable& data){
     return output;
 }
 
-void SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
+void SnedCMD(Hashtable& data,unsigned long dataSize){
     //send raw data to the modem
     
     
@@ -113,8 +113,8 @@ void SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
     }
     dbg("sending command");
     SendATArr((char*)dataBytes,dataSize,0);
-    byte* output = SendAT((0x1a),outputSize,1000);// because the modem doesn't wait for the server aknowlagment it should respond instantly
-    free(output);
+    byte* output = StopDataSend();// because the modem doesn't wait for the server aknowlagment it should respond instantly
+    free(output);// to not lose the pointer withput freeing it
 
     
 }

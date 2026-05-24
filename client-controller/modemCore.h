@@ -2,6 +2,7 @@
 #include <client.h>
 #include "ATcommands.h"
 
+
 void changeModemPowerStart(byte state);
 void rebootModem();
 char fixATchar(const char c,byte dataMode=2);
@@ -42,3 +43,6 @@ inline bool confirmDataSize(byte* data,size_t packageSize){
     return tmpSize == packageSize;
 }
 void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT);
+
+void StartDataSend(size_t dataLength);
+byte* StopDataSend();

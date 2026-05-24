@@ -140,3 +140,12 @@ byte _BringUpGPRSConnection(){
         }
     return 0;
 }
+
+void _StartDataSend(size_t dataLength){
+    SendAT(ENTER_DATA_MODE_CMD,0); // returnes ">"
+}
+byte* _StopDataSend(){
+    unsigned long outputSize;
+    return SendAT((0x1a),outputSize,1000);// because the modem doesn't wait for the server aknowlagment it should respond instantly
+
+}

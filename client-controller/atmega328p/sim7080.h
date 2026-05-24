@@ -1,14 +1,20 @@
 #pragma once
-//https://m2msupport.net/m2msupport/tcp-ip-testing-with-simcom-sim7070-sim7080-modules/ is very helpful
 
+//https://m2msupport.net/m2msupport/tcp-ip-testing-with-simcom-sim7070-sim7080-modules/ is very helpful
+#define CONNECT_TO_SERVER_CMD "AT+CAOPEN"
 #define PWRKEY_PIN 16 //A2 soon to be implamented
 #define CONFIG_PDP_CMD "AT+CNCFG" // 7.2.2
 #define DEFAULT_PDP_IDX 0
+#define DEFAULT_CID_IDX 0 // what connection slot to use
+#define CONNECT_CMD_MAX_TIMEOUT_SEC 10
+#define SET_TCP_MAX_TIMEOUT_CMD "AT+CACFG=\"TIMEOUT\",0,"
+#define SEND_DATA_CMD "AT+CASEND"
+
 //must be defined in each sim header
 #define SET_APN_CMD_FULL CONFIG_PDP_CMD +"="+DEFAULT_PDP_IDX+",1,"+APN_NAME
 #define REBOOT_MODEM_CMD "AT+CFUN=6"
 #define TEST_COMMAND "AT"
-#define CLOSE_CONNECTION_CMD "AT+CIPCLOSE"
+#define CLOSE_CONNECTION_CMD "AT+CACLOSE"
 #define GET_LOCAL_IP_ADDRESS_CMD "AT+CNACT?"
 #define BRING_UP_WIRELESS_CONNECTION_GPRS "AT+CNACT=0,1"
 
@@ -19,8 +25,9 @@
 //this file is for each modemtype implamentation because for example sim7000 has different start up procedure then sim7080
 //used in modemCore that is importing some specific implamentation used in this file for example AT commands
 void _initialModem(SoftwareSerial *AT){
-    SendAT("AT+CACFG=\"TIMEOUT\",0,10");
+    SendAT((String)SET_TCP_MAX_TIMEOUT_CMD+CONNECT_CMD_MAX_TIMEOUT_SEC);
     //by default is at multi connection mode
+    SendAT("ATE0"); // disable command echo in from the modem
     
 }
 byte _checkModemStatus(){
@@ -39,15 +46,18 @@ void _resetPDPDeact(){
 }
 void _conncectToSerevr(){
     //must run initialModem before
+    //maybe a connection is saved on the modem but is down so close it in case
+    SendAT((String)CLOSE_CONNECTION_CMD+"="+DEFAULT_CID_IDX);
     byte tries = 50;
     do {
-    // String res = SendAT((String)CONNECT_TO_SERVER_CMD+"=\"TCP\",\""+SERVER_IP+"\","+SERVER_PORT); //returnes OK usually, for now not handling other types of outputs
-    // res = SendAT("",CONNECT_CMD_MAX_TIMEOUT_SEC*1000);
-    // dbg(res);
-    // if (res.indexOf("CONNECT OK") !=-1 || res.indexOf("ALREADY CONNECT") !=-1){
-    //     dbg("connected to the server successfully!");
-    //      return;
-    // }
+    String res = SendAT((String)CONNECT_TO_SERVER_CMD+"="+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP"+",\""+SERVER_IP+"\","+SERVER_PORT,CONNECT_CMD_MAX_TIMEOUT_SEC*1000); //returnes OK usually, for now not handling other types of outputs
+
+    res = SendAT((String)CONNECT_TO_SERVER_CMD+"?");
+
+    if (res.indexOf((String)+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP") !=-1){// supposing the rest is right
+        dbg("connected to the server successfully!");
+         return;
+    }
     } while (--tries !=0);
 
     dbg("failed connecting to the server!");
@@ -72,4 +82,12 @@ byte _BringUpGPRSConnection(){
     
         
     return 0;
+}
+void _StartDataSend(size_t dataLength){
+    SendAT((String)SEND_DATA_CMD+"="+DEFAULT_CID_IDX+","+"dataLength"); //if something went wrong, after 5 seconds(by default) cancel the sending 
+    //returns ok by default so no need to save the output
+}
+byte* _StopDataSend(){
+    return (byte*)malloc(1); // just so the free has something to free
+    //do nothing for now, StartDataSend handles the whole input with expected size
 }
