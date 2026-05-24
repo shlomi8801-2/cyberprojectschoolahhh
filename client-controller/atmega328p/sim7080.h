@@ -84,7 +84,7 @@ byte _BringUpGPRSConnection(){
     return 0;
 }
 void _StartDataSend(size_t dataLength){
-    SendAT((String)SEND_DATA_CMD+"="+DEFAULT_CID_IDX+","+"dataLength"); //if something went wrong, after 5 seconds(by default) cancel the sending 
+    SendAT((String)SEND_DATA_CMD+"="+DEFAULT_CID_IDX+","+dataLength); //if something went wrong, after 5 seconds(by default) cancel the sending 
     //returns ok by default so no need to save the output
 }
 byte* _StopDataSend(){

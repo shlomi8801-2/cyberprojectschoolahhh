@@ -99,7 +99,7 @@ byte* buildData(Hashtable& data){
 
 void SnedCMD(Hashtable& data,unsigned long dataSize){
     //send raw data to the modem
-    
+    StartDataSend(dataSize);
     
     // dbg((String)"sending "+data["type"]);
     byte* dataBytes = buildData(data);
