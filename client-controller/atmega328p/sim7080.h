@@ -1,7 +1,7 @@
 #pragma once
 //https://m2msupport.net/m2msupport/tcp-ip-testing-with-simcom-sim7070-sim7080-modules/ is very helpful
 
-#define pwrkeyPin 16 //A2 soon to be implamented
+#define PWRKEY_PIN 16 //A2 soon to be implamented
 #define CONFIG_PDP_CMD "AT+CNCFG" // 7.2.2
 #define DEFAULT_PDP_IDX 0
 //must be defined in each sim header
@@ -19,17 +19,23 @@
 //this file is for each modemtype implamentation because for example sim7000 has different start up procedure then sim7080
 //used in modemCore that is importing some specific implamentation used in this file for example AT commands
 void _initialModem(SoftwareSerial *AT){
-    // startInteractiveConsoleWithModem(*AT);
     SendAT("AT+CACFG=\"TIMEOUT\",0,10");
-    
     //by default is at multi connection mode
     
 }
 byte _checkModemStatus(){
     
 }
+void _powerCycleModem(){
+    dbg("starting power cycle");
+    pinMode(PWRKEY_PIN,OUTPUT); //software serial uses it so use it aswell
+    digitalWrite(PWRKEY_PIN,LOW);
+    sleep(200);
+    digitalWrite(PWRKEY_PIN,HIGH);
+    pinMode(PWRKEY_PIN,INPUT);
+}
 void _resetPDPDeact(){
-    
+    //didnt find a way yet only restart or just try to reactivate the pdp
 }
 void _conncectToSerevr(){
     //must run initialModem before
@@ -59,7 +65,7 @@ byte _BringUpGPRSConnection(){
                 strtok(localIp.begin(),"\"");
                 for(byte i=1;i<DEFAULT_PDP_IDX*2;++i)
                     strtok(NULL,"\""); 
-                    
+
                 dbg((String)"local ip is:" + strtok(NULL,"\""));
                 return 1;
             }

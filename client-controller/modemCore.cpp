@@ -183,15 +183,31 @@ byte BringUpGPRSConnection(){
 void closeConnectionToServer(){
     SendAT(CLOSE_CONNECTION_CMD);
 }
+
 void initialModem(SoftwareSerial *AT)
 {
     dbg("initializing modem!");
     fixATchar('0',0);
 
     SendAT("AT", 0, AT); // assign the object as static in the function
-    // should bring the modem from any status to 3 which is IP GPRSACT
+     #ifdef PWRKEY_PIN
+     for( byte tries = 10;--tries > 0;/*SEGA*/){
+            //https://github.com/MikulasP/sim7080/blob/master/sim7080g.cpp#L1064
+            
+            _powerCycleModem();
+            sleep(500);
+            if(waitForATResponse(2)){
+                break;
+            }
+            _powerCycleModem();
+
+    }
+    #endif
+    
     for( byte tries = 10;--tries > 0;/*SEGA*/)
     {
+       
+        
         if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
             dbg("module not responding");
