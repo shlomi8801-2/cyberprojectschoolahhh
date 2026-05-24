@@ -1,5 +1,7 @@
 #include "modemCore.h"
-#include <sim7000.h>
+
+#include "atmega328p/modem.h"
+
 char fixATchar(const char c,byte dataMode)
 {
     // bitSet(UCSR0A,U2X0);
@@ -156,7 +158,7 @@ byte waitForATResponse(unsigned int maxTimeoutSec)
 }
 void setModemAPN()
 {
-    dbg(SendAT((String)SET_APN_CMD + "=" + APN_NAME,APN_TASK_MAX_RESPONSE_TIME_SEC*1000));
+    dbg(SendAT((String)SET_APN_CMD_FULL,APN_TASK_MAX_RESPONSE_TIME_SEC*1000));
     
 }
 void resetModemAndWait()
@@ -172,7 +174,7 @@ void resetModemAndWait()
     }
 }
 void resetPDPDeact(){
-    SendAT(RESET_PDP_DEACT_STATE_CMD);
+    _resetPDPDeact();
 }
 byte BringUpGPRSConnection(){
     dbg("trying to use mobile data");
@@ -206,10 +208,6 @@ void initialModem(SoftwareSerial *AT)
             stopProgram();
             return;
         }
-        //set modem settings here
-        SendAT((String)WAIT_FOR_SERVER_AKNOLAGEMENTCMD+"=1");
-        SendAT("ATE0"); // disable command echo(the modem usually echoing the command used)
-
         _initialModem(AT);
         if (BringUpGPRSConnection()) break;
     }
@@ -221,20 +219,7 @@ inline void rebootModem()
     SendAT(REBOOT_MODEM_CMD);
 }
 void conncectToSerevr(){
-    //must run initialModem before
-    byte tries = 50;
-    do {
-    String res = SendAT((String)CONNECT_TO_SERVER_CMD+"=\"TCP\",\""+SERVER_IP+"\","+SERVER_PORT); //returnes OK usually, for now not handling other types of outputs
-    res = SendAT("",CONNECT_CMD_MAX_TIMEOUT_SEC*1000);
-    dbg(res);
-    if (res.indexOf("CONNECT OK") !=-1 || res.indexOf("ALREADY CONNECT") !=-1){
-        dbg("connected to the server successfully!");
-         return;
-    }
-    } while (--tries !=0);
-
-    dbg("failed connecting to the server!");
-    stopProgram();
+    _conncectToSerevr();
 }
 
 void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT){

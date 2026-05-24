@@ -97,8 +97,8 @@ byte* buildData(Hashtable& data){
     return output;
 }
 
-void SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){// TODO fix this function catching after 4 bytes
-    SendAT(ENTER_DATA_MODE_CMD,0); // returnes ">"
+void SnedCMD(Hashtable& data,unsigned long& outputSize,unsigned long dataSize){
+    //send raw data to the modem
     
     
     // dbg((String)"sending "+data["type"]);

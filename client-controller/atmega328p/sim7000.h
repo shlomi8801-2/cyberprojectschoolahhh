@@ -1,4 +1,36 @@
 #pragma once
+
+
+
+#define GET_SUBSCRIPTION_NUMBER "AT+CNUM"
+
+#define START_TCP_CONNECTION "AT+CIPSTART" // section 8 in the document
+#define QUALITY_REPORT_CMD "AT+CSQ" // 3.2.16
+//https://github.com/DFRobot/DFRobot_SIM/blob/master/DFRobot_SIMclient.cpp might be helpful
+#define GET_CURR_STATUS_CMD "AT+CIPSTATUS" // 8.2.13 
+#define SET_APN_CMD "AT+CSTT" // add = at the end to set the apn 5.2.27
+#define SET_SERIAL_SPEED_CMD "AT+IPR" // use as AT+IPR=<rate> 2.2.32
+#define SET_MODEM_FUNCTIONALITY_CMD "AT+CFUN" //3.2.19
+
+#define RESET_PDP_DEACT_STATE_CMD "AT+CIPSHUT"
+#define TCP_EXAMPLE_CONNECT_REMOTE_ECHO_SERVER "AT+CIPSTART=\"TCP\",\"45.79.112.203\",4242" //https://tcpbin.com
+#define CONNECT_TO_SERVER_CMD "AT+CIPSTART"// must be at IP STATUS state witch executed by using AT+CIFSR, send with args for like this ...="<TCP/UDP>"","<host>",<port> 
+#define CONNECT_CMD_MAX_TIMEOUT_SEC 160
+#define ENTER_DATA_MODE_CMD "AT+CIPSEND" // data received as normal 8 bit each time and at every sent data it has to add 0x1a to execute the message sending
+#define WAIT_FOR_SERVER_AKNOLAGEMENTCMD "AT+CIPQSEND" // = either 0 or 1 https://electronics.stackexchange.com/questions/508699/sim7000e-modem-stops-sending-send-ok-reply
+
+//must be defined in each sim header
+#define SET_APN_CMD_FULL SET_APN_CMD + "=" + APN_NAME
+#define REBOOT_MODEM_CMD "AT+CFUN=6"
+#define TEST_COMMAND "AT"
+#define CLOSE_CONNECTION_CMD "AT+CIPCLOSE"
+#define GET_LOCAL_IP_ADDRESS_CMD "AT+CIFSREX" //8.2.12
+#define BRING_UP_WIRELESS_CONNECTION_GPRS "AT+CIICR" // 8.2.10
+
+
+
+
+
 //this file is for each modemtype implamentation because for example sim7000 has different start up procedure then sim7080
 //used in modemCore that is importing some specific implamentation used in this file for example AT commands
 void _initialModem(SoftwareSerial *AT){
@@ -7,6 +39,10 @@ void _initialModem(SoftwareSerial *AT){
             return;
         dbg("setting apn");
         setModemAPN();
+        //set modem settings here
+        SendAT((String)WAIT_FOR_SERVER_AKNOLAGEMENTCMD+"=1");
+        SendAT("ATE0"); // disable command echo(the modem usually echoing the command used)
+
         status = checkModemStatus();
         if (status != 1){
             dbg("status is:" + (String)status);
@@ -33,6 +69,7 @@ void _initialModem(SoftwareSerial *AT){
                     resetModemAndWait();
         }
 }
+
 }
 byte _checkModemStatus(){
     byte tries = 5;
@@ -70,4 +107,23 @@ byte _checkModemStatus(){
     // 10 PDP DEACT
     // 11 IP PROCESSING
     // 12 the modem responded with ERROR
+}
+void _resetPDPDeact(){
+    SendAT(RESET_PDP_DEACT_STATE_CMD);
+}
+void _conncectToSerevr(){
+    //must run initialModem before
+    byte tries = 50;
+    do {
+    String res = SendAT((String)CONNECT_TO_SERVER_CMD+"=\"TCP\",\""+SERVER_IP+"\","+SERVER_PORT); //returnes OK usually, for now not handling other types of outputs
+    res = SendAT("",CONNECT_CMD_MAX_TIMEOUT_SEC*1000);
+    dbg(res);
+    if (res.indexOf("CONNECT OK") !=-1 || res.indexOf("ALREADY CONNECT") !=-1){
+        dbg("connected to the server successfully!");
+         return;
+    }
+    } while (--tries !=0);
+
+    dbg("failed connecting to the server!");
+    stopProgram();
 }
