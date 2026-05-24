@@ -124,8 +124,15 @@ void RegisterToServer(){
     Hashtable test;
     test["type"]="REG";
     char* dataBytes = (char*)buildData(test);
-    unsigned long outputSize;
+    unsigned long outputSize=0;
     int n = 5;
+
+    //get the bytes array size by how its built
+    for (byte i=0;i<HEADER_SIZE_BYTES;i++){
+        dbg(outputSize);
+        outputSize+=dataBytes[i]<<8*i;
+    }
+
     SnedCMD(test,outputSize);
             dbg("waiting for data");
             fixATchar('0',4);
