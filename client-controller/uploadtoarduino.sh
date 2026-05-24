@@ -3,8 +3,8 @@ cd "$PWD"
 # /home/shlomilevi/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++ -c -g -w -std=gnu++11 -fpermissive -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics -Wno-error=narrowing -flto -w -x c++ -E -CC -DARDUINO=10819 -DARDUINO_AVR_UNO -DARDUINO_ARCH_AVR -I/home/shlomilevi/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino -I/home/shlomilevi/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard client.cpp -o main -lm -mmcu=atmega328 -DF_CPU=16000000UL -Os -Dpc &&
 # avr-g++ client.cpp -o main -lm -Iatmega328p/includes/core -Iatmega328p/includes/ -mmcu=atmega328 -DF_CPU=16000000UL -Os -D__AVR_ATmega328P__ &&
 FLAGS="-w -o main -Iatmega328p/includes/core -Iatmega328p/includes/ -lm -w -g -flto -fuse-linker-plugin -mmcu=atmega328 -DF_CPU=16000000UL -Os -Wl,--gc-sections -fdata-sections -ffunction-sections -D_SS_MAX_RX_BUFF=256"
-ARDUINOPORT="/dev/ttyUSB0"
-# ARDUINOPORT="/dev/ttyACM0"
+# ARDUINOPORT="/dev/ttyUSB0"
+ARDUINOPORT="/dev/ttyACM0"
 sudo chmod 777 $ARDUINOPORT
 if [ $# -eq 0 ]; then #no input arguments given
 # echo "$(find atmega328p/includes/. -type f -iregex ".*\.cpp") $(find atmega328p/includes/. -type f -iregex ".*\.c") $FLAGS"

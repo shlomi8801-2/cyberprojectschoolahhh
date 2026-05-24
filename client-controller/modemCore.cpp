@@ -158,7 +158,7 @@ byte waitForATResponse(unsigned int maxTimeoutSec)
 }
 void setModemAPN()
 {
-    dbg(SendAT((String)SET_APN_CMD_FULL,APN_TASK_MAX_RESPONSE_TIME_SEC*1000));
+    SendAT((String)SET_APN_CMD_FULL,APN_TASK_MAX_RESPONSE_TIME_SEC*1000);
     
 }
 void resetModemAndWait()
@@ -177,17 +177,7 @@ void resetPDPDeact(){
     _resetPDPDeact();
 }
 byte BringUpGPRSConnection(){
-    dbg("trying to use mobile data");
-        SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS);
-        SendAT("AT",65000); // the BRING_UP_WIRELESS_CONNECTION_GPRS returnes an output when it gets it but its not the response after that returns the response then waiting for it like that
-        // finally
-        String localIp = SendAT(GET_LOCAL_IP_ADDRESS_CMD);
-        if (localIp.indexOf('.')!=-1) // 
-        { // 3 IP GPRSACT means connected
-            dbg("local ip is:" + localIp);
-            return 1;
-        }
-    return 0;
+    return _BringUpGPRSConnection();
 }
 
 void closeConnectionToServer(){
@@ -208,7 +198,9 @@ void initialModem(SoftwareSerial *AT)
             stopProgram();
             return;
         }
+        //should bring the modem into to a point that it can activate network so BringUpGPRSConnection succeed
         _initialModem(AT);
+        setModemAPN();
         if (BringUpGPRSConnection()) break;
     }
     dbg("modem initionlized!");

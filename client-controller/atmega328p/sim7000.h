@@ -127,3 +127,16 @@ void _conncectToSerevr(){
     dbg("failed connecting to the server!");
     stopProgram();
 }
+byte _BringUpGPRSConnection(){
+    dbg("trying to use mobile data");
+        SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS);
+        SendAT("AT",65000); // the BRING_UP_WIRELESS_CONNECTION_GPRS returnes an output when it gets it but its not the response after that returns the response then waiting for it like that
+        // finally
+        String localIp = SendAT(GET_LOCAL_IP_ADDRESS_CMD);
+        if (localIp.indexOf('.')!=-1) // 
+        { // 3 IP GPRSACT means connected
+            dbg("local ip is:" + localIp);
+            return 1;
+        }
+    return 0;
+}

@@ -29,7 +29,7 @@ inline size_t getSizeFromHeader(byte* data){
     }
     size_t tmpSize = 0;
     for (byte i=HEADER_SIZE_BYTES-sizeof(size_t);i<HEADER_SIZE_BYTES;++i){//the lengths of the data are represented as big endian instead of this code compiling as little endian
-            dbg(data[i]);
+            // dbg(data[i]);
             tmpSize <<= 8;
             tmpSize +=data[i];
     }

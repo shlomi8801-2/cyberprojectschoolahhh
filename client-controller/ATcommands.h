@@ -16,8 +16,10 @@
 #define HEADER_SIZE_BYTES 4 //HEADER_SIZE_BYTES must be under 5
 #define RAMTOTAL RAMEND-RAMSTART
 
+// -----------------define your modem file(located in atmega328p/modem.h)----------------
 // #define sim7000;
 #define sim7080;
+//---------------------------------------------------------------------------------------
 
 // #define _SS_MAX_RX_BUFF 256 // packets arriving are stored in a buffer for now at least because the modem just sends all of the data at once so change the max buffer from 64
 //changed in the upload to arduino script as compiler flag
