@@ -58,7 +58,29 @@ void SkipNATCharacters(int n, unsigned long Timeoutms)
         }
     }
 }
+byte *GetATResponseFixedSize(unsigned long size, unsigned long Timeoutms, SoftwareSerial *AT){
+while (Timeoutms > 0 && _AT->available() <= 0)
+    {
+        sleep(10);
+        Timeoutms -= 10;
+    }
+    if (Timeoutms <= 0 && _AT->available() <= 0)
+    {
+        byte *res = (byte *)malloc(11);
+        memcpy(res, "NO RESPONSE", 11);
+        return res;
+    }
 
+    byte *output = (byte *)malloc(sizeof(byte)*size);
+    
+    for (unsigned long i = 0; _AT->available(); i++)
+    {
+        char c = _AT->read();
+        c = fixATchar(c);
+        output[i] = c;
+    }
+    return output;
+}
 byte *GetATResponse(unsigned long &size, unsigned long Timeoutms, SoftwareSerial *AT)
 {
     while (Timeoutms > 0 && _AT->available() <= 0)
@@ -74,10 +96,12 @@ byte *GetATResponse(unsigned long &size, unsigned long Timeoutms, SoftwareSerial
     }
 
     byte *output = (byte *)malloc(sizeof(byte));
-    // for(byte i=0;i<4;i++)
-    //         output[i]=_AT->read();
-    // output = (byte*)realloc(output,sizeof(byte)* (*(unsigned long*)output));
-
+    if (output == nullptr)
+        {
+            dbg("out of memory in GetATResponse");
+            stopProgram();
+        }
+    
     size = 1;
     for (unsigned long i = 0; _AT->available(); i++)
     {
@@ -93,7 +117,7 @@ byte *GetATResponse(unsigned long &size, unsigned long Timeoutms, SoftwareSerial
     }
     return (byte *)reallocSafe(output, --size);
 }
-byte *SendAT(const char str, unsigned long &size, unsigned long Timeoutms, SoftwareSerial *AT)
+byte* SendATchrArr(const char str, unsigned long &size, unsigned long Timeoutms, SoftwareSerial *AT)
 {
     SendATHelper(&str, 1, 0, AT);
     return GetATResponse(size, Timeoutms, AT);
@@ -279,4 +303,7 @@ void StartDataSend(size_t dataLength){
 }
 byte* StopDataSend(){
     return _StopDataSend();
+}
+byte* waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
+    return _waitForServerResponse(size,Timeoutms);
 }
