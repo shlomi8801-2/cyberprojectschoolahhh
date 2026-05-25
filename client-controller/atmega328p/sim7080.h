@@ -9,6 +9,7 @@
 #define CONNECT_CMD_MAX_TIMEOUT_SEC 10
 #define SET_TCP_MAX_TIMEOUT_CMD "AT+CACFG=\"TIMEOUT\",0,"
 #define SEND_DATA_CMD "AT+CASEND"
+#define RECEIVE_DATA_CMD "AT+CARECV"
 
 //must be defined in each sim header
 #define SET_APN_CMD_FULL CONFIG_PDP_CMD +"="+DEFAULT_PDP_IDX+",1,"+APN_NAME
@@ -88,6 +89,41 @@ void _StartDataSend(size_t dataLength){
     //returns ok by default so no need to save the output
 }
 byte* _StopDataSend(){
+    SendAT("",10000); //wait for ok from the server
     return (byte*)malloc(1); // just so the free has something to free
     //do nothing for now, StartDataSend handles the whole input with expected size
+}
+byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
+    //implament receiving data on the server connection
+    String res = SendAT((String)RECEIVE_DATA_CMD+"?");
+    while(res.indexOf("+CARECV")==-1){
+        res = SendAT((String)RECEIVE_DATA_CMD+"?");
+        sleep(100);
+        if(Timeoutms>1){
+            Timeoutms -=100;
+        }else{
+            //no response in time
+            size=0;
+            return nullptr;
+        }
+    }
+    //example response for that: "+CARECV: 4,IMK"
+    strtok(res.begin(),((String)DEFAULT_CID_IDX+",").begin());
+    char* buf = strtok(nullptr,"\n");
+    sscanf(buf,",%d",&size);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
+    dbg("buffer size for receiving is:",0);
+    dbg(size);
+    //do size checks here altho the modem cant have infinite buffer also
+    dbg(SendAT((String)RECEIVE_DATA_CMD+"="+DEFAULT_CID_IDX+","+size,0));
+    size+=4;
+    fixATchar(0,4);
+    unsigned long newSize =0;
+    byte* output = GetATResponse(newSize,Timeoutms);
+    //temporarly fix is to shift the whole array because of the recv command adding prefix
+    // printArr(output,size);
+    memmove(output,output+(newSize-size),size);
+    printArr(output,size);
+    output = (byte*)reallocSafe(output,size);//relaese the end of the array because we shifted it down
+    fixATchar(0,0);
+    return output;
 }

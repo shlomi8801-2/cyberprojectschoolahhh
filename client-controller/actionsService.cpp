@@ -118,6 +118,7 @@ void SnedCMD(Hashtable& data,unsigned long dataSize){
 
     
 }
+
 void RegisterToServer(){
 
     dbg("registering to server");
@@ -129,14 +130,12 @@ void RegisterToServer(){
 
     //get the bytes array size by how its built
     for (byte i=0;i<HEADER_SIZE_BYTES;i++){
-        dbg(outputSize);
         outputSize+=dataBytes[i]<<8*i;
     }
 
     SnedCMD(test,outputSize);
             dbg("waiting for data");
-            fixATchar('0',4);
-            byte* output = GetATResponse(outputSize,10000);//10 sec timeout
+            byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
             if (output == nullptr){
                 dbg("error in sendATArr");
                 stopProgram();

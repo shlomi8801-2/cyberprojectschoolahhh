@@ -149,3 +149,7 @@ byte* _StopDataSend(){
     return SendAT((0x1a),outputSize,1000);// because the modem doesn't wait for the server aknowlagment it should respond instantly
 
 }
+byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
+    fixATchar('0',4);
+    return GetATResponse(size,Timeoutms);
+}
