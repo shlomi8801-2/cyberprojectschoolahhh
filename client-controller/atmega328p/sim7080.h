@@ -114,10 +114,8 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
         newsize=size;
         //example response for that: "+CARECV: 4,IMK"
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
-        dbg(res);
         strtok(res.begin(),((String)DEFAULT_CID_IDX+",").begin());
         char* buf = strtok(nullptr,"\n");
-        dbg(buf+1);
         sscanf(buf+1,"%d",&size);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
         if(strlen(buf)==0){
             newsize = ~size;
@@ -133,9 +131,9 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
     SendAT((String)RECEIVE_DATA_CMD+"="+DEFAULT_CID_IDX+","+size,0);
     unsigned long newSize =0;
     skipUntilChar(',');
-    fixATchar(0,3);
+    fixATchar(0,2); // date mode(just temporarly to make it work)
     byte* output = GetATResponse(newSize,Timeoutms);
-    printArr(output,newSize);
+    // printArr(output,newSize); // for debugging if needed
     fixATchar(0,0);
     newSize -= strlen("\r\n\r\nOK\r\n");
     if(newSize !=size){

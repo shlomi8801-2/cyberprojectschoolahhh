@@ -123,6 +123,11 @@ void RegisterToServer(){
     // printArr(output,outputSize);
     test.~Hashtable();
     // printArr(output,outputSize);
+    
+    // StartDataSend(outputSize);
+    // SendATArr((char*)output,outputSize);
+    // StopDataSend();
+
     bool verified = confirmDataSize(output,outputSize);
     dbg("verified:",0);
     dbg(verified);

@@ -12,7 +12,7 @@ server.bind((bind_ip, bind_port))
 server.listen(5)
 
 print(f"[+] Listening on port {bind_ip} : {bind_port}")
-print(len(''.join([chr(x) for x in range(0,256)]).encode("latin-1")))
+print(len(''.join([chr(x) for x in range(0,128)]).encode("latin-1")))
 #client handling thread
 def handle_client(client_socket):
     #printing what the client sends
@@ -20,11 +20,10 @@ def handle_client(client_socket):
 #    print(f"[+] Recieved: {request}")
     #sending back the packet
 #    client_socket.send(bytes(1))
-    client_socket.send(''.join([chr(x) for x in range(0,128)]).encode("latin-1"))
+    client_socket.send(''.join([chr(x) for x in range(0,250)]).encode("latin-1"))
     
 #    client_socket.send(bytes((103).to_bytes(4,'little')))
     # client_socket.send(b'abcdefg')
-    print(client_socket.recv(1024))
     client_socket.close()
 
 while True:

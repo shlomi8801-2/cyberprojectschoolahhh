@@ -21,7 +21,7 @@
     "client": {
         "ip": "127.0.0..1",
         "port":1234,
-        "encoding":"utf-8", //default
+        "encoding":"latin-1", //required for the modem to recognize digits correctly
         "header_size":4 //bytes
     }
 }
