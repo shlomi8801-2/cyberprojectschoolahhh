@@ -123,7 +123,9 @@ byte *GetATResponse(unsigned long &size, unsigned long Timeoutms, SoftwareSerial
         }
     
     size = 1;
-    for (unsigned long i = 0; _AT->available(); i++)
+    unsigned long i = 0; // must be outside so it keeps the output
+    while(_AT->available()){
+        for (; _AT->available(); i++)
     {
         output = (byte *)reallocSafe(output, ++size);
         if (output == nullptr)
@@ -135,6 +137,9 @@ byte *GetATResponse(unsigned long &size, unsigned long Timeoutms, SoftwareSerial
         c = fixATchar(c);
         output[i] = c;
     }
+    sleep(1);//in case there was a break that was too big
+    }
+    
     return (byte *)reallocSafe(output, --size);
 }
 byte* SendATchrArr(const char str, unsigned long &size, unsigned long Timeoutms, SoftwareSerial *AT)
@@ -326,4 +331,9 @@ byte* StopDataSend(){
 }
 byte* waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
     return _waitForServerResponse(size,Timeoutms);
+}
+void clearATBuffer(){
+    while (_AT->available()){
+        _AT->read();
+    }
 }

@@ -38,3 +38,4 @@ void StartDataSend(size_t dataLength);
 byte* StopDataSend();
 byte* waitForServerResponse(unsigned long &size, unsigned long Timeoutms);
 void skipUntilChar(char c,size_t Timeoutms=10000);
+void clearATBuffer();

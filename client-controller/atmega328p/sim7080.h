@@ -29,6 +29,7 @@ void _initialModem(SoftwareSerial *AT){
     SendAT((String)SET_TCP_MAX_TIMEOUT_CMD+CONNECT_CMD_MAX_TIMEOUT_SEC);
     //by default is at multi connection mode
     SendAT("ATE0"); // disable command echo in from the modem
+    SendAT("AT+CSCS=\"UCS2\""); // set the correct charset to use
     
 }
 byte _checkModemStatus(){
@@ -98,7 +99,6 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
     String res = SendAT((String)RECEIVE_DATA_CMD+"?");
     while(res.indexOf("+CARECV")==-1){
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
-        
         if(Timeoutms>1){
             Timeoutms -=100;
         }else{
@@ -107,18 +107,35 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
             return nullptr;
         }
     }
-    //example response for that: "+CARECV: 4,IMK"
-    strtok(res.begin(),((String)DEFAULT_CID_IDX+",").begin());
-    char* buf = strtok(nullptr,"\n");
-    sscanf(buf,",%d",&size);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
+    // size=-1; // breaks the sscanf setting size value for some reason
+    unsigned long newsize =~size;
+    while (newsize != size)
+    {
+        newsize=size;
+        //example response for that: "+CARECV: 4,IMK"
+        res = SendAT((String)RECEIVE_DATA_CMD+"?");
+        dbg(res);
+        strtok(res.begin(),((String)DEFAULT_CID_IDX+",").begin());
+        char* buf = strtok(nullptr,"\n");
+        dbg(buf+1);
+        sscanf(buf+1,"%d",&size);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
+        if(strlen(buf)==0){
+            newsize = ~size;
+        }
+    }
+    
+    
+
+
     dbg("buffer size for receiving is:",0);
     dbg(size);
     //do size checks here altho the modem cant have infinite buffer also
     SendAT((String)RECEIVE_DATA_CMD+"="+DEFAULT_CID_IDX+","+size,0);
     unsigned long newSize =0;
     skipUntilChar(',');
-    fixATchar(0,4);
+    fixATchar(0,3);
     byte* output = GetATResponse(newSize,Timeoutms);
+    printArr(output,newSize);
     fixATchar(0,0);
     newSize -= strlen("\r\n\r\nOK\r\n");
     if(newSize !=size){
