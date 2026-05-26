@@ -1,5 +1,5 @@
 #include "actionsService.h"
-
+#include <dataPackage.h>
 
 void registerClient(){
 
@@ -22,27 +22,6 @@ void loginClient(){
         return output;
 }
 
-Hashtable parseData(byte* data){
-    //byte array which looks like this <length><encoded?><data><length2><encoded?><data2> for exanple:   \x00\x00\x00\x04\x00code\x00\x00\x00\x05\x00abcde
-    //encoded means is the data bin or chars
-    //the length is always as the HEADER_SIZE the data is always encoded with the encoding in settings
-    Hashtable output;
-    size_t dataSize =getSizeFromHeader(data);
-    dbg("size:",0);
-    dbg(dataSize);
-    for(int i =HEADER_SIZE_BYTES;i<dataSize;i++){
-        String key =getValue(data+i,i);
-        i+=key.length();
-        i+=HEADER_SIZE_BYTES;
-        String value =getValue(data+i,i);
-        i+=HEADER_SIZE_BYTES;
-        i+=value.length();
-        output[key]=value;
-    }
-    return output;
-        
-
-}
 
 
 byte* buildData(Hashtable& data){
@@ -144,16 +123,31 @@ void RegisterToServer(){
     
 
     test.~Hashtable();
+    // printArr(output,outputSize);
     bool verified = confirmDataSize(output,outputSize);
     dbg("verified:",0);
     dbg(verified);
-    if (verified)
-    test = parseData(output);
+    if (verified){
+        
     // for(auto i: test){
     //     dbg(i.key,0);
     //     dbg(": ",0);
     //     dbg(i.value);
     // }
+    dataPackage aaa(output,outputSize);
+    size_t n=0;
+    dbg("printing");
+    byte* b = aaa.get("password",n);
+    // for (int i=0;i<n;i++){
+    //     //  dbg(((byte*)output)[i],0);
+    //     //  dbg("    ",0);
+    //     dbg(fixATchar(((char*)output)[i],0),0);
+    // }
+    printArr(b,n);
+    dbg(n);
+    // dbg(test["uuid"]);
+    }
+    
     free(output);
 
 }

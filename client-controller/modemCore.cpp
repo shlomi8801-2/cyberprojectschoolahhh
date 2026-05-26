@@ -44,6 +44,22 @@ String SendATArr(const char *str, unsigned long size, unsigned long Timeoutms, S
 }
 static SoftwareSerial *_AT;
 
+void skipUntilChar(char c,size_t Timeoutms){
+    //skips the output from the AT serial until certain char or timeout
+     while (Timeoutms > 0)
+    {
+        while (_AT->available())
+        { // sometimes it comes with delay from each character
+            char tmp = fixATchar(_AT->read());
+            if (tmp == c){
+                return;
+            }
+            
+        }
+        sleep(10);
+        Timeoutms -= 10;
+    }
+}
 void SkipNATCharacters(int n, unsigned long Timeoutms)
 {
     // waits for n characters from the modem with max timeout
@@ -83,6 +99,7 @@ while (Timeoutms > 0 && _AT->available() <= 0)
 }
 byte *GetATResponse(unsigned long &size, unsigned long Timeoutms, SoftwareSerial *AT)
 {
+    //reads from the AT serial buffer
     while (Timeoutms > 0 && _AT->available() <= 0)
     {
         sleep(10);

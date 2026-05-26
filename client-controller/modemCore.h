@@ -1,6 +1,6 @@
 #pragma once
 #include <client.h>
-#include "ATcommands.h"
+#include <ATcommands.h>
 
 //this file should handle all custom modem functions
 
@@ -24,20 +24,7 @@ void initialModem(SoftwareSerial* AT);
 void connectToServer();
 void conncectToSerevr();
 void closeConnectionToServer();
-inline size_t getSizeFromHeader(byte* data){
-    //getting the value of the number from the "header"(couple of bytes at the start of data)
-    for (byte i=0;i<HEADER_SIZE_BYTES- sizeof(size_t);++i){
-        //if the data header is bigger then the size of the packageSize then the first bytes must be 0
-        if (data[i]!=0) return -1;
-    }
-    size_t tmpSize = 0;
-    for (byte i=HEADER_SIZE_BYTES-sizeof(size_t);i<HEADER_SIZE_BYTES;++i){//the lengths of the data are represented as big endian instead of this code compiling as little endian
-            // dbg(data[i]);
-            tmpSize <<= 8;
-            tmpSize +=data[i];
-    }
-    return tmpSize;
-}
+
 inline bool confirmDataSize(byte* data,size_t packageSize){
     
     size_t tmpSize = getSizeFromHeader(data);
@@ -50,3 +37,4 @@ void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT);
 void StartDataSend(size_t dataLength);
 byte* StopDataSend();
 byte* waitForServerResponse(unsigned long &size, unsigned long Timeoutms);
+void skipUntilChar(char c,size_t Timeoutms=10000);

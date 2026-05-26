@@ -16,7 +16,6 @@ class clientSock:
         if (cmdtype and data):
             data["type"] = cmdtype
             data = buildata(data)
-            print(data)
             self.sock.sendall(data)
     def recievecmd(self)->dict:
         """run in a loop, waits for bytes from the client then parsing it and returning it as a dict mostly the first item should be tyoe:<type name>"""

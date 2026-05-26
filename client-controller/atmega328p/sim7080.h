@@ -98,7 +98,7 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
     String res = SendAT((String)RECEIVE_DATA_CMD+"?");
     while(res.indexOf("+CARECV")==-1){
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
-        sleep(100);
+        
         if(Timeoutms>1){
             Timeoutms -=100;
         }else{
@@ -114,16 +114,17 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
     dbg("buffer size for receiving is:",0);
     dbg(size);
     //do size checks here altho the modem cant have infinite buffer also
-    dbg(SendAT((String)RECEIVE_DATA_CMD+"="+DEFAULT_CID_IDX+","+size,0));
-    size+=4;
-    fixATchar(0,4);
+    SendAT((String)RECEIVE_DATA_CMD+"="+DEFAULT_CID_IDX+","+size,0);
     unsigned long newSize =0;
+    skipUntilChar(',');
+    fixATchar(0,4);
     byte* output = GetATResponse(newSize,Timeoutms);
-    //temporarly fix is to shift the whole array because of the recv command adding prefix
-    // printArr(output,size);
-    memmove(output,output+(newSize-size),size);
-    printArr(output,size);
-    output = (byte*)reallocSafe(output,size);//relaese the end of the array because we shifted it down
     fixATchar(0,0);
-    return output;
+    newSize -= strlen("\r\n\r\nOK\r\n");
+    if(newSize !=size){
+        dbg("incorrect size or buffer overflow while getting data from server in waitForServerResponse");
+        return output;
+    }
+    
+    return (byte*)reallocSafe(output,newSize);//relaese the end of the array because we shifted it down
 }

@@ -1,13 +1,13 @@
 #pragma once
 #include "modemCore.h"
 #include <Hashtable.h>
+#include <dataPackage.h>
 void registerClient();
 void loginClient();
 
 String getValue(byte* data,int& CurrentIdx);   
 byte* ToByteArr(String data,int* OutputSize);
 
-Hashtable parseData(byte* data);
 byte* buildData(Hashtable& data);
 void SnedCMD(Hashtable& data,unsigned long dataSize=0);
 void RegisterToServer();
