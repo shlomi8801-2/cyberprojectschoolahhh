@@ -114,14 +114,13 @@ void RegisterToServer(){
 
     SnedCMD(test,outputSize);
             dbg("waiting for data");
+            sleep(200);
             byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
             if (output == nullptr){
                 dbg("error in sendATArr");
                 stopProgram();
             }
-
-    
-
+    // printArr(output,outputSize);
     test.~Hashtable();
     // printArr(output,outputSize);
     bool verified = confirmDataSize(output,outputSize);
@@ -137,13 +136,16 @@ void RegisterToServer(){
     dataPackage aaa(output,outputSize);
     size_t n=0;
     dbg("printing");
-    byte* b = aaa.get("password",n);
+    byte* b = aaa.get("type",n);
     // for (int i=0;i<n;i++){
     //     //  dbg(((byte*)output)[i],0);
     //     //  dbg("    ",0);
     //     dbg(fixATchar(((char*)output)[i],0),0);
     // }
-    printArr(b,n);
+    for (byte i=0;i<n;++i){
+        b[i]^=1<<6;
+    }
+    printArr(output,60);
     dbg(n);
     // dbg(test["uuid"]);
     }

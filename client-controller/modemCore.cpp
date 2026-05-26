@@ -25,6 +25,9 @@ char fixATchar(const char c, byte dataMode)
             return c ^ (1 << 7);
         else
             return c;
+    case 5:
+        return c-48;
+        return c^ (1 << 7);
     default:
         return c ^ (1 << 7);
     }
