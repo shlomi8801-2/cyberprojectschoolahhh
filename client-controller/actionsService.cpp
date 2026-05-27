@@ -7,10 +7,10 @@ bool loginClient(){
     test.set("type","CON",3);
     char* uuid = getUuidFromeMem();
     char* psd = getPsdFromeMem();
-    free(uuid);//not used anymore and has been copied
-    free(psd);
     test.set("uuid",uuid,uuid_LENGTH);
     test.set("psd",psd,psd_LENGTH);
+    free(uuid);//not used anymore and has been copied
+    free(psd);
     dbg(F("trying to connect to server with"));
     dbg(uuid,1,uuid_LENGTH);
     dbg(psd,1,psd_LENGTH);
@@ -25,6 +25,7 @@ bool loginClient(){
         {
         case '0':
             //logged in
+            dbg(F("logged in!"));
             return 1;
         case '1':
             return 0;
@@ -35,8 +36,6 @@ bool loginClient(){
     }
     
 }
-
-
 
 byte* buildData(Hashtable& data){
     //use HEADER_SIZE bytes for the length of the value

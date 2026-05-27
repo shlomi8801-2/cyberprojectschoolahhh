@@ -31,14 +31,25 @@ int main()
     
     initialModem(&SerialAT);
     //to make if else like to do a chain if a function gets true as output continue
-    
+    bool connected = false;
     if(conncectToSerevr())
-    if(!loginClient())
-    RegisterToServer();
-    if(loginClient()){
-        dbg(F("connected and waiting!"));
+    if(loginClient())
+    connected = true;
+    else{
+    if(RegisterToServer()){
+        if(!loginClient()){
+            dbg(F("failed to login after registering"));
+        
+    }else {
+        
+        connected = true;
+    }
     }else{
-        dbg(F("failed to activate service"));
+        dbg(F("failed to register to the server"));
+    }
+    }
+    if (connected){
+        dbg(F("connected and waiting!"));
     }
     fixATchar('0',0);
     startInteractiveConsoleWithModem(SerialAT);

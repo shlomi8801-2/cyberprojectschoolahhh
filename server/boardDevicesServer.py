@@ -20,7 +20,7 @@ def getClients(args:dict,algo:str="exact")->list:
 def loginClient(_id:str,password:str)->tuple:
     """searching the client in the database if found and the password and id match,
     returnes the row of the client in the database as tuple"""
-    return database.Search(CARMODULES_TABLE[0],{"uuid":_id,"password":utils.hashString(password)})
+    return database.Search(CARMODULES_TABLE[0],{"uuid":_id,"password":password})
 
 def addClientToDatabase(_id:str,password:str,availablePins:str) ->None:
     database.AddTable(*CARMODULES_TABLE)
@@ -31,7 +31,7 @@ def expirId(_id:str)->None:
     time.sleep(MAXREGISTERWAIT)
     if (_id in waitingToRegister):
         del waitingToRegister[_id]
-def loginClient(cSock:client_coms.clientSock,msg:dict)->None:
+def handleCon(cSock:client_coms.clientSock,msg:dict)->None:
     #gets the uuid from the client and checks password
     if (type(msg) != dict):
         log.log(f"msg type is not dict!\nmsg:{msg}")
@@ -56,10 +56,10 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     log.log("starting to register client")
     if not ("uuid" in msg and "psd" in msg):
         #create a request to register new client
-        # _id = utils.generateToken()
-        # _password = utils.generateToken()
-        _id = "123456789123457891234567891231"
-        _password ="123456789123457891234567891231"
+        _id = utils.generateToken()
+        _password = utils.generateToken()
+        # _id = "123456789123457891234567891231"
+        # _password ="123456789123457891234567891231"
         while (len(getClients({"uuid":_id}))==1): #acquiring a unique id
                 _id = utils.generateToken()
         waitingToRegister[_id] = _password
@@ -112,13 +112,12 @@ def indentifyClient(clientSock:client_coms.clientSock):
         if (type(msg) != dict):
             log.log(f"msg type is not dict!\nmsg:'''{msg}'''")
             continue
-        print(msg)
         match (msg.get("type","NOTYPE")): #commands are here
             case "REG":
                 registerClient(clientSock,msg)
                 continue
             case "CON": #connect - first message
-                loginClient(clientSock,msg)
+                handleCon(clientSock,msg)
                 continue
             case _:
                 log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
