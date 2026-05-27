@@ -21,6 +21,8 @@ bool loginClient(){
     resPackage.printPackage();
     byte* code = resPackage.get("code",*(size_t*)&outputSize);
     if(code != nullptr){
+        byte _code = code[0];
+        free(res);
         switch (code[0])
         {
         case '0':
@@ -34,7 +36,38 @@ bool loginClient(){
             break;
         }
     }
+    return 0;
+    //the distructor of test should be run here because of the end of the function so dont free it before
+}
+bool updateAvailablePins(){
+    static constexpr char PinsArr[] = { AVAILABLE_PINS };
+    static constexpr byte PinsCount = sizeof(PinsArr)/sizeof(char); // the array size is not guaranteed to be at least 1
+    Hashtable test;
+    test.set(F("type"),"AP",2);
+    test.set(F("AP"),PinsArr,PinsCount);
+    SnedCMD(test);
+    unsigned long outputSize =0;
+    byte* res = waitForServerResponse(outputSize,5000);
+    dataPackage resPackage(res,outputSize);
+    resPackage.printPackage();
     
+    byte* code = resPackage.get(F("code"),*(size_t*)&outputSize);
+    if(code != nullptr){
+        byte _code = code[0];
+        free(res);
+        switch (code[0])
+        {
+        case '0':
+            //success
+            dbg(F("updated availablePins in the database!"));
+            return 1;
+        case '1':
+            return 0;
+        default:
+            return 0;
+        }
+    }
+    return 0;
 }
 
 byte* buildData(Hashtable& data){

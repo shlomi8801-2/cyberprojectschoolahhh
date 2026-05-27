@@ -6,6 +6,7 @@
 char* getUuidFromeMem();
 char* getPsdFromeMem();
 bool loginClient();
+bool updateAvailablePins();
 String getValue(byte* data,int& CurrentIdx);   
 byte* ToByteArr(String data,int* OutputSize);
 

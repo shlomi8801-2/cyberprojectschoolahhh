@@ -2,7 +2,7 @@
 #include <client.h>
 
     
-        void Hashtable::set(String str,char* val,const size_t length){
+        void Hashtable::set(String str,const char* val,const size_t length){
         for(auto i=0;i<container.size();i++){
             // dbg(container[i]->key);
             // dbg(str);

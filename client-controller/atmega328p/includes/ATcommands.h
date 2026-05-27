@@ -16,7 +16,7 @@
 #define HEADER_SIZE_BYTES 4 //HEADER_SIZE_BYTES must be under 5
 #define RAMTOTAL RAMEND-RAMSTART
 
-#define AVAILABLE_PINS 1,2,3,4,5,6,7,8,9,10,11,12,13 // must be with "","
+#define AVAILABLE_PINS 1,2,3,4,5,6,7,8,9,10,11,12,13 // must be with ""," allowed max of 20 items by the server by default
 
 // -----------------define your modem file(located in atmega328p/modem.h)----------------
 // #define sim7000;

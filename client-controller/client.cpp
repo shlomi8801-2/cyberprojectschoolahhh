@@ -50,6 +50,7 @@ int main()
     }
     if (connected){
         dbg(F("connected and waiting!"));
+        updateAvailablePins();
     }
     fixATchar('0',0);
     startInteractiveConsoleWithModem(SerialAT);

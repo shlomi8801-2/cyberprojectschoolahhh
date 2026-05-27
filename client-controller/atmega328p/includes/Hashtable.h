@@ -12,7 +12,7 @@ class Hashtable{
     };
     LinkedList<Pair*> container;
     public:
-    void set(String str,char* val,const size_t length);
+    void set(String str,const char* val,const size_t length);
     char* get(const String str,size_t &outputSize);
     inline Pair* get(const byte i){return container.get(i);}
     inline byte getSize(){return container.size();} 
