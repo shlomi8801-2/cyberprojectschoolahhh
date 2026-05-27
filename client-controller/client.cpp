@@ -20,9 +20,10 @@ int main()
 
 
 
-
-    
-
+    // for( byte x=0;x<psd_LENGTH;++x)
+    //         EEPROM.write(psd_ADDR+x,(char)(97+x));
+    // int a =0;
+    // dbg(getPsdFromeMem(),1,psd_LENGTH);
 
     sei(); // start listening to interrupts
     DDRB |= 1 << PORTB5; // sets builtin led to output mode
@@ -31,7 +32,10 @@ int main()
     initialModem(&SerialAT);
     //to make if else like to do a chain if a function gets true as output continue
     
-    if(conncectToSerevr() && (loginClient() || (RegisterToServer() && loginClient()))){
+    if(conncectToSerevr())
+    if(!loginClient())
+    RegisterToServer();
+    if(loginClient()){
         dbg(F("connected and waiting!"));
     }else{
         dbg(F("failed to activate service"));

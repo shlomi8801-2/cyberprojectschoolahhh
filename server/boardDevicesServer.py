@@ -56,8 +56,10 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     log.log("starting to register client")
     if not ("uuid" in msg and "psd" in msg):
         #create a request to register new client
-        _id = utils.generateToken()
-        _password = utils.generateToken()
+        # _id = utils.generateToken()
+        # _password = utils.generateToken()
+        _id = "123456789123457891234567891231"
+        _password ="123456789123457891234567891231"
         while (len(getClients({"uuid":_id}))==1): #acquiring a unique id
                 _id = utils.generateToken()
         waitingToRegister[_id] = _password
@@ -77,6 +79,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
             return
         addClientToDatabase(_id,msg["psd"],msg.get("AP",""))
         cSock.sendcmd("REG",{"code":0}) #success
+        log.log("registered a controller")
         del waitingToRegister[_id]
 
 def handleClient(controllerObj:controllersActions.Controller)->None:
@@ -107,14 +110,16 @@ def indentifyClient(clientSock:client_coms.clientSock):
         if (len(msg) == 0):
             continue
         if (type(msg) != dict):
-            log.log(f"msg type is not dict!\nmsg:{msg}")
+            log.log(f"msg type is not dict!\nmsg:'''{msg}'''")
             continue
+        print(msg)
         match (msg.get("type","NOTYPE")): #commands are here
             case "REG":
                 registerClient(clientSock,msg)
                 continue
             case "CON": #connect - first message
                 loginClient(clientSock,msg)
+                continue
             case _:
                 log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
                 clientSock.sock.close()

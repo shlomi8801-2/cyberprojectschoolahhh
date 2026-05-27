@@ -156,7 +156,7 @@ bool RegisterToServer(){
     for (byte tries=0;tries<5;++tries){
         dbg(F("registering to server"));
     Hashtable test;
-    test.set("type","REG",3);
+    test.set(F("type"),"REG",3);
     size_t n;
     // dbg(test.get("type",n));
     // dbg(n);
@@ -168,7 +168,7 @@ bool RegisterToServer(){
     unsigned long outputSize=-1;
     byte* output = waitForServerResponse(outputSize,2000);//2 sec timeout
     if (output == nullptr){
-        dbg("error in sendATArr");
+        dbg(F("error in sendATArr"));
         return false;
     }
     
@@ -180,7 +180,7 @@ bool RegisterToServer(){
     // StopDataSend();
 
     bool verified = confirmDataSize(output,outputSize);
-    dbg("verified:",0);
+    dbg(F("verified:"),0);
     dbg(verified);
     if (verified){
         dataPackage outputPackage(output,outputSize);
@@ -190,14 +190,14 @@ bool RegisterToServer(){
         size_t valLen=0;
 
         //getting and saving uuid
-        char* val =(char*)outputPackage.get("uuid",valLen);
+        char* val =(char*)outputPackage.get(F("uuid"),valLen);
         if (abs(valLen-uuid_LENGTH)>5){ dbg(F("difference of lengths for uuid is bigger then 5!"));stopProgram();}
         
         dbg(F("writing to eeprom uuid:"),0);
         dbg(val,1,uuid_LENGTH);
         for( byte x=0;x<uuid_LENGTH;++x)
             EEPROM.write(uuid_ADDR+x,val[x]);
-        test.set("uuid",val,valLen);
+        test.set(F("uuid"),val,valLen);
         //getting and saving psd
         val =(char*)outputPackage.get("psd",valLen);
 
@@ -206,7 +206,7 @@ bool RegisterToServer(){
         dbg(val,1,psd_LENGTH);
         for( byte x=0;x<psd_LENGTH;++x)
             EEPROM.write(psd_ADDR+x,val[x]);
-        test.set("psd",val,valLen);
+        test.set(F("psd"),val,valLen);
         free(output);//the moment you stop using it
         
         SnedCMD(test);
@@ -215,26 +215,38 @@ bool RegisterToServer(){
         output = waitForServerResponse(outputSize,10000);//10 sec timeout
         outputPackage = dataPackage(output,outputSize);
         outputPackage.printPackage();
-        val = (char*)outputPackage.get("code",valLen);
+        val = (char*)outputPackage.get(F("code"),valLen);
+        
+        char code = valLen>0 ? val[0]:'E';
+        free(output);
         dbg(F("got code "),0);
-        dbg(val,1,valLen);
-        if(valLen<0){
-            dbg(F("no code provided by the server after registering!"));
-            stopProgram();
-        }
-        switch (val[0]-'0')
+        dbg(code);
+        switch (code)
         {
-        case 0:
-        //no errors
-            dbg("registered successfully!");
+        case '0':{
+            //no errors
+            dbg(F("registered successfully!"));
+            char* uuid = getUuidFromeMem();
+            dbg(F("uuid:"),0);
+            dbg(uuid,1,uuid_LENGTH);
+            free(uuid);
+            char* psd = getPsdFromeMem();
+            dbg(F("password:"),0);
+            dbg(psd,1,psd_LENGTH);
+            free(psd);
             
             return true; // if got here it didn't fail
-        case 1:
+        }
+        
+        case '1':
         //id not found on the server - reregister
         continue;
-        case 2:
+        case '2':
         //passwords did not match - reregister
             continue;
+        case 'E':
+            dbg(F("no code provided by the server after registering!"));
+            stopProgram();
         default:
             continue;
         }
