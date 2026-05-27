@@ -51,19 +51,19 @@ byte* buildData(Hashtable& data){
         clearNextBytes(output+idx,sizeof(byte)*HEADER_SIZE_BYTES);
         
         
-        output[idx]=i.value.length(); // using buffer overflow
+        output[idx]=i.valueLength; // using buffer overflow
         
         
         idx +=HEADER_SIZE_BYTES;
         
         
-        outputSize +=i.value.length()+HEADER_SIZE_BYTES;
+        outputSize +=i.valueLength+HEADER_SIZE_BYTES;
         
         output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
         
         
-        for(auto c :i.value){
-            output[idx++]=c;
+        for(size_t x=0;x<i.valueLength;++x){
+            output[idx++]=i.value[x];
         }
     }
     
@@ -102,10 +102,9 @@ void RegisterToServer(){
 
     dbg("registering to server");
     Hashtable test;
-    test["type"]="REG";
+    test.set("type","REG",3);
     char* dataBytes = (char*)buildData(test);
     unsigned long outputSize=0;
-    int n = 5;
 
     //get the bytes array size by how its built
     for (byte i=0;i<HEADER_SIZE_BYTES;i++){
@@ -113,16 +112,16 @@ void RegisterToServer(){
     }
 
     SnedCMD(test,outputSize);
-            dbg("waiting for data");
-            sleep(200);
-            byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
-            if (output == nullptr){
-                dbg("error in sendATArr");
-                stopProgram();
-            }
-    // printArr(output,outputSize);
-    test.~Hashtable();
-    // printArr(output,outputSize);
+    dbg("waiting for data");
+    sleep(200);
+    byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
+    if (output == nullptr){
+        dbg("error in sendATArr");
+        stopProgram();
+    }
+    
+    
+    
     
     // StartDataSend(outputSize);
     // SendATArr((char*)output,outputSize);
@@ -134,22 +133,17 @@ void RegisterToServer(){
     if (verified){
         
 
-    dataPackage aaa(output,outputSize);
-    size_t n=0;
-    aaa.printPackage();
-    dbg("printing");
-    byte* b = aaa.get("type",n);
-    // for (int i=0;i<n;i++){
-    //     //  dbg(((byte*)output)[i],0);
-    //     //  dbg("    ",0);
-    //     dbg(fixATchar(((char*)output)[i],0),0);
-    // }
-    for (byte i=0;i<n;++i){
-        b[i]^=1<<6;
-    }
-    printArr(output,60);
-    dbg(n);
-    // dbg(test["uuid"]);
+    dataPackage outputPackage(output,outputSize);
+    
+    outputPackage.printPackage();
+
+    //sending reg back with uuid and password
+    size_t uuidLen=0;
+    char* uuid =(char*)outputPackage.get("uuid",uuidLen);
+    test.set("uuid",uuid,uuidLen);
+    uuid =(char*)outputPackage.get("password",uuidLen);
+    test.set("password",uuid,uuidLen);
+    SnedCMD(test,)
     }
     
     free(output);

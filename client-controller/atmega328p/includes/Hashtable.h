@@ -6,11 +6,13 @@
 class Hashtable{
     struct Pair{
         String key;
-        String value;
+        char* value;
+        size_t valueLength;
     };
     LinkedList<Pair*> container;
     public:
-    String& operator[](const String str);
+    void set(const char* str,char* val,const size_t length);
+    char* get(const String str,size_t &outputSize);
     inline unsigned int length() {return container.size();}
     class Iterator{
         unsigned int idx;

@@ -45,7 +45,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         _password = utils.generateToken()
         while (len(getClients({"uuid":_id}))==1): #acquiring a unique id
                 _id = utils.generateToken()
-        waitingToRegister[_id] = utils.hashString(_password)
+        waitingToRegister[_id] = _password
         log.log("sending respose with login details")
         cSock.sendcmd("REG",{"uuid":_id,"password":_password})
         utils.makeThreadAndStart(expirId,[_id])
@@ -55,10 +55,10 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         if not (_id in waitingToRegister):
             cSock.sendcmd("REG",{"error":f"request for uuid {_id} doesn't exist"})
             return
-        if (utils.hashString(msg.get("password","")) != waitingToRegister[_id]):
+        if (msg.get("password","") != waitingToRegister[_id]):
             cSock.sendcmd("REG",{"error":"passwords does not match"})
             return
-        addClientToDatabase(_id,utils.hashString(msg["password"]),msg.get("availablePins",""))
+        addClientToDatabase(_id,msg["password"],msg.get("availablePins",""))
         del waitingToRegister[_id]
     
 

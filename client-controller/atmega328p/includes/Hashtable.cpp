@@ -1,20 +1,37 @@
 #include <Hashtable.h>
 #include <client.h>
 
-    String& Hashtable::operator[](const String str){
+    
+        void Hashtable::set(const char* str,char* val,const size_t length){
         for(auto i=0;i<container.size();i++){
             if(container[i]->key.equals(str)){
-                return container[i]->value;
+                char* tmp = (char*)malloc(length*sizeof(char));
+                memcpy(tmp,val,length);
+                container[i]->value = tmp;
+                container[i]->valueLength=length;
             }
         }
-        Pair* tmp = (Pair*)calloc(sizeof(Pair),1);
-        if (tmp == nullptr){
+        
+        Pair* tmpPair = (Pair*)calloc(sizeof(Pair),1);
+        if (tmpPair == nullptr){
             dbg("unable to allocate memory for hashtable!");
             stopProgram();
         }
-        tmp->key=str;
-        container.add(tmp);
-        return tmp->value;
+        tmpPair->key=str;
+        container.add(tmpPair);
+        char* tmp = (char*)malloc(length*sizeof(char));
+        memcpy(tmp,val,length);
+        tmpPair->value = tmp;
+        tmpPair->valueLength=length;
+        
+    }
+    char* Hashtable::get(const String str,size_t &outputSize){
+        for(auto i=0;i<container.size();i++){
+            if(container[i]->key.equals(str)){
+                outputSize = container[i]->valueLength;
+                return container[i]->value;
+            }
+        }
     }
     Hashtable::Hashtable() {}
         const String Hashtable::ToString(){
