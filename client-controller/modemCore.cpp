@@ -300,6 +300,7 @@ String SendATHelper(const T str, unsigned long size, unsigned long Timeoutms, So
     for (unsigned long i = 0; i < size; i++)
     {
         _AT->write((char)str[i]);
+        _AT->flush();
     }
     _AT->print("\r\n");
     _AT->flush();

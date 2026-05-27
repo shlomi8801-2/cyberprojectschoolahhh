@@ -99,5 +99,6 @@ inline void checkMemory(size_t n){
         dbg("out of memory");
         return;
     }
+    free(tmp);
     dbg("has memory");
 }

@@ -42,6 +42,7 @@ void _initialModem(SoftwareSerial *AT){
         //set modem settings here
         SendAT((String)WAIT_FOR_SERVER_AKNOLAGEMENTCMD+"=1");
         SendAT("ATE0"); // disable command echo(the modem usually echoing the command used)
+        SendAT("AT+CACFG=\"TRANSPKTSIZE\",1024");
 
         status = checkModemStatus();
         if (status != 1){

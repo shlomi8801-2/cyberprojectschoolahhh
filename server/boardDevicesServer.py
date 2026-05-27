@@ -58,11 +58,11 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
             # cSock.sendcmd("REG",{"error":f"request for uuid {_id} doesn't exist","code":"1"})
             cSock.sendcmd("REG",{"code":"1"})
             return
-        if (msg.get("password","") != waitingToRegister[_id]):
+        if (msg.get("psd","") != waitingToRegister[_id]):
             # cSock.sendcmd("REG",{"error":"passwords does not match","code":"2"})
             cSock.sendcmd("REG",{"code":"2"})
             return
-        addClientToDatabase(_id,msg["password"],msg.get("availablePins",""))
+        addClientToDatabase(_id,msg["psd"],msg.get("AP",""))
         cSock.sendcmd("REG",{"code":0}) #success
         del waitingToRegister[_id]
 
