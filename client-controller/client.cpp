@@ -30,7 +30,12 @@ int main()
     
     initialModem(&SerialAT);
     //to make if else like to do a chain if a function gets true as output continue
-    conncectToSerevr() && RegisterToServer();
+    
+    if(conncectToSerevr() && (loginClient() || (RegisterToServer() && loginClient()))){
+        dbg(F("connected and waiting!"));
+    }else{
+        dbg(F("failed to activate service"));
+    }
     fixATchar('0',0);
     startInteractiveConsoleWithModem(SerialAT);
     return 0;

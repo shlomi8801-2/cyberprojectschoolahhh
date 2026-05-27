@@ -33,13 +33,17 @@ def expirId(_id:str)->None:
         del waitingToRegister[_id]
 def loginClient(cSock:client_coms.clientSock,msg:dict)->None:
     #gets the uuid from the client and checks password
+    if (type(msg) != dict):
+        log.log(f"msg type is not dict!\nmsg:{msg}")
+        return
     controllerRow = loginClient(msg.get("uuid",""),msg.get("psd","")) #list of tuples of data
-    if (len(controllerRow) == 0):
+    if (controllerRow == None):
         cSock.sendcmd("CON",{"code":"1"}) #invalid login details
         return
     #logged in
     #might change later to new thread for less memory usage because this function ends after the handleClient function ends
     controller = controllersActions.Controller(controllerRow[0],cSock)
+    cSock.sendcmd("CON",{"code":"0"})
     handleClient(controller)
 
 def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
@@ -50,7 +54,6 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     #the id as unique key
     #the availablePins column will have max of 20 pins each is a char representing a number of pin
     log.log("starting to register client")
-    print(msg)
     if not ("uuid" in msg and "psd" in msg):
         #create a request to register new client
         _id = utils.generateToken()
@@ -63,7 +66,6 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         utils.makeThreadAndStart(expirId,[_id])
     else:
         #got response to the register msg
-        
         _id = msg.get("uuid","")
         if not (_id in waitingToRegister):
             # cSock.sendcmd("REG",{"error":f"request for uuid {_id} doesn't exist","code":"1"})
@@ -101,9 +103,11 @@ def indentifyClient(clientSock:client_coms.clientSock):
     known:bool = False
     # log.log("got new client!")
     while (not known):
-        
         msg = clientSock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
+            continue
+        if (type(msg) != dict):
+            log.log(f"msg type is not dict!\nmsg:{msg}")
             continue
         match (msg.get("type","NOTYPE")): #commands are here
             case "REG":
@@ -111,9 +115,9 @@ def indentifyClient(clientSock:client_coms.clientSock):
                 continue
             case "CON": #connect - first message
                 loginClient(clientSock,msg)
-                return #the controller is not connected anymore
             case _:
                 log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
+                clientSock.sock.close()
                 break
 def listen(host:str,port:int)->None:
     #Reg - to register client to the database and give unique id

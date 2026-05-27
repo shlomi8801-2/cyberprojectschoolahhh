@@ -2,9 +2,10 @@
 #include "modemCore.h"
 #include <Hashtable.h>
 #include <dataPackage.h>
-void registerClient();
-void loginClient();
 
+char* getUuidFromeMem();
+char* getPsdFromeMem();
+bool loginClient();
 String getValue(byte* data,int& CurrentIdx);   
 byte* ToByteArr(String data,int* OutputSize);
 

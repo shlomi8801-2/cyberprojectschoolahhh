@@ -2,25 +2,38 @@
 #include <dataPackage.h>
 #include <eeprom/EEPROM.h>
 
-void registerClient(){
-
-}
-void loginClient(){
-
-}
-    String getValue(byte* data,int& CurrentIdx){
-    size_t currSize =getSizeFromHeader(data);
-        //get the size of the value
-        // cout<<currSize;
-        
-        // data++; //skip the encode bit for now
-        //read the value
-        String output = "";
-        for(long _=0;_<currSize;_++){
-            output +=(char)*data;
-            ++data;
+bool loginClient(){
+    Hashtable test;
+    test.set("type","CON",3);
+    char* uuid = getUuidFromeMem();
+    char* psd = getPsdFromeMem();
+    free(uuid);//not used anymore and has been copied
+    free(psd);
+    test.set("uuid",uuid,uuid_LENGTH);
+    test.set("psd",psd,psd_LENGTH);
+    dbg(F("trying to connect to server with"));
+    dbg(uuid,1,uuid_LENGTH);
+    dbg(psd,1,psd_LENGTH);
+    SnedCMD(test);
+    unsigned long outputSize =0;
+    byte* res = waitForServerResponse(outputSize,5000);
+    dataPackage resPackage(res,outputSize);
+    resPackage.printPackage();
+    byte* code = resPackage.get("code",*(size_t*)&outputSize);
+    if(code != nullptr){
+        switch (code[0])
+        {
+        case '0':
+            //logged in
+            return 1;
+        case '1':
+            return 0;
+        default:
+            return 0;
+            break;
         }
-        return output;
+    }
+    
 }
 
 
@@ -196,45 +209,23 @@ bool RegisterToServer(){
         test.set("psd",val,valLen);
         free(output);//the moment you stop using it
         
-        
-        // test.set("password","hello",5);
-        // val =getAvailablePins(*((byte*)&valLen));
-        // char arr[] = {1,2,3,4,5,6,7,8,9,1,2,3,3};
-        // test.set("AP","123456789123",12); send in CON package instead
         SnedCMD(test);
-        dbg("waiting for data");
+        dbg(F("waiting for data"));
 
         output = waitForServerResponse(outputSize,10000);//10 sec timeout
         outputPackage = dataPackage(output,outputSize);
         outputPackage.printPackage();
         val = (char*)outputPackage.get("code",valLen);
-        dbg("got code ",0);
+        dbg(F("got code "),0);
         dbg(val,1,valLen);
         if(valLen<0){
-            dbg("no code provided by the server after registering!");
+            dbg(F("no code provided by the server after registering!"));
             stopProgram();
         }
         switch (val[0]-'0')
         {
         case 0:
         //no errors
-        //write uuid to memory
-        // dbg("writing to eeprom:",0);
-        // dbg(uuid,1,uuid_LENGTH);
-        // for( byte x=0;x<uuid_LENGTH;++x)
-        //     EEPROM.write(uuid_ADDR+x,uuid[x]);
-        // //write psd to memory
-        // dbg("writing to eeprom:",0);
-        // dbg(psd,1,psd_LENGTH);
-        // for( byte x=0;x<psd_LENGTH;++x)
-        //     EEPROM.write(psd_ADDR+x,psd[x]);
-        // free(psd);
-        // free(uuid);
-        
-        dbg(getUuidFromeMem(),1,uuid_LENGTH);
-        printArr(getUuidFromeMem(),uuid_LENGTH);
-        dbg(getPsdFromeMem(),1,psd_LENGTH);
-        printArr(getPsdFromeMem(),psd_LENGTH);
             dbg("registered successfully!");
             
             return true; // if got here it didn't fail
