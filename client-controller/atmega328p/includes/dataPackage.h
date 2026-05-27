@@ -11,4 +11,5 @@ class dataPackage{
     public:
     dataPackage(byte* _data,size_t _size) : data(_data),size(_size) {}
     byte* get(const String str,size_t &outputSize);
+    void printPackage();
 };

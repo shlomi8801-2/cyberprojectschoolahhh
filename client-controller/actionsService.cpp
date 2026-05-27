@@ -133,13 +133,10 @@ void RegisterToServer(){
     dbg(verified);
     if (verified){
         
-    // for(auto i: test){
-    //     dbg(i.key,0);
-    //     dbg(": ",0);
-    //     dbg(i.value);
-    // }
+
     dataPackage aaa(output,outputSize);
     size_t n=0;
+    aaa.printPackage();
     dbg("printing");
     byte* b = aaa.get("type",n);
     // for (int i=0;i<n;i++){
