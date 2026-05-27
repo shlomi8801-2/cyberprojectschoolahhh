@@ -76,12 +76,16 @@ byte* buildData(Hashtable& data){
     return output;
 }
 
-void SnedCMD(Hashtable& data,unsigned long dataSize){
+void SnedCMD(Hashtable& data){
     //send raw data to the modem
-    StartDataSend(dataSize);
-    
-    // dbg((String)"sending "+data["type"]);
+
     byte* dataBytes = buildData(data);
+    unsigned long dataSize=0;
+    //get the bytes array size by how its built
+    for (byte i=0;i<HEADER_SIZE_BYTES;i++){
+        dataSize+=dataBytes[i]<<8*i;
+    }
+    
     if (dataSize ==0 ){
         if (*(unsigned long*)dataBytes >RAMTOTAL){
             dbg((String)"data is too big "+*(unsigned long*)dataBytes);
@@ -90,6 +94,11 @@ void SnedCMD(Hashtable& data,unsigned long dataSize){
         else
             dataSize = *(unsigned long*)dataBytes;
     }
+
+    StartDataSend(dataSize);
+    
+    // dbg((String)"sending "+data["type"]);
+    
     dbg("sending command");
     SendATArr((char*)dataBytes,dataSize,0);
     byte* output = StopDataSend();// because the modem doesn't wait for the server aknowlagment it should respond instantly
@@ -103,17 +112,15 @@ void RegisterToServer(){
     dbg("registering to server");
     Hashtable test;
     test.set("type","REG",3);
-    char* dataBytes = (char*)buildData(test);
-    unsigned long outputSize=0;
+    size_t n;
+    // dbg(test.get("type",n));
+    // dbg(n);
+    
 
-    //get the bytes array size by how its built
-    for (byte i=0;i<HEADER_SIZE_BYTES;i++){
-        outputSize+=dataBytes[i]<<8*i;
-    }
-
-    SnedCMD(test,outputSize);
+    SnedCMD(test);
     dbg("waiting for data");
     sleep(200);
+    unsigned long outputSize;
     byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
     if (output == nullptr){
         dbg("error in sendATArr");
@@ -143,7 +150,7 @@ void RegisterToServer(){
     test.set("uuid",uuid,uuidLen);
     uuid =(char*)outputPackage.get("password",uuidLen);
     test.set("password",uuid,uuidLen);
-    SnedCMD(test,)
+    SnedCMD(test);
     }
     
     free(output);

@@ -46,7 +46,7 @@
                 output += "\t";
                 output+=i.key;
                 output += ":\"";
-                output+=i.value;
+                output+="..."; // since the change to char* with length instead of just String object this is disabled
                 output += "\",\n";
             }
             output +="}";

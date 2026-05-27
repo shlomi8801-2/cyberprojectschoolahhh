@@ -9,7 +9,7 @@ String getValue(byte* data,int& CurrentIdx);
 byte* ToByteArr(String data,int* OutputSize);
 
 byte* buildData(Hashtable& data);
-void SnedCMD(Hashtable& data,unsigned long dataSize=0);
+void SnedCMD(Hashtable& data);
 void RegisterToServer();
 void ConnectToServer();
 void StartConnectionToServer();
