@@ -31,7 +31,17 @@ def expirId(_id:str)->None:
     time.sleep(MAXREGISTERWAIT)
     if (_id in waitingToRegister):
         del waitingToRegister[_id]
-    
+def loginClient(cSock:client_coms.clientSock,msg:dict)->None:
+    #gets the uuid from the client and checks password
+    controllerRow = loginClient(msg.get("uuid",""),msg.get("psd","")) #list of tuples of data
+    if (len(controllerRow) == 0):
+        cSock.sendcmd("CON",{"code":"1"}) #invalid login details
+        return
+    #logged in
+    #might change later to new thread for less memory usage because this function ends after the handleClient function ends
+    controller = controllersActions.Controller(controllerRow[0],cSock)
+    handleClient(controller)
+
 def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     #msg is the message after the parsedata function applied to it
     #when gettings register message it will generate unique id and password both will be sent to the controller
@@ -100,14 +110,7 @@ def indentifyClient(clientSock:client_coms.clientSock):
                 registerClient(clientSock,msg)
                 continue
             case "CON": #connect - first message
-                #gets the id from the client and checks password
-                controllerRow = loginClient(msg.get("id",""),msg.get("password","")) #list of tuples of data
-                if (len(controllerRow) == 0):
-                    continue
-                #logged in
-                #might change later to new thread for less memory usage because this function ends after the handleClient function ends
-                controller = controllersActions.Controller(controllerRow[0],clientSock)
-                handleClient(controller)
+                loginClient(clientSock,msg)
                 return #the controller is not connected anymore
             case _:
                 log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
