@@ -29,11 +29,9 @@ int main()
     SoftwareSerial SerialAT(MODEM_RDX_PORT, MODEM_TDX_PORT); 
     
     initialModem(&SerialAT);
-    conncectToSerevr();
-
-    RegisterToServer();
+    //to make if else like to do a chain if a function gets true as output continue
+    conncectToSerevr() && RegisterToServer();
     fixATchar('0',0);
-
     startInteractiveConsoleWithModem(SerialAT);
     return 0;
 }

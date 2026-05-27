@@ -5,7 +5,7 @@
 //to switch to IP START then you can use the AT+CIICR then if successful switches to IP GPRSAC/IP STATUS status
 
 #define APN_NAME "iisp"
-#define DEFAULT_TIMEOUT_SEC 5
+#define DEFAULT_TIMEOUT_SEC 3
 #define APN_TASK_MAX_RESPONSE_TIME_SEC 120
 #define AT_CONSOLE_SPEED 115200
 #define MODEM_RDX_PORT 14 // connect the txd of the modem to port 14(A0) and the rxd to port 15(A1)
@@ -15,6 +15,8 @@
 #define SERVER_PORT 1234
 #define HEADER_SIZE_BYTES 4 //HEADER_SIZE_BYTES must be under 5
 #define RAMTOTAL RAMEND-RAMSTART
+
+#define AVAILABLE_PINS 1,2,3,4,5,6,7,8,9,10,11,12,13 // must be with "","
 
 // -----------------define your modem file(located in atmega328p/modem.h)----------------
 // #define sim7000;

@@ -10,8 +10,7 @@ byte* ToByteArr(String data,int* OutputSize);
 
 byte* buildData(Hashtable& data);
 void SnedCMD(Hashtable& data);
-void RegisterToServer();
-void ConnectToServer();
+bool RegisterToServer();
 void StartConnectionToServer();
 inline void clearNextBytes(void* data,int n){
     for (;n>0;){ ((char*)data)[--n]=0;}

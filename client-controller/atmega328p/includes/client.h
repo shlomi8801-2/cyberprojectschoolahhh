@@ -39,6 +39,17 @@ inline void dbg(T str,bool nl=1){
     Serial.flush();
     #endif
 }
+// template <class T>
+// inline void dbg(T str,bool nl,size_t length){
+//     #ifdef debug
+    
+//     for (size_t i=0;i<length;++i)
+//     Serial.print(str[i]);
+//     if( nl)
+//     Serial.write("\n");
+//     Serial.flush();
+//     #endif
+// }
 inline String ShowBytes(byte* arr,unsigned int size=0){
     String output="";
     size = size==0? strlen((char*)arr):size;
@@ -75,4 +86,10 @@ inline size_t getSizeFromHeader(byte* data){
             tmpSize +=data[i];
     }
     return tmpSize;
+}
+
+inline char* getAvailablePins(byte &n){
+    static char arr[] = {AVAILABLE_PINS};
+    constexpr byte len = 13;// for now
+    return arr;
 }

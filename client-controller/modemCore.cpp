@@ -382,18 +382,7 @@ void initialModem(SoftwareSerial *AT)
     fixATchar('0', 0);
 
     SendAT("AT", 0, AT); // assign the object as static in the function
-#ifdef PWRKEY_PIN
-    for (byte tries = 10; --tries > 0; /*SEGA*/)
-    {
-        // https://github.com/MikulasP/sim7080/blob/master/sim7080g.cpp#L1064
-        _powerCycleModem();
-        sleep(500);
-        if (waitForATResponse(2))
-        {
-            break;
-        }
-    }
-#endif
+
 
     for (byte tries = 10; --tries > 0; /*SEGA*/)
     {
@@ -401,25 +390,31 @@ void initialModem(SoftwareSerial *AT)
         if (!waitForATResponse(DEFAULT_TIMEOUT_SEC))
         {
             dbg("module not responding");
-            stopProgram();
-            return;
+            #ifdef PWRKEY_PIN
+                // https://github.com/MikulasP/sim7080/blob/master/sim7080g.cpp#L1064
+                _powerCycleModem();
+                sleep(500);
+            #endif
+            continue;
         }
         // should bring the modem into to a point that it can activate network so BringUpGPRSConnection succeed
         _initialModem(AT);
         setModemAPN();
         if (BringUpGPRSConnection())
-            break;
+        dbg("modem initionlized!");
+            return;
     }
-    dbg("modem initionlized!");
+    dbg("failed to use network!");
+    stopProgram();
 }
 
 inline void rebootModem()
 {
     SendAT(REBOOT_MODEM_CMD);
 }
-void conncectToSerevr()
+bool conncectToSerevr()
 {
-    _conncectToSerevr();
+    return _conncectToSerevr();
 }
 
 void startInteractiveConsoleWithModem(SoftwareSerial &SerialAT)

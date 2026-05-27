@@ -39,6 +39,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     #the id as unique key
     #the availablePins column will have max of 20 pins each is a char representing a number of pin
     log.log("starting to register client")
+    print(msg)
     if not ("uuid" in msg and "password" in msg):
         #create a request to register new client
         _id = utils.generateToken()
@@ -51,14 +52,18 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
         utils.makeThreadAndStart(expirId,[_id])
     else:
         #got response to the register msg
-        _id = msg.get("uuid")
+        
+        _id = msg.get("uuid","")
         if not (_id in waitingToRegister):
-            cSock.sendcmd("REG",{"error":f"request for uuid {_id} doesn't exist"})
+            # cSock.sendcmd("REG",{"error":f"request for uuid {_id} doesn't exist","code":"1"})
+            cSock.sendcmd("REG",{"code":"1"})
             return
         if (msg.get("password","") != waitingToRegister[_id]):
-            cSock.sendcmd("REG",{"error":"passwords does not match"})
+            # cSock.sendcmd("REG",{"error":"passwords does not match","code":"2"})
+            cSock.sendcmd("REG",{"code":"2"})
             return
         addClientToDatabase(_id,msg["password"],msg.get("availablePins",""))
+        cSock.sendcmd("REG",{"code":0}) #success
         del waitingToRegister[_id]
 
 def handleClient(controllerObj:controllersActions.Controller)->None:
@@ -85,6 +90,7 @@ def indentifyClient(clientSock:client_coms.clientSock):
     known:bool = False
     # log.log("got new client!")
     while (not known):
+        
         msg = clientSock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
             continue

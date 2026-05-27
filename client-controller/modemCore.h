@@ -21,8 +21,7 @@ void SetupModemSettings();
 byte checkModemStatus();
 byte waitForATResponse(unsigned int maxTimeout);
 void initialModem(SoftwareSerial* AT);
-void connectToServer();
-void conncectToSerevr();
+bool conncectToSerevr();
 void closeConnectionToServer();
 
 inline bool confirmDataSize(byte* data,size_t packageSize){

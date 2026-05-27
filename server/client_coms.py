@@ -32,6 +32,8 @@ class clientSock:
             return ()
         res_len:bytearray =self.sock.recv(settings.GetSetting("client.header_size"))
         res_len = int.from_bytes(res_len,"little") -settings.GetSetting("client.header_size") #the first one is without encoded byte which is the length
+        if (res_len<0):
+            raise Exception(f"negative cmd length! {res_len}")
         res = self.sock.recv(res_len)
         try:
             output = parsedata(res)

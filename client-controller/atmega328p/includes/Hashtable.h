@@ -11,7 +11,7 @@ class Hashtable{
     };
     LinkedList<Pair*> container;
     public:
-    void set(const char* str,char* val,const size_t length);
+    void set(String str,char* val,const size_t length);
     char* get(const String str,size_t &outputSize);
     inline unsigned int length() {return container.size();}
     class Iterator{

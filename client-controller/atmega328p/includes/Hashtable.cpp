@@ -2,7 +2,7 @@
 #include <client.h>
 
     
-        void Hashtable::set(const char* str,char* val,const size_t length){
+        void Hashtable::set(String str,char* val,const size_t length){
         for(auto i=0;i<container.size();i++){
             if(container[i]->key.equals(str)){
                 char* tmp = (char*)malloc(length*sizeof(char));

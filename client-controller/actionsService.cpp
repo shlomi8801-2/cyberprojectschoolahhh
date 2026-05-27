@@ -94,12 +94,13 @@ void SnedCMD(Hashtable& data){
         else
             dataSize = *(unsigned long*)dataBytes;
     }
-
     StartDataSend(dataSize);
     
     // dbg((String)"sending "+data["type"]);
     
-    dbg("sending command");
+    dbg("sending command with size:",0);
+    dbg(dataSize);
+    // printArr(dataBytes,dataSize);
     SendATArr((char*)dataBytes,dataSize,0);
     byte* output = StopDataSend();// because the modem doesn't wait for the server aknowlagment it should respond instantly
     free(output);// to not lose the pointer withput freeing it
@@ -107,9 +108,9 @@ void SnedCMD(Hashtable& data){
     
 }
 
-void RegisterToServer(){
-
-    dbg("registering to server");
+bool RegisterToServer(){
+    for (byte tries=0;tries<5;++tries){
+        dbg("registering to server");
     Hashtable test;
     test.set("type","REG",3);
     size_t n;
@@ -124,7 +125,7 @@ void RegisterToServer(){
     byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
     if (output == nullptr){
         dbg("error in sendATArr");
-        stopProgram();
+        return false;
     }
     
     
@@ -145,16 +146,31 @@ void RegisterToServer(){
     outputPackage.printPackage();
 
     //sending reg back with uuid and password
-    size_t uuidLen=0;
-    char* uuid =(char*)outputPackage.get("uuid",uuidLen);
-    test.set("uuid",uuid,uuidLen);
-    uuid =(char*)outputPackage.get("password",uuidLen);
-    test.set("password",uuid,uuidLen);
+    size_t valLen=0;
+    char* val =(char*)outputPackage.get("uuid",valLen);
+    test.set("uuid",val,valLen);
+    val =(char*)outputPackage.get("password",valLen);
+    test.set("password",val,valLen);
+
+    // test.set("password","hello",5);
+    // val =getAvailablePins(*((byte*)&valLen));
+    // char arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+    // test.set("availablepins","abc",3);
     SnedCMD(test);
+    dbg("waiting for data");
+    
+    // output = waitForServerResponse(outputSize,10000);//10 sec timeout
+    // outputPackage = dataPackage(output,outputSize);
+    // val = (char*)outputPackage.get("code",valLen);
+    // dbg("got code ",0);
+    // dbg(val,1,valLen);
+    free(output);
+    break; // if got here it didn't fail
     }
     
-    free(output);
+    }
+    
+    return true;
 
 }
-void ConnectToServer();
 void StartConnectionToServer();

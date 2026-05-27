@@ -39,31 +39,32 @@ void _powerCycleModem(){
     dbg("starting power cycle");
     pinMode(PWRKEY_PIN,OUTPUT); //software serial uses it so use it aswell
     digitalWrite(PWRKEY_PIN,LOW);
-    sleep(200);
+    sleep(1100);
     digitalWrite(PWRKEY_PIN,HIGH);
     pinMode(PWRKEY_PIN,INPUT);
 }
 void _resetPDPDeact(){
     //didnt find a way yet only restart or just try to reactivate the pdp
 }
-void _conncectToSerevr(){
+bool _conncectToSerevr(){
     //must run initialModem before
     //maybe a connection is saved on the modem but is down so close it in case
     SendAT((String)CLOSE_CONNECTION_CMD+"="+DEFAULT_CID_IDX);
-    byte tries = 50;
+    byte tries = 5;
     do {
     String res = SendAT((String)CONNECT_TO_SERVER_CMD+"="+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP"+",\""+SERVER_IP+"\","+SERVER_PORT,CONNECT_CMD_MAX_TIMEOUT_SEC*1000); //returnes OK usually, for now not handling other types of outputs
-
+    dbg(res);
+    sleep(200);
     res = SendAT((String)CONNECT_TO_SERVER_CMD+"?");
 
     if (res.indexOf((String)+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP") !=-1){// supposing the rest is right
         dbg("connected to the server successfully!");
-         return;
+         return true;
     }
     } while (--tries !=0);
 
     dbg("failed connecting to the server!");
-    stopProgram();
+    return false;
 }
 byte _BringUpGPRSConnection(){
     dbg("trying to use mobile data");
@@ -72,8 +73,7 @@ byte _BringUpGPRSConnection(){
         String localIp = SendAT(GET_LOCAL_IP_ADDRESS_CMD);
         //returnes +CNACT line for each connection with +CNACT: <pdpidx>,<statusx>,<addressx>  7.2.1
             if (localIp.indexOf((String)"+CNACT: "+DEFAULT_PDP_IDX+",1") !=-1) //
-            
-            { // 3 IP GPRSACT means connected
+            { 
                 strtok(localIp.begin(),"\"");
                 for(byte i=1;i<DEFAULT_PDP_IDX*2;++i)
                     strtok(NULL,"\""); 
@@ -86,11 +86,13 @@ byte _BringUpGPRSConnection(){
     return 0;
 }
 void _StartDataSend(size_t dataLength){
-    SendAT((String)SEND_DATA_CMD+"="+DEFAULT_CID_IDX+","+dataLength); //if something went wrong, after 5 seconds(by default) cancel the sending 
+    String Query = (String)SEND_DATA_CMD+"="+DEFAULT_CID_IDX+","+dataLength;
+    
+    dbg(SendAT(Query,5000)); //if something went wrong, after 5 seconds(by default) cancel the sending 
     //returns ok by default so no need to save the output
 }
 byte* _StopDataSend(){
-    SendAT("",10000); //wait for ok from the server
+    dbg(SendAT("",10000)); //wait for ok from the server
     return (byte*)malloc(1); // just so the free has something to free
     //do nothing for now, StartDataSend handles the whole input with expected size
 }
@@ -108,17 +110,17 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long &Timeoutms){
         }
     }
     unsigned long tmpSize=0;
-    unsigned long newsize =~tmpSize;
-    while (newsize != tmpSize)
+    unsigned long newSize =~tmpSize;
+    while (newSize != tmpSize)
     {
-        newsize=tmpSize;
+        newSize=tmpSize;
         //example response for that: "+CARECV: 4,IMK"
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
         strtok(res.begin(),((String)DEFAULT_CID_IDX+",").begin());
         char* buf = strtok(nullptr,"\n")+1;// skip first char
         sscanf(buf,"%d",&tmpSize);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
         if(strlen(buf)==0){
-            newsize = ~tmpSize;
+            newSize = ~tmpSize;
         }
     }
     
@@ -128,7 +130,7 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long &Timeoutms){
     dbg(size);
     //do size checks here altho the modem cant have infinite buffer also
     SendAT((String)RECEIVE_DATA_CMD+"="+DEFAULT_CID_IDX+","+size,0);
-    unsigned long newSize =0;
+     newSize =0;
     skipUntilChar(',');
     fixATchar(0,2); // date mode(just temporarly to make it work)
     byte* output = GetATResponse(newSize,Timeoutms);
