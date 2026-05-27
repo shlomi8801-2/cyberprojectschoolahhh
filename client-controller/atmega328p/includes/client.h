@@ -10,7 +10,7 @@
 // #include <ATcommands.h>
 #define debug
 #include <SoftwareSerial.h>
-
+#include <eeprom/EEPROM.h>
 #include <ATcommands.h>
 
 

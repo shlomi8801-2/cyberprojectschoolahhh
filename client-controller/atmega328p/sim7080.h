@@ -46,26 +46,6 @@ void _powerCycleModem(){
 void _resetPDPDeact(){
     //didnt find a way yet only restart or just try to reactivate the pdp
 }
-bool _conncectToSerevr(){
-    //must run initialModem before
-    //maybe a connection is saved on the modem but is down so close it in case
-    SendAT((String)CLOSE_CONNECTION_CMD+"="+DEFAULT_CID_IDX);
-    byte tries = 5;
-    do {
-    String res = SendAT((String)CONNECT_TO_SERVER_CMD+"="+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP"+",\""+SERVER_IP+"\","+SERVER_PORT,CONNECT_CMD_MAX_TIMEOUT_SEC*1000); //returnes OK usually, for now not handling other types of outputs
-    dbg(res);
-    sleep(200);
-    res = SendAT((String)CONNECT_TO_SERVER_CMD+"?");
-
-    if (res.indexOf((String)+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP") !=-1){// supposing the rest is right
-        dbg("connected to the server successfully!");
-         return true;
-    }
-    } while (--tries !=0);
-
-    dbg("failed connecting to the server!");
-    return false;
-}
 byte _BringUpGPRSConnection(){
     dbg("trying to use mobile data");
         String res = SendAT(BRING_UP_WIRELESS_CONNECTION_GPRS,65*1000);
@@ -85,6 +65,28 @@ byte _BringUpGPRSConnection(){
         
     return 0;
 }
+bool _conncectToSerevr(){
+    //must run initialModem before
+    //maybe a connection is saved on the modem but is down so close it in case
+    SendAT((String)CLOSE_CONNECTION_CMD+"="+DEFAULT_CID_IDX);
+    byte tries = 5;
+    do {
+    String res = SendAT((String)CONNECT_TO_SERVER_CMD+"="+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP"+",\""+SERVER_IP+"\","+SERVER_PORT,CONNECT_CMD_MAX_TIMEOUT_SEC*1000); //returnes OK usually, for now not handling other types of outputs
+    dbg(res);
+    sleep(200);
+    res = SendAT((String)CONNECT_TO_SERVER_CMD+"?");
+
+    if (res.indexOf((String)+DEFAULT_CID_IDX+","+DEFAULT_PDP_IDX+","+"TCP") !=-1){// supposing the rest is right
+        dbg("connected to the server successfully!");
+         return true;
+    }
+    _BringUpGPRSConnection();
+    } while (--tries !=0);
+
+    dbg("failed connecting to the server!");
+    return false;
+}
+
 void _StartDataSend(size_t dataLength){
     String Query = (String)SEND_DATA_CMD+"="+DEFAULT_CID_IDX+","+dataLength;
     

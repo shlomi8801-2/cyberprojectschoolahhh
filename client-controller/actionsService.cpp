@@ -96,7 +96,7 @@ void SnedCMD(Hashtable& data){
     }
     if (dataSize>=127){
         //between arduino and modem
-        dbg("sending more then 127 chars may fail");
+        dbg(F("sending more then 127 chars may fail"));
     }
     
     if (dataSize ==0 ){
@@ -107,16 +107,16 @@ void SnedCMD(Hashtable& data){
         else
             dataSize = *(unsigned long*)dataBytes;
     }
-    dbg("checking modem response");
+    dbg(F("checking modem response"));
     if (!waitForATResponse(10000)){
-        dbg("modem did not respond");
+        dbg(F("modem did not respond"));
         return;
     }
     StartDataSend(dataSize);
     
     // dbg((String)"sending "+data["type"]);
     
-    dbg("sending command with size:",0);
+    dbg(F("sending command with size:"),0);
     dbg(dataSize);
     // printArr(dataBytes,dataSize);
     SendATArr((char*)dataBytes,dataSize,0);
@@ -127,21 +127,21 @@ void SnedCMD(Hashtable& data){
     
 }
 char* getUuidFromeMem(){
-    char* output = (char*)malloc(sizeof(char)*uuid_LENGTH);
+    char* output = (char*)calloc(sizeof(char)*uuid_LENGTH,1);
     for (byte x=0;x<uuid_LENGTH;++x)
-        output[x] = EEPROM.read(uuid_ADDR+x);
+        output[x] = (char)EEPROM.read(uuid_ADDR+x);
     return output;
 }
 char* getPsdFromeMem(){
     //get password
-    char* output = (char*)malloc(sizeof(char)*psd_LENGTH);
+    char* output = (char*)calloc(sizeof(char)*psd_LENGTH,1);
     for (byte x=0;x<psd_LENGTH;++x)
-        output[x] = EEPROM.read(psd_ADDR+x);
+        output[x] = (char)EEPROM.read(psd_ADDR+x);
     return output;
 }
 bool RegisterToServer(){
     for (byte tries=0;tries<5;++tries){
-        dbg("registering to server");
+        dbg(F("registering to server"));
     Hashtable test;
     test.set("type","REG",3);
     size_t n;
@@ -150,7 +150,7 @@ bool RegisterToServer(){
     
 
     SnedCMD(test);
-    dbg("waiting for data");
+    dbg(F("waiting for data"));
     sleep(200);
     unsigned long outputSize=-1;
     byte* output = waitForServerResponse(outputSize,2000);//2 sec timeout
@@ -175,11 +175,28 @@ bool RegisterToServer(){
         outputPackage.printPackage();
         //sending reg back with uuid and password
         size_t valLen=0;
+
+        //getting and saving uuid
         char* val =(char*)outputPackage.get("uuid",valLen);
+        if (abs(valLen-uuid_LENGTH)>5){ dbg(F("difference of lengths for uuid is bigger then 5!"));stopProgram();}
+        
+        dbg(F("writing to eeprom uuid:"),0);
+        dbg(val,1,uuid_LENGTH);
+        for( byte x=0;x<uuid_LENGTH;++x)
+            EEPROM.write(uuid_ADDR+x,val[x]);
         test.set("uuid",val,valLen);
+        //getting and saving psd
         val =(char*)outputPackage.get("psd",valLen);
-        free(output);//the moment you stop using it
+
+        if (abs(valLen-psd_LENGTH)>5){ dbg(F("difference of lengths for psd is bigger then 5!"));stopProgram();}
+        dbg(F("writing to eeprom psd:"),0);
+        dbg(val,1,psd_LENGTH);
+        for( byte x=0;x<psd_LENGTH;++x)
+            EEPROM.write(psd_ADDR+x,val[x]);
         test.set("psd",val,valLen);
+        free(output);//the moment you stop using it
+        
+        
         // test.set("password","hello",5);
         // val =getAvailablePins(*((byte*)&valLen));
         // char arr[] = {1,2,3,4,5,6,7,8,9,1,2,3,3};
@@ -202,13 +219,17 @@ bool RegisterToServer(){
         case 0:
         //no errors
         //write uuid to memory
-        val = (char*)outputPackage.get("uuid",valLen);
-        for( byte x=0;x<uuid_LENGTH;++x)
-            EEPROM.write(uuid_ADDR+x,val[x]);
-        //write psd to memory
-        val = (char*)outputPackage.get("psd",valLen);
-        for( byte x=0;x<psd_LENGTH;++x)
-            EEPROM.write(psd_ADDR+x,val[x]);
+        // dbg("writing to eeprom:",0);
+        // dbg(uuid,1,uuid_LENGTH);
+        // for( byte x=0;x<uuid_LENGTH;++x)
+        //     EEPROM.write(uuid_ADDR+x,uuid[x]);
+        // //write psd to memory
+        // dbg("writing to eeprom:",0);
+        // dbg(psd,1,psd_LENGTH);
+        // for( byte x=0;x<psd_LENGTH;++x)
+        //     EEPROM.write(psd_ADDR+x,psd[x]);
+        // free(psd);
+        // free(uuid);
         
         dbg(getUuidFromeMem(),1,uuid_LENGTH);
         printArr(getUuidFromeMem(),uuid_LENGTH);
