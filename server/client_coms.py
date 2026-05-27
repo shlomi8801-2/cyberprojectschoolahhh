@@ -3,6 +3,13 @@ import socket
 import log
 
 class clientSock:
+    def checkAllowedArray(self,data:bytearray) -> bool:
+        #because the arduino sometimes has limits on how each digit is proccessed, check the whole package before
+        allowed = set([x for x in range(0,128)])
+        for x in data:
+            if (not (x in allowed)):
+                return False
+        return True
     def __init__(self,accept_res:tuple):
         """accept_res is the output of socker.accept()"""
         self.sock:socket.socket = accept_res[0]
@@ -16,6 +23,8 @@ class clientSock:
         if (cmdtype and data):
             data["type"] = cmdtype
             data = buildata(data)
+            if(not self.checkAllowedArray(data)):
+                raise Exception("byte array is not in allowed characters to send!")
             self.sock.sendall(data)
     def recievecmd(self)->dict:
         """run in a loop, waits for bytes from the client then parsing it and returning it as a dict mostly the first item should be tyoe:<type name>"""
