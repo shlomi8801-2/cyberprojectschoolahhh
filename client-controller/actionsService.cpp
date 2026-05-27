@@ -78,13 +78,9 @@ byte* buildData(Hashtable& data){
         }
         
     }
-    checkMemory(50);
     outputSize -= HEADER_SIZE_BYTES;
-    checkMemory(50);
     output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
-    checkMemory(50);
     *(unsigned long*)output = outputSize;
-    checkMemory(50);
     return output;
 }
 
@@ -167,20 +163,22 @@ bool RegisterToServer(){
     char* val =(char*)outputPackage.get("uuid",valLen);
     test.set("uuid",val,valLen);
     val =(char*)outputPackage.get("password",valLen);
-    free(output);
+    free(output);//the moment you stop using it
     test.set("password",val,valLen);
     // test.set("password","hello",5);
     // val =getAvailablePins(*((byte*)&valLen));
     // char arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-    // test.set("availablepins","abc",3);
+    // test.set("availablePins",arr,13);
+    clearATBuffer();
     SnedCMD(test);
     dbg("waiting for data");
     
-    // output = waitForServerResponse(outputSize,10000);//10 sec timeout
-    // outputPackage = dataPackage(output,outputSize);
-    // val = (char*)outputPackage.get("code",valLen);
-    // dbg("got code ",0);
-    // dbg(val,1,valLen);
+    output = waitForServerResponse(outputSize,10000);//10 sec timeout
+    outputPackage = dataPackage(output,outputSize);
+    outputPackage.printPackage();
+    val = (char*)outputPackage.get("code",valLen);
+    dbg("got code ",0);
+    dbg(val,1,valLen);
     
     break; // if got here it didn't fail
     }

@@ -103,9 +103,12 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long &Timeoutms){
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
         if(Timeoutms>1){
             Timeoutms -=100;
+            sleep(100);
         }else{
             //no response in time
             size=0;
+            dbg("buffer size for receiving is:",0);
+            dbg(size);
             return nullptr;
         }
     }

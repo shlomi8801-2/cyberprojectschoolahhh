@@ -16,6 +16,7 @@ class Hashtable{
     char* get(const String str,size_t &outputSize);
     inline Pair* get(const byte i){return container.get(i);}
     inline byte getSize(){return container.size();} 
+    inline void clearItems(){container.clear();}
 //     class Iterator{
 //         unsigned int idx;
 //         LinkedList<Pair*>* container;

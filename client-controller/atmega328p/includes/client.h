@@ -39,17 +39,17 @@ inline void dbg(T str,bool nl=1){
     Serial.flush();
     #endif
 }
-// template <class T>
-// inline void dbg(T str,bool nl,size_t length){
-//     #ifdef debug
+template <class T>
+inline void dbg(T str,bool nl,size_t length){
+    #ifdef debug
     
-//     for (size_t i=0;i<length;++i)
-//     Serial.print(str[i]);
-//     if( nl)
-//     Serial.write("\n");
-//     Serial.flush();
-//     #endif
-// }
+    for (size_t i=0;i<length;++i)
+    Serial.print(str[i]);
+    if( nl)
+    Serial.write("\n");
+    Serial.flush();
+    #endif
+}
 inline String ShowBytes(byte* arr,unsigned int size=0){
     String output="";
     size = size==0? strlen((char*)arr):size;
