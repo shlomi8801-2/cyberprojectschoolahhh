@@ -26,6 +26,12 @@ def addClientToDatabase(_id:str,password:str,availablePins:str) ->None:
     database.AddTable(*CARMODULES_TABLE)
     print("".join(sorted(list(set(x for x in availablePins)))))
     database.Insert(CARMODULES_TABLE[0],{"uuid":_id,"password":password,"availablePins":"".join(sorted(list(set(x for x in availablePins))))}) # the availablePins compacting is to prevent sql injection and use the laest amount of chars
+def updateClientAvailablePins(_id:str,availablePins:str)->None:
+    availablePins = "".join(sorted(list(set(x for x in availablePins))))
+    if (len(availablePins)>20):
+        raise Exception("availablePins should have less then 20 uique items")
+    database.Update(CARMODULES_TABLE[0],{"availablePins":availablePins},{"uuid":_id})
+
 def expirId(_id:str)->None:
     #used as thread waits until MAXREGISTERWAIT seconds pass then removs the id from the waitingToRegister dict
     time.sleep(MAXREGISTERWAIT)
@@ -37,7 +43,7 @@ def handleCon(cSock:client_coms.clientSock,msg:dict)->None:
         log.log(f"msg type is not dict!\nmsg:{msg}")
         return
     controllerRow = loginClient(msg.get("uuid",""),msg.get("psd","")) #list of tuples of data
-    if (controllerRow == None):
+    if (controllerRow == None or len(controllerRow)<1):
         cSock.sendcmd("CON",{"code":"1"}) #invalid login details
         return
     #logged in
@@ -84,14 +90,23 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
 
 def handleClient(controllerObj:controllersActions.Controller)->None:
     #listen to each client and handle commands
+    #after logged in and connected
     connectedClients[controllerObj.Id] = controllerObj
     while (controllerObj.connected):
         msg = controllerObj.Csock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):
             continue
         match (msg.get("type","NOTYPE")): #commands are here
+            case "AP": #update availablePins
+                try:
+                    updateClientAvailablePins(controllerObj.Id,msg.get("AP",""))
+                    controllerObj.sendCommand("AP",{"code":"0"})
+                except Exception as e:
+                    log.log(e)
+                    controllerObj.sendCommand("AP",{"code":"1"})
+                    
             case "PING":
-                pass
+                controllerObj.sendCommand("PONG",{})
             case "LOGOUT":
                 del connectedClients[controllerObj.Id]
                 controllerObj.connected =False
