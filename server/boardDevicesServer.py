@@ -10,6 +10,8 @@ import time
 waitingToRegister = dict() # id -> password in plain text
 connectedClients = dict() # id -> Controller object
 
+def getControllerObjFromId(ControllerId:str)->controllersActions.Controller:
+    return connectedClients.get(ControllerId,None)
 
 def getClients(args:dict,algo:str="exact")->list:
     #all the dict keys MUST be columns in the table in the database
@@ -92,6 +94,7 @@ def handleClient(controllerObj:controllersActions.Controller)->None:
     #listen to each client and handle commands
     #after logged in and connected
     connectedClients[controllerObj.Id] = controllerObj
+    print(connectedClients)
     while (controllerObj.connected):
         msg = controllerObj.Csock.recievecmd() # (type:str,data:dict)
         if (len(msg) == 0):

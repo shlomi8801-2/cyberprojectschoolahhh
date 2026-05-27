@@ -3,6 +3,7 @@ import utils
 import database
 from client_coms import clientSock
 import constants
+from utils import log
 
 class clientCommand:
     action:str = ""
@@ -49,7 +50,7 @@ class Controller:
             self.connected = False
             return
         sqlRow:dict = utils.makeSqlDict(sqlRow,CARMODULES_TABLE)
-        self.Id = sqlRow.get("id",None)
+        self.Id = sqlRow.get("uuid",None)
         self.Csock = Csock
         self.availablePins = [ord(x) for x in sqlRow.get("availablePins")]
     def sendCommand(self,command:clientCommand)->None: # for action
@@ -65,8 +66,13 @@ class Controller:
     # def updateCommand(cmd:clientCommand)->None: 
     #     """set in the database the command with the id of 'cmd' to the current values"""
     #     cmd.updateDatabase()
+from boardDevicesServer import getControllerObjFromId #must be after class Controller
+
 def getControllerCommands(controllerId:str,maxRows:int=100,offset:int=0) -> list:
     return database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId},maxRows,offset,"exact")
+def getControllerCommand(controllerId:str,btnTitle:str) ->clientCommand:
+    res = database.Search(CONTROLLERSCOMMANDS_TABLE[0],{"ControllerId":controllerId,"title":btnTitle},1,0,"exact")
+    return None if res == None or len(res)<1 else res[0]
 def getControllersList(filters:dict={},maxRows:int=100,offset:int=0,algo:str="exact")->list:
     output = database.Search(CARMODULES_TABLE[0],filters,maxRows,offset,algo)
     return [] if output is None else output
@@ -79,3 +85,8 @@ def checkCommandExistanceByRow(controllerRow:tuple,title:str) -> bool:
 def removeFromControllersList(ControllersList:list,columns:tuple)->list:
     #removing columns from the list of rows(tuples)
     return utils.removeFromSqlList(ControllersList,columns,CARMODULES_TABLE)
+def execCommandOnController(ControllerId:str,cmd:clientCommand)->None:
+    Cobj =  getControllerObjFromId(ControllerId)
+    if(Cobj):
+        log.log(f"sending {cmd.buttonTitle} actions to {ControllerId}")
+        Cobj.sendCommand(cmd)

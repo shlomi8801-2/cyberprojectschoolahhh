@@ -88,16 +88,16 @@ function getCommandByTitle(title){
 }
 
 function btnClick(thisBtn){
-  const btnUUID =getBtnId(thisBtn)
+  const btnUUID =getBtnId(thisBtn) // gets the btn id from an hidden input inside of the btn object
+  const btnData = getCommandByTitle(btnUUID);
+  // thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.indexOf("uuid")]==btnUUID) //searches in controllers for controller that has the selected uuid
+  // thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
   if (editMode){
     const editForm = document.getElementById("editform");
-    thisBtnInfo = myControllers.controllers.filter((row)=>row[myControllers.columns.indexOf("uuid")]==btnUUID)
-    thisBtnInfo = thisBtnInfo.length >= 1 ?thisBtnInfo[0] : null
-    const btnData = getCommandByTitle(btnUUID);
     setupEditForm(btnData)
   }else {
   //send the command id to the server
-  makeFetch(API_URL + `/controllers/${selectedController.uuid}/execute`,{},"post")
+  makeFetch(API_URL + `/controllers/${selectedController.uuid}/execute`,{},"post",JSON.stringify({title:btnUUID,ControllerId:selectedController.uuid}))
   }
 }
 function getDataFromEditForm(){

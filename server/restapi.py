@@ -153,9 +153,15 @@ def controllerManagement(controllerId:int,option:str="get"):
         raise Exception("not logged in")
     controller =  getList("controllers",1,0,{"ownerUsername":user.get("username",""),"uuid":controllerId},bypassPermissionChecking=True)
     if (len(controller.get("controllers",[])) == 0):
-        raise Exception(f"no such controller with id {controllerId}")
+        raise Exception(f"no such controller with id {controllerId}") #or the user is not the owner
     if (request.method == "POST"):
         commandObj = controllersActions.clientCommand(dict(request.get_json(force=True)))
+        # should get in body data like the columns in database for example
+        #{
+        #"ControllerId": "TPKQZUgTzEclSX5hXoP96539AmQ2rm",
+        #"title": "fsfdsfd",
+        #"actions": "5"
+        #}
         match (option):
             #only for the commands - no need to change the controller row
             case "update":
@@ -177,8 +183,11 @@ def controllerManagement(controllerId:int,option:str="get"):
                 if not controllersActions.checkCommandExistanceByTitle(controllerId=controllerId,title=commandObj.buttonTitle):
                     raise Exception(f"command {commandObj.buttonTitle} does not exist for controller {controllerId}")
                 commandObj.deleteFromDatabase()
-            case "excute":
+            case "execute":
                 #get the action id(title and controllerId) from the request body then send it to the controller
+                #title == btnId
+                commandObj.__init__(controllersActions.getControllerCommand(commandObj.controllerId,commandObj.buttonTitle)) # rewrite from database
+                controllersActions.execCommandOnController(commandObj.controllerId,commandObj)
                 pass
             case _:
                 raise Exception(f"no such option {option}")
