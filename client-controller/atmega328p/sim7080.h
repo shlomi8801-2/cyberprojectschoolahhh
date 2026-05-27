@@ -102,8 +102,8 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long &Timeoutms){
     while(res.indexOf("+CARECV")==-1){
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
         if(Timeoutms>1){
-            Timeoutms -=100;
-            sleep(100);
+            Timeoutms -=300;//300ms because sometimes when the arduino spams the modem it doesnt listen to incoming data fast enough
+            sleep(300);
         }else{
             //no response in time
             size=0;

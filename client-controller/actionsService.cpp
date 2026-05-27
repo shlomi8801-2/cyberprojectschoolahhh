@@ -136,7 +136,7 @@ bool RegisterToServer(){
     dbg("waiting for data");
     sleep(200);
     unsigned long outputSize=-1;
-    byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
+    byte* output = waitForServerResponse(outputSize,2000);//2 sec timeout
     if (output == nullptr){
         dbg("error in sendATArr");
         return false;
@@ -153,39 +153,52 @@ bool RegisterToServer(){
     dbg("verified:",0);
     dbg(verified);
     if (verified){
+        dataPackage outputPackage(output,outputSize);
         
-
-    dataPackage outputPackage(output,outputSize);
-    
-    outputPackage.printPackage();
-    //sending reg back with uuid and password
-    size_t valLen=0;
-    char* val =(char*)outputPackage.get("uuid",valLen);
-    test.set("uuid",val,valLen);
-    val =(char*)outputPackage.get("password",valLen);
-    free(output);//the moment you stop using it
-    test.set("password",val,valLen);
-    // test.set("password","hello",5);
-    // val =getAvailablePins(*((byte*)&valLen));
-    // char arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-    // test.set("availablePins",arr,13);
-    clearATBuffer();
-    SnedCMD(test);
-    dbg("waiting for data");
-    
-    output = waitForServerResponse(outputSize,10000);//10 sec timeout
-    outputPackage = dataPackage(output,outputSize);
-    outputPackage.printPackage();
-    val = (char*)outputPackage.get("code",valLen);
-    dbg("got code ",0);
-    dbg(val,1,valLen);
-    
-    break; // if got here it didn't fail
+        outputPackage.printPackage();
+        //sending reg back with uuid and password
+        size_t valLen=0;
+        char* val =(char*)outputPackage.get("uuid",valLen);
+        test.set("uuid",val,valLen);
+        val =(char*)outputPackage.get("password",valLen);
+        free(output);//the moment you stop using it
+        test.set("password",val,valLen);
+        // test.set("password","hello",5);
+        // val =getAvailablePins(*((byte*)&valLen));
+        // char arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+        // test.set("availablePins",arr,13);
+        SnedCMD(test);
+        dbg("waiting for data");
+        output = waitForServerResponse(outputSize,10000);//10 sec timeout
+        outputPackage = dataPackage(output,outputSize);
+        outputPackage.printPackage();
+        val = (char*)outputPackage.get("code",valLen);
+        dbg("got code ",0);
+        dbg(val,1,valLen);
+        if(valLen<0){
+            dbg("no code provided by the server after registering!");
+            stopProgram();
+        }
+        switch (val[0]-'0')
+        {
+        case 0:
+        //no errors
+            dbg("registered successfully!");
+            return true; // if got here it didn't fail
+        case 1:
+        //id not found on the server - reregister
+        continue;
+        case 2:
+        //passwords did not match - reregister
+            continue;
+        default:
+            continue;
+        }
+        
+        }
+    //package came back corrupted 
     }
-    
-    }
-    
-    return true;
+    return false;
 
 }
 void StartConnectionToServer();
