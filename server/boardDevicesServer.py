@@ -60,7 +60,6 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
             return
         addClientToDatabase(_id,msg["password"],msg.get("availablePins",""))
         del waitingToRegister[_id]
-    
 
 def handleClient(controllerObj:controllersActions.Controller)->None:
     #listen to each client and handle commands
@@ -74,6 +73,7 @@ def handleClient(controllerObj:controllersActions.Controller)->None:
                 pass
             case "LOGOUT":
                 del connectedClients[controllerObj.Id]
+                controllerObj.connected =False
                 return
             case _:
                 log.log(f"warning: uknown command {msg.get("type","NOTYPE")}")
@@ -91,7 +91,7 @@ def indentifyClient(clientSock:client_coms.clientSock):
         match (msg.get("type","NOTYPE")): #commands are here
             case "REG":
                 registerClient(clientSock,msg)
-                break
+                continue
             case "CON": #connect - first message
                 #gets the id from the client and checks password
                 controllerRow = loginClient(msg.get("id",""),msg.get("password","")) #list of tuples of data
