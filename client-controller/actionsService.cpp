@@ -120,7 +120,7 @@ void RegisterToServer(){
     SnedCMD(test);
     dbg("waiting for data");
     sleep(200);
-    unsigned long outputSize;
+    unsigned long outputSize=-1;
     byte* output = waitForServerResponse(outputSize,10000);//10 sec timeout
     if (output == nullptr){
         dbg("error in sendATArr");

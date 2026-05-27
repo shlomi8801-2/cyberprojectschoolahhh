@@ -94,7 +94,7 @@ byte* _StopDataSend(){
     return (byte*)malloc(1); // just so the free has something to free
     //do nothing for now, StartDataSend handles the whole input with expected size
 }
-byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
+byte* _waitForServerResponse(unsigned long &size, unsigned long &Timeoutms){
     //implament receiving data on the server connection
     String res = SendAT((String)RECEIVE_DATA_CMD+"?");
     while(res.indexOf("+CARECV")==-1){
@@ -107,23 +107,22 @@ byte* _waitForServerResponse(unsigned long &size, unsigned long Timeoutms){
             return nullptr;
         }
     }
-    // size=-1; // breaks the sscanf setting size value for some reason
-    unsigned long newsize =~size;
-    while (newsize != size)
+    unsigned long tmpSize=0;
+    unsigned long newsize =~tmpSize;
+    while (newsize != tmpSize)
     {
-        newsize=size;
+        newsize=tmpSize;
         //example response for that: "+CARECV: 4,IMK"
         res = SendAT((String)RECEIVE_DATA_CMD+"?");
         strtok(res.begin(),((String)DEFAULT_CID_IDX+",").begin());
-        char* buf = strtok(nullptr,"\n");
-        sscanf(buf+1,"%d",&size);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
+        char* buf = strtok(nullptr,"\n")+1;// skip first char
+        sscanf(buf,"%d",&tmpSize);//gets the string after "<DEFAULT_CID_IDX>," to "\n"
         if(strlen(buf)==0){
-            newsize = ~size;
+            newsize = ~tmpSize;
         }
     }
     
-    
-
+    size=tmpSize;
 
     dbg("buffer size for receiving is:",0);
     dbg(size);
