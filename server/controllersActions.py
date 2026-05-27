@@ -53,10 +53,10 @@ class Controller:
         self.Id = sqlRow.get("uuid",None)
         self.Csock = Csock
         self.availablePins = [ord(x) for x in sqlRow.get("availablePins")]
-    def sendCommand(self,command:clientCommand)->None: # for action
+    def sendCommandObj(self,command:clientCommand)->None: # for action
         if (not self.connected):
             return
-        self.Csock.sendcmd("action",command.action)
+        self.Csock.sendcmd("action",{"action":command.action})
     def sendCommand(self,cmdtype:str,data:dict)->None:
         if (not self.connected):
             return
@@ -89,4 +89,4 @@ def execCommandOnController(ControllerId:str,cmd:clientCommand)->None:
     Cobj =  getControllerObjFromId(ControllerId)
     if(Cobj):
         log.log(f"sending {cmd.buttonTitle} actions to {ControllerId}")
-        Cobj.sendCommand(cmd)
+        Cobj.sendCommandObj(cmd)
