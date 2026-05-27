@@ -28,19 +28,30 @@ byte* buildData(Hashtable& data){
     //use HEADER_SIZE bytes for the length of the value
     // for 2^(8*HEADER_SIZE) of data support
     // takes the dict and turns into a simple string then bytearray
-    byte* output =  (byte*)calloc(sizeof(char)*HEADER_SIZE_BYTES,2);
+
+    byte* output = (byte*)calloc(sizeof(char)*HEADER_SIZE_BYTES,2);
+
     unsigned int outputSize=sizeof(char)*HEADER_SIZE_BYTES*2;
+
     unsigned int idx=HEADER_SIZE_BYTES;
-    for (auto i:data){
+    
+    for (byte p=0;p<data.getSize();++p){
+        auto i = data.get(p);
         clearNextBytes(output+idx,sizeof(byte)*HEADER_SIZE_BYTES);
-        output[idx]=i.key.length(); // using buffer overflow
+
+        output[idx]=i->key.length(); // using buffer overflow
+  
         idx +=HEADER_SIZE_BYTES;
-        outputSize +=i.key.length()+HEADER_SIZE_BYTES;
+
+        outputSize +=i->key.length()+HEADER_SIZE_BYTES;
+  
         output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
 
-        for(auto c :i.key){
+
+        for(auto c :i->key){
             output[idx++]=c;
         }
+
     
         // idx +=1; adding encoding bit
         
@@ -51,28 +62,29 @@ byte* buildData(Hashtable& data){
         clearNextBytes(output+idx,sizeof(byte)*HEADER_SIZE_BYTES);
         
         
-        output[idx]=i.valueLength; // using buffer overflow
+        output[idx]=i->valueLength; // using buffer overflow
         
         
         idx +=HEADER_SIZE_BYTES;
         
         
-        outputSize +=i.valueLength+HEADER_SIZE_BYTES;
+        outputSize +=i->valueLength+HEADER_SIZE_BYTES;
         
         output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
         
         
-        for(size_t x=0;x<i.valueLength;++x){
-            output[idx++]=i.value[x];
+        for(size_t x=0;x<i->valueLength;++x){
+            output[idx++]=i->value[x];
         }
+        
     }
-    
+    checkMemory(50);
     outputSize -= HEADER_SIZE_BYTES;
-    
+    checkMemory(50);
     output = (byte*)reallocSafe(output,sizeof(byte)*outputSize);
-    
+    checkMemory(50);
     *(unsigned long*)output = outputSize;
-    
+    checkMemory(50);
     return output;
 }
 
@@ -99,7 +111,7 @@ void SnedCMD(Hashtable& data){
         dbg("modem did not respond");
         return;
     }
-    StartDataSend(19);
+    StartDataSend(dataSize);
     
     // dbg((String)"sending "+data["type"]);
     
@@ -107,10 +119,10 @@ void SnedCMD(Hashtable& data){
     dbg(dataSize);
     // printArr(dataBytes,dataSize);
     SendATArr((char*)dataBytes,dataSize,0);
-    dbg("1");
+
     byte* output = StopDataSend();// because the modem doesn't wait for the server aknowlagment it should respond instantly
     free(output);// to not lose the pointer withput freeing it
-    dbg("2");
+
     
 }
 
@@ -150,7 +162,6 @@ bool RegisterToServer(){
     dataPackage outputPackage(output,outputSize);
     
     outputPackage.printPackage();
-
     //sending reg back with uuid and password
     size_t valLen=0;
     char* val =(char*)outputPackage.get("uuid",valLen);
@@ -158,7 +169,7 @@ bool RegisterToServer(){
     val =(char*)outputPackage.get("password",valLen);
     free(output);
     test.set("password",val,valLen);
-    test.set("password","hello",5);
+    // test.set("password","hello",5);
     // val =getAvailablePins(*((byte*)&valLen));
     // char arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
     // test.set("availablepins","abc",3);

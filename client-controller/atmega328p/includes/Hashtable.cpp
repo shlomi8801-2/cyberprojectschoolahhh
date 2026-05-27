@@ -4,12 +4,16 @@
     
         void Hashtable::set(String str,char* val,const size_t length){
         for(auto i=0;i<container.size();i++){
+            // dbg(container[i]->key);
+            // dbg(str);
+            // dbg(container[i]->key.equals(str));
             if(container[i]->key.equals(str)){
                 char* tmp = (char*)malloc(length*sizeof(char));
                 memcpy(tmp,val,length);
                 free(container[i]->value);
                 container[i]->value = tmp;
                 container[i]->valueLength=length;
+                return;
             }
         }
         
@@ -43,11 +47,13 @@
                 // output +="\t"+(String)(int)&(container[i]->key)+":\""+(String)(int)&(container[i]->value)+"\",\n";
 
             // }
-            for (auto i:*this){
+            for (byte p=0;p<getSize();++p){
+                auto i = get(p);
                 output += "\t";
-                output+=i.key;
+                output+=i->key;
                 output += ":\"";
                 output+="..."; // since the change to char* with length instead of just String object this is disabled
+                output+=(String)i->valueLength;
                 output += "\",\n";
             }
             output +="}";

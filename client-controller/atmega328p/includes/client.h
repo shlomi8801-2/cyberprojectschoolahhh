@@ -93,3 +93,11 @@ inline char* getAvailablePins(byte &n){
     constexpr byte len = 13;// for now
     return arr;
 }
+inline void checkMemory(size_t n){
+    void* tmp = malloc(n);
+    if(tmp == nullptr){
+        dbg("out of memory");
+        return;
+    }
+    dbg("has memory");
+}
