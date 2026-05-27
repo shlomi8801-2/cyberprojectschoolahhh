@@ -24,7 +24,8 @@ def loginClient(_id:str,password:str)->tuple:
 
 def addClientToDatabase(_id:str,password:str,availablePins:str) ->None:
     database.AddTable(*CARMODULES_TABLE)
-    database.Insert(CARMODULES_TABLE[0],{"uuid":_id,"password":password,"availablePins":"".join(sorted(list(set(chr(x) for x in availablePins))))}) # the availablePins compacting is to prevent sql injection and use the laest amount of chars
+    print("".join(sorted(list(set(x for x in availablePins)))))
+    database.Insert(CARMODULES_TABLE[0],{"uuid":_id,"password":password,"availablePins":"".join(sorted(list(set(x for x in availablePins))))}) # the availablePins compacting is to prevent sql injection and use the laest amount of chars
 def expirId(_id:str)->None:
     #used as thread waits until MAXREGISTERWAIT seconds pass then removs the id from the waitingToRegister dict
     time.sleep(MAXREGISTERWAIT)
@@ -40,7 +41,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
     #the availablePins column will have max of 20 pins each is a char representing a number of pin
     log.log("starting to register client")
     print(msg)
-    if not ("uuid" in msg and "password" in msg):
+    if not ("uuid" in msg and "psd" in msg):
         #create a request to register new client
         _id = utils.generateToken()
         _password = utils.generateToken()
@@ -48,7 +49,7 @@ def registerClient(cSock:client_coms.clientSock,msg:dict)->None:
                 _id = utils.generateToken()
         waitingToRegister[_id] = _password
         log.log("sending respose with login details")
-        cSock.sendcmd("REG",{"uuid":_id,"password":_password})
+        cSock.sendcmd("REG",{"uuid":_id,"psd":_password})
         utils.makeThreadAndStart(expirId,[_id])
     else:
         #got response to the register msg

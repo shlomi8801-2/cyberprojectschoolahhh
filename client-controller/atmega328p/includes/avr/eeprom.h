@@ -1,0 +1,377 @@
+/* Copyright (c) 2002, 2003, 2004, 2007 Marek Michalkiewicz
+   Copyright (c) 2005, 2006 Bjoern Haase
+   Copyright (c) 2008 Atmel Corporation
+   Copyright (c) 2008 Wouter van Gulik
+   Copyright (c) 2009 Dmitry Xmelkov
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+   * Neither the name of the copyright holders nor the names of
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE. */
+
+#ifndef _AVR_EEPROM_H_
+#define _AVR_EEPROM_H_ 1
+
+#include <avr/io.h>
+
+#if !E2END && !defined(__DOXYGEN__) && !defined(__COMPILING_AVR_LIBC__)
+# warning "Device does not have EEPROM available."
+#else
+
+#if defined (EEAR) && !defined (EEARL) && !defined (EEARH)
+#define EEARL EEAR
+#endif
+
+#ifndef	__ASSEMBLER__
+
+#include <stddef.h>	/* size_t */
+#include <stdint.h>
+
+/** \file */
+/** \defgroup avr_eeprom <avr/eeprom.h>: EEPROM handling
+    \code #include <avr/eeprom.h> \endcode
+
+    This header file declares the interface to some simple library
+    routines suitable for handling the data EEPROM contained in the
+    AVR microcontrollers.  The implementation uses a simple polled
+    mode interface.  Applications that require interrupt-controlled
+    EEPROM access to ensure that no time will be wasted in spinloops
+    will have to deploy their own implementation.
+
+    <b>Notes:</b>
+
+    - Date is stores and retrieved in little endian format and with
+    no padding bytes or alignment requirements.
+
+    - In addition to the write functions there is a set of update functions.
+    This functions read each byte first and skip the burning if the
+    old value is the same with new.  The scanning direction is from
+    high address to low, to obtain quick return in common cases.
+
+    - Similar functions for fixed-point types are supplied by
+    \ref avr_stdfix "<stdfix.h>".
+
+    - All of the read/write functions first make sure the EEPROM is
+    ready to be accessed.  Since this may cause long delays if a
+    write operation is still pending, time-critical applications
+    should first poll the EEPROM e. g. using eeprom_is_ready() before
+    attempting any actual I/O.  But this functions does not wait until
+    SELFPRGEN in SPMCSR becomes zero.  Do this manually, if your
+    software contains the Flash burning.
+
+    - As these functions modify IO registers, they are known to be
+    non-reentrant.  If any of these functions are used from both,
+    standard and interrupt context, the applications must ensure
+    proper protection (e.g. by disabling interrupts before accessing
+    them).
+
+    - All write functions force erase_and_write programming mode.
+
+    - For Xmega the EEPROM start address is 0, like other architectures.
+    The reading functions add the 0x2000 value to use EEPROM mapping into
+    data space.
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <bits/attribs.h>
+
+/** \ingroup avr_eeprom
+    Attribute expression causing a variable to be allocated within the
+    .eeprom section.	*/
+#define EEMEM __attribute__((__section__(".eeprom")))
+
+/** \def eeprom_is_ready
+    \ingroup avr_eeprom
+    \returns 1 if EEPROM is ready for a new read/write operation, 0 if not.
+ */
+#if	defined (__DOXYGEN__)
+# define eeprom_is_ready()
+#elif	defined (NVM_STATUS)
+# define eeprom_is_ready()	bit_is_clear (NVM_STATUS, NVM_NVMBUSY_bp)
+#elif	defined (NVMCTRL_STATUS)
+# define eeprom_is_ready()	bit_is_clear (NVMCTRL_STATUS, NVMCTRL_EEBUSY_bp)
+#elif	defined (DEECR)
+# define eeprom_is_ready()	bit_is_clear (DEECR, BSY)
+#elif	defined (EEPE)
+# define eeprom_is_ready()	bit_is_clear (EECR, EEPE)
+#else
+# define eeprom_is_ready()	bit_is_clear (EECR, EEWE)
+#endif
+
+
+/** \ingroup avr_eeprom
+    Loops until the eeprom is no longer busy.
+    \returns Nothing. */
+#define eeprom_busy_wait() do {} while (!eeprom_is_ready())
+
+/** \name EEPROM Read Functions */
+
+/** \ingroup avr_eeprom
+    Read one byte from EEPROM address \a __p. */
+uint8_t eeprom_read_byte (const uint8_t *__p) __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read a char from EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+char eeprom_read_char (const char *__p) __asm("eeprom_read_byte") __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read an unsigned 8-bit integer from EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+uint8_t eeprom_read_u8 (const uint8_t *__p) __asm("eeprom_read_byte") __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read a signed 8-bit integer from EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+int8_t eeprom_read_i8 (const int8_t *__p) __asm("eeprom_read_byte") __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read one 16-bit word from EEPROM address \a __p. */
+uint16_t eeprom_read_word (const uint16_t *__p) __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read an unsigned 16-bit integer from EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+uint16_t eeprom_read_u16 (const uint16_t *__p) __asm("eeprom_read_word") __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read a signed 16-bit integer from EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+int16_t eeprom_read_i16 (const int16_t *__p) __asm("eeprom_read_word") __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read an unsigned 24-bit integer from EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+
+
+/** \ingroup avr_eeprom
+    Read one float value from EEPROM address \a __p. */
+float eeprom_read_float (const float *__p) __ATTR_PURE__;
+
+/** \ingroup avr_eeprom
+    Read one double value from EEPROM address \a __p.
+    \since AVR-LibC v2.2 */
+#if defined(__DOXYGEN__)
+double eeprom_read_double (const double *__p);
+#elif __SIZEOF_DOUBLE__ == 4
+double eeprom_read_double (const double *__p) __asm("eeprom_read_dword");
+#elif __SIZEOF_DOUBLE__ == 8
+double eeprom_read_double (const double *__p) __asm("eeprom_read_qword");
+#endif
+
+/** \ingroup avr_eeprom
+    Read one long double value from EEPROM address \a __p.
+    \since AVR-LibC v2.2 */
+#if defined(__DOXYGEN__)
+long double eeprom_read_long_double (const long double *__p);
+#elif __SIZEOF_LONG_DOUBLE__ == 4
+long double eeprom_read_long_double (const long double *__p) __asm("eeprom_read_dword");
+#elif __SIZEOF_LONG_DOUBLE__ == 8
+long double eeprom_read_long_double (const long double *__p) __asm("eeprom_read_qword");
+#endif
+
+/** \ingroup avr_eeprom
+    Read a block of \a __n bytes from EEPROM address \a __src to SRAM
+    \a __dst. */
+void eeprom_read_block (void *__dst, const void *__src, size_t __n);
+
+
+/** \name EEPROM Write Functions */
+
+/** \ingroup avr_eeprom
+    Write a byte \a __value to EEPROM address \a __p. */
+void eeprom_write_byte (uint8_t *__p, uint8_t __value);
+
+/** \ingroup avr_eeprom
+    Write a char to EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_write_char (char *__p, char __value) __asm("eeprom_write_byte");
+
+/** \ingroup avr_eeprom
+    Write an unsigned 8-bit integer to EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_write_u8 (uint8_t *__p, uint8_t __value) __asm("eeprom_write_byte");
+
+/** \ingroup avr_eeprom
+    Write a signed 8-bit integer to EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_write_i8 (int8_t *__p, int8_t __value) __asm("eeprom_write_byte");
+
+/** \ingroup avr_eeprom
+    Write a word \a __value to EEPROM address \a __p. */
+
+void eeprom_write_word (uint16_t *__p, uint16_t __value);
+
+/** \ingroup avr_eeprom
+    Write an unsigned 16-bit integer to EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_write_u16 (uint16_t *__p, uint16_t __value) __asm("eeprom_write_word");
+
+/** \ingroup avr_eeprom
+    Write a signed 16-bit integer to EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_write_i16 (int16_t *__p, int16_t __value) __asm("eeprom_write_word");
+
+/** \ingroup avr_eeprom
+    Write an unsigned 24-bit integer to EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+
+
+
+/** \ingroup avr_eeprom
+    Write a float \a __value to EEPROM address \a __p. */
+void eeprom_write_float (float *__p, float __value);
+
+/** \ingroup avr_eeprom
+    Write a double \a __value to EEPROM address \a __p.
+    \since AVR-LibC v2.2 */
+#if defined(__DOXYGEN__)
+void eeprom_write_double (double *__p, double __value);
+#elif __SIZEOF_DOUBLE__ == 4
+void eeprom_write_double (double *__p, double __value) __asm("eeprom_write_dword");
+#elif __SIZEOF_DOUBLE__ == 8
+void eeprom_write_double (double *__p, double __value) __asm("eeprom_write_qword");
+#endif
+
+/** \ingroup avr_eeprom
+    Write a long double \a __value to EEPROM address \a __p.
+    \since AVR-LibC v2.2 */
+#if defined(__DOXYGEN__)
+void eeprom_write_long_double (long double *__p, long double __value);
+#elif __SIZEOF_LONG_DOUBLE__ == 4
+void eeprom_write_long_double (long double *__p, long double __value) __asm("eeprom_write_dword");
+#elif __SIZEOF_LONG_DOUBLE__ == 8
+void eeprom_write_long_double (long double *__p, long double __value) __asm("eeprom_write_qword");
+#endif
+
+/** \ingroup avr_eeprom
+    Write a block of \a __n bytes to EEPROM address \a __dst from \a __src.
+    \note The argument order is mismatch with common functions like strcpy(). */
+void eeprom_write_block (const void *__src, void *__dst, size_t __n);
+
+
+/** \name EEPROM Update Functions */
+
+/** \ingroup avr_eeprom
+    Update a byte \a __value at EEPROM address \a __p. */
+void eeprom_update_byte (uint8_t *__p, uint8_t __value);
+
+/** \ingroup avr_eeprom
+    Update a char \a at EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_update_char (char *__p, char __value) __asm("eeprom_update_byte");
+
+/** \ingroup avr_eeprom
+    Update an unsigned 8-bit integer \a at EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_update_u8 (uint8_t *__p, uint8_t __value) __asm("eeprom_update_byte");
+
+/** \ingroup avr_eeprom
+    Update a signed 8-bit integer \a at EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_update_i8 (int8_t *__p, int8_t __value) __asm("eeprom_update_byte");
+
+/** \ingroup avr_eeprom
+    Update a word \a __value at EEPROM address \a __p. */
+void eeprom_update_word (uint16_t *__p, uint16_t __value);
+
+/** \ingroup avr_eeprom
+    Update an unsigned 16-bit integer \a at EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_update_u16 (uint16_t *__p, uint16_t __value) __asm("eeprom_update_word");
+
+/** \ingroup avr_eeprom
+    Update a signed 16-bit integer \a at EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+void eeprom_update_i16 (int16_t *__p, int16_t __value) __asm("eeprom_update_word");
+
+/** \ingroup avr_eeprom
+    Update an unsigned 24-bit integer \a at EEPROM address \a __p.
+    \since AVR-LibC v2.3 */
+
+
+
+/** \ingroup avr_eeprom
+    Update a float \a __value at EEPROM address \a __p. */
+void eeprom_update_float (float *__p, float __value);
+
+/** \ingroup avr_eeprom
+    Update a double \a __value at EEPROM address \a __p.
+    \since AVR-LibC v2.2 */
+#if defined(__DOXYGEN__)
+void eeprom_update_double (double *__p, double __value);
+#elif __SIZEOF_DOUBLE__ == 4
+void eeprom_update_double (double *__p, double __value) __asm("eeprom_update_dword");
+#elif __SIZEOF_DOUBLE__ == 8
+void eeprom_update_double (double *__p, double __value) __asm("eeprom_update_qword");
+#endif
+
+/** \ingroup avr_eeprom
+    Update a long double \a __value at EEPROM address \a __p.
+    \since AVR-LibC v2.2 */
+#if defined(__DOXYGEN__)
+void eeprom_update_long_double (long double *__p, long double __value);
+#elif __SIZEOF_LONG_DOUBLE__ == 4
+void eeprom_update_long_double (long double *__p, long double __value) __asm("eeprom_update_dword");
+#elif __SIZEOF_LONG_DOUBLE__ == 8
+void eeprom_update_long_double (long double *__p, long double __value) __asm("eeprom_update_qword");
+#endif
+
+/** \ingroup avr_eeprom
+    Update a block of \a __n bytes at EEPROM address \a __dst from \a __src.
+    \note The argument order is mismatch with common functions like strcpy(). */
+void eeprom_update_block (const void *__src, void *__dst, size_t __n);
+
+
+/** \name IAR C Compatibility Defines	*/
+/**@{*/
+
+/** \ingroup avr_eeprom
+    Write a byte to EEPROM. Compatibility define for IAR C.	*/
+#define _EEPUT(addr, val) eeprom_write_byte ((uint8_t *)(addr), (uint8_t)(val))
+
+/** \ingroup avr_eeprom
+    Write a byte to EEPROM. Compatibility define for IAR C.	*/
+#define __EEPUT(addr, val) eeprom_write_byte ((uint8_t *)(addr), (uint8_t)(val))
+
+/** \ingroup avr_eeprom
+    Read a byte from EEPROM. Compatibility define for IAR C.	*/
+#define _EEGET(var, addr) (var) = eeprom_read_byte ((const uint8_t *)(addr))
+
+/** \ingroup avr_eeprom
+    Read a byte from EEPROM. Compatibility define for IAR C.	*/
+#define __EEGET(var, addr) (var) = eeprom_read_byte ((const uint8_t *)(addr))
+
+/**@}*/
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif	/* !__ASSEMBLER__ */
+#endif	/* E2END || defined(__DOXYGEN__) || defined(__COMPILING_AVR_LIBC__) */
+#endif	/* !_AVR_EEPROM_H_ */

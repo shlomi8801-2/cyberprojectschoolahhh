@@ -1,5 +1,6 @@
 #include "actionsService.h"
 #include <dataPackage.h>
+#include <eeprom/EEPROM.h>
 
 void registerClient(){
 
@@ -93,6 +94,10 @@ void SnedCMD(Hashtable& data){
     for (byte i=0;i<HEADER_SIZE_BYTES;i++){
         dataSize+=dataBytes[i]<<8*i;
     }
+    if (dataSize>=127){
+        //between arduino and modem
+        dbg("sending more then 127 chars may fail");
+    }
     
     if (dataSize ==0 ){
         if (*(unsigned long*)dataBytes >RAMTOTAL){
@@ -121,7 +126,19 @@ void SnedCMD(Hashtable& data){
     
     
 }
-
+char* getUuidFromeMem(){
+    char* output = (char*)malloc(sizeof(char)*uuid_LENGTH);
+    for (byte x=0;x<uuid_LENGTH;++x)
+        output[x] = EEPROM.read(uuid_ADDR+x);
+    return output;
+}
+char* getPsdFromeMem(){
+    //get password
+    char* output = (char*)malloc(sizeof(char)*psd_LENGTH);
+    for (byte x=0;x<psd_LENGTH;++x)
+        output[x] = EEPROM.read(psd_ADDR+x);
+    return output;
+}
 bool RegisterToServer(){
     for (byte tries=0;tries<5;++tries){
         dbg("registering to server");
@@ -165,8 +182,8 @@ bool RegisterToServer(){
         test.set("psd",val,valLen);
         // test.set("password","hello",5);
         // val =getAvailablePins(*((byte*)&valLen));
-        char arr[] = {1,2,3,4,5,6,7,8,9};
-        test.set("AP",arr,9);
+        // char arr[] = {1,2,3,4,5,6,7,8,9,1,2,3,3};
+        // test.set("AP","123456789123",12); send in CON package instead
         SnedCMD(test);
         dbg("waiting for data");
 
@@ -184,7 +201,21 @@ bool RegisterToServer(){
         {
         case 0:
         //no errors
+        //write uuid to memory
+        val = (char*)outputPackage.get("uuid",valLen);
+        for( byte x=0;x<uuid_LENGTH;++x)
+            EEPROM.write(uuid_ADDR+x,val[x]);
+        //write psd to memory
+        val = (char*)outputPackage.get("psd",valLen);
+        for( byte x=0;x<psd_LENGTH;++x)
+            EEPROM.write(psd_ADDR+x,val[x]);
+        
+        dbg(getUuidFromeMem(),1,uuid_LENGTH);
+        printArr(getUuidFromeMem(),uuid_LENGTH);
+        dbg(getPsdFromeMem(),1,psd_LENGTH);
+        printArr(getPsdFromeMem(),psd_LENGTH);
             dbg("registered successfully!");
+            
             return true; // if got here it didn't fail
         case 1:
         //id not found on the server - reregister

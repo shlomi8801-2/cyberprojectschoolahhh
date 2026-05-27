@@ -25,3 +25,8 @@
 
 // #define _SS_MAX_RX_BUFF 256 // packets arriving are stored in a buffer for now at least because the modem just sends all of the data at once so change the max buffer from 64
 //changed in the upload to arduino script as compiler flag
+
+#define uuid_ADDR 0
+#define uuid_LENGTH 30
+#define psd_ADDR 30
+#define psd_LENGTH 30
