@@ -8,6 +8,7 @@ class Hashtable{
         String key;
         char* value;
         size_t valueLength;
+        ~Pair(){ free(value);}
     };
     LinkedList<Pair*> container;
     public:

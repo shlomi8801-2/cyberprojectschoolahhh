@@ -94,7 +94,12 @@ void SnedCMD(Hashtable& data){
         else
             dataSize = *(unsigned long*)dataBytes;
     }
-    StartDataSend(dataSize);
+    dbg("checking modem response");
+    if (!waitForATResponse(10000)){
+        dbg("modem did not respond");
+        return;
+    }
+    StartDataSend(19);
     
     // dbg((String)"sending "+data["type"]);
     
@@ -102,9 +107,10 @@ void SnedCMD(Hashtable& data){
     dbg(dataSize);
     // printArr(dataBytes,dataSize);
     SendATArr((char*)dataBytes,dataSize,0);
+    dbg("1");
     byte* output = StopDataSend();// because the modem doesn't wait for the server aknowlagment it should respond instantly
     free(output);// to not lose the pointer withput freeing it
-
+    dbg("2");
     
 }
 
@@ -150,9 +156,9 @@ bool RegisterToServer(){
     char* val =(char*)outputPackage.get("uuid",valLen);
     test.set("uuid",val,valLen);
     val =(char*)outputPackage.get("password",valLen);
+    free(output);
     test.set("password",val,valLen);
-
-    // test.set("password","hello",5);
+    test.set("password","hello",5);
     // val =getAvailablePins(*((byte*)&valLen));
     // char arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
     // test.set("availablepins","abc",3);
@@ -164,7 +170,7 @@ bool RegisterToServer(){
     // val = (char*)outputPackage.get("code",valLen);
     // dbg("got code ",0);
     // dbg(val,1,valLen);
-    free(output);
+    
     break; // if got here it didn't fail
     }
     

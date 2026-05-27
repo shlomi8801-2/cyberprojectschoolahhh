@@ -7,6 +7,7 @@
             if(container[i]->key.equals(str)){
                 char* tmp = (char*)malloc(length*sizeof(char));
                 memcpy(tmp,val,length);
+                free(container[i]->value);
                 container[i]->value = tmp;
                 container[i]->valueLength=length;
             }
