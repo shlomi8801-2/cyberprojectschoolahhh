@@ -27,7 +27,7 @@
 
 requirements:
 
-* \`\`python 3.10\`\`
+* \`python 3.10\`
 
 first copy this repo to some sort of a computer/server
 run `bash  python3 ./server/server.py`
@@ -38,3 +38,10 @@ and then host the `client-web` directory somewhere can be on nginx root apache2 
 compile the client.c file in the root of the repo
 upload it to your device(arduino for example)
 and if you are using your own server change the server addresses in the client first lines in the `#define`'s
+
+#### TODO:
+- implament assign button for controllers
+- make some sort of wizard to choose actions for buttons
+- make confirmation system when sending command to know if it got to the microcontroller
+- FIX THE MEMORY LEAKS(and add the \`F()\` macro for static strings) in the microcontroller code
+- hnadle bad packages correctly(ignore if no spam for example)
