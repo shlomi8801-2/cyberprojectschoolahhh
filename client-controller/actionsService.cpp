@@ -46,7 +46,7 @@ void mainService(){
         unsigned long outputSize =0;
         byte* buf =waitForServerResponse(outputSize,100);
         if (outputSize==0){// no need to free buf here because its nullptr
-            sleep(500);
+            sleep(1000);
             continue;
         } 
         // bool verified = confirmDataSize(output,outputSize);

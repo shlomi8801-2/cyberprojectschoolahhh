@@ -34,10 +34,12 @@ class clientSock:
         res_len = int.from_bytes(res_len,"little") -settings.GetSetting("client.header_size") #the first one is without encoded byte which is the length
         if (res_len<0):
             # raise Exception(f"negative cmd length! {res_len}")
-            log.log(f"negative cmd length! {res_len} ignored")
+            log.log(f"negative cmd length! {res_len}")
+            self.sock.close()
             return
         if (res_len>512):
-            log.log(f"too big cmd length! {res_len} ignored")
+            log.log(f"too big cmd length! {res_len}")
+            self.sock.close()
             return
         res = self.sock.recv(res_len)
         try:
