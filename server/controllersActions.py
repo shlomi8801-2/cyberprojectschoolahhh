@@ -56,7 +56,8 @@ class Controller:
     def sendCommandObj(self,command:clientCommand)->None: # for action
         if (not self.connected):
             return
-        self.Csock.sendcmd("action",{"action":command.action})
+        #action is in decimal convert it to char
+        self.Csock.sendcmd("action",{"action":chr(int(command.action))})
     def sendCommand(self,cmdtype:str,data:dict)->None:
         if (not self.connected):
             return

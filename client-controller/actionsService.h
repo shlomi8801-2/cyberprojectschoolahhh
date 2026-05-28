@@ -18,3 +18,4 @@ inline void clearNextBytes(void* data,int n){
     for (;n>0;){ ((char*)data)[--n]=0;}
     return;
 }
+void mainService();

@@ -97,7 +97,7 @@ def handleClient(controllerObj:controllersActions.Controller)->None:
     print(connectedClients)
     while (controllerObj.connected):
         msg = controllerObj.Csock.recievecmd() # (type:str,data:dict)
-        if (len(msg) == 0):
+        if (msg == None or len(msg) == 0):
             continue
         match (msg.get("type","NOTYPE")): #commands are here
             case "AP": #update availablePins

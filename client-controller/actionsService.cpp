@@ -39,6 +39,45 @@ bool loginClient(){
     return 0;
     //the distructor of test should be run here because of the end of the function so dont free it before
 }
+void mainService(){
+    //listen for recv and excute if needed
+    dbg("started main service!");
+    while (1){
+        unsigned long outputSize =0;
+        byte* buf =waitForServerResponse(outputSize,100);
+        if (outputSize==0){// no need to free buf here because its nullptr
+            sleep(500);
+            continue;
+        } 
+        // bool verified = confirmDataSize(output,outputSize);
+        dataPackage resPackage(buf,outputSize);
+        dbg(F("got package"));
+        resPackage.printPackage();
+        size_t typeLen = 0;
+        char* type = (char*)resPackage.get(F("type"),typeLen);
+        dbg(F("type is:"),0);
+        dbg(type,1,typeLen);
+        if (memcmp(type,F("action"),typeLen)){
+            if (typeLen%2==0)
+            for (byte i=0;i<typeLen/2;++i){
+                byte pin = resPackage.get(F("action"),typeLen)[2*i];
+                byte state = resPackage.get(F("action"),typeLen)[2*i+1];
+                dbg(F("setting pin:"),0);
+                dbg(pin,0);
+                dbg(F(" to state: "),0);
+                dbg(state!=0);
+                pinMode(pin,OUTPUT);
+                digitalWrite(pin,state!=0);
+            }
+            
+            
+        }
+        free(buf);
+       
+
+    }
+    
+}
 bool updateAvailablePins(){
     static constexpr char PinsArr[] = { AVAILABLE_PINS };
     static constexpr byte PinsCount = sizeof(PinsArr)/sizeof(char); // the array size is not guaranteed to be at least 1
