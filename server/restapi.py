@@ -156,6 +156,9 @@ def controllerManagement(controllerId:int,option:str="get"):
         raise Exception(f"no such controller with id {controllerId}") #or the user is not the owner
     if (request.method == "POST"):
         commandObj = controllersActions.clientCommand(dict(request.get_json(force=True)))
+        #because how to command is lookin in the page and how it should be proccessed do it here
+        if(commandObj.action):
+            commandObj.action = "".join([chr(int(x)) for x in commandObj.action.split(" ")])
         # should get in body data like the columns in database for example
         #{
         #"ControllerId": "TPKQZUgTzEclSX5hXoP96539AmQ2rm",

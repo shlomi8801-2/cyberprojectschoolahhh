@@ -67,7 +67,7 @@ void mainService(){
                 dbg(F(" to state: "),0);
                 dbg(state!=0);
                 pinMode(pin,OUTPUT);
-                digitalWrite(pin,state!=0);
+                digitalWrite(pin,state!=0?HIGH:LOW);
             }
             
             
