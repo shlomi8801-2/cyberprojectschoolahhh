@@ -46,10 +46,22 @@ void mainService(){
         unsigned long outputSize =0;
         byte* buf =waitForServerResponse(outputSize,100);
         if (outputSize==0){// no need to free buf here because its nullptr
-            sleep(1000);
+            sleep(2000);
             continue;
         } 
-        // bool verified = confirmDataSize(output,outputSize);
+        bool verified = confirmDataSize(buf,outputSize);
+        if (!verified){
+            //accedentaly got 2 packeges at once relaese the second one keep the first
+            outputSize = getSizeFromHeader(buf);
+            if (outputSize>100){
+                free(buf);
+                continue;
+            }
+            buf = (byte*)reallocSafe(buf,outputSize);
+            if(buf==nullptr){
+                continue;
+            }
+        }
         dataPackage resPackage(buf,outputSize);
         dbg(F("got package"));
         resPackage.printPackage();
@@ -57,7 +69,8 @@ void mainService(){
         char* type = (char*)resPackage.get(F("type"),typeLen);
         dbg(F("type is:"),0);
         dbg(type,1,typeLen);
-        if (memcmp(type,F("action"),typeLen)){
+
+        if (memcmp(type,F("action"),typeLen)){//check type
             if (typeLen%2==0)
             for (byte i=0;i<typeLen/2;++i){
                 byte pin = resPackage.get(F("action"),typeLen)[2*i];
@@ -69,8 +82,6 @@ void mainService(){
                 pinMode(pin,OUTPUT);
                 digitalWrite(pin,state!=0?HIGH:LOW);
             }
-            
-            
         }
         free(buf);
        
